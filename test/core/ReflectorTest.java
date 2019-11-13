@@ -1,21 +1,25 @@
-package reflector;
+package core;
 
 import metrics.Comparison;
 import org.junit.jupiter.api.Test;
-import reflector.Reflector;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 
 public class ReflectorTest {
 
     @Test
     public void testReflect() {
-        Reflector r = new Reflector();
+        Reflector r = new Reflector("metrics.");
         Object instance = null;
+        String className = "DistanceMetric";
+
         try {
-            instance = r.loadClass("path/to/DistanceMetric");
+            instance = r.loadClass(className);
+            Comparison comparisonMethod = (Comparison)instance;
+            comparisonMethod.compare(1, 2);
         } catch (ClassNotFoundException e) {
-            System.err.println("Failed to find class.");
+            System.err.println("Failed to find class " + className);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {
@@ -23,7 +27,7 @@ public class ReflectorTest {
         } catch (Exception e) {
             System.err.println("Failed to find class.");
         }
-        assertTrue(instance instanceof Comparison);
+        assertNotNull(instance, "Unable to instantiate class '" + className + "'.");
     }
 
 }
