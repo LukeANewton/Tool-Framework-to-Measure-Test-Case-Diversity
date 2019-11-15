@@ -1,4 +1,4 @@
-package metrics;
+package metrics.pairwise;
 
 public class DistanceMetric implements Comparison {
     @Override

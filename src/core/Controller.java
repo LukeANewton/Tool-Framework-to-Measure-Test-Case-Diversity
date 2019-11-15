@@ -1,14 +1,15 @@
 package core;
 
 import cli.Terminal;
+import model.JobDTO;
 
 public class Controller {
-    
+
     public Controller() {
     }
 
-    public void executeAction(String action) {
-        System.out.println("Executing action '" + action + "'.");
+    public void executeAction(JobDTO job) {
+        System.out.println("Executing job");
     }
 
     public String getStatus() {
@@ -17,7 +18,7 @@ public class Controller {
 
     public void run() {
         Terminal gui = new Terminal();
-        gui.run();
+        gui.run(this);
     }
 
 }

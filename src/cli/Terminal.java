@@ -2,16 +2,22 @@ package cli;
 
 //import core.Controller;
 
+import core.Controller;
+import model.JobDTO;
+
 import java.util.Scanner;
 
 public class Terminal {
 
-    public void run() {
+    public void run(Controller controller) {
 
         Scanner input = new Scanner(System.in);
         System.out.print("Awaiting command: ");
-//        String command = input.nextLine();
-//        ctrl.executeAction(command);
+        String command = input.nextLine();
+
+        InputParser parser = new InputParser();
+        JobDTO job = parser.parse(command);
+        controller.executeAction(job);
 
     }
 
