@@ -1,4 +1,4 @@
-package metrics.pairwise;
+package main.java.metrics.pairwise;
 
 public interface Comparison {
 

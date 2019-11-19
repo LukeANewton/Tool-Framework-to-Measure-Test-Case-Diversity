@@ -1,10 +1,11 @@
-package model;
+package main.java.model;
 
 /**
- * Data transfer object used by the terminal to transfer request data to core.
+ * Data transfer object used by a user interface to transfer request data to test.java.core.
  */
 
 public class JobDTO {
+    private String command;
     private String comparisonMethod;
     private String aggregationMethod;
     private String dataRepresentationFormat;
@@ -15,14 +16,23 @@ public class JobDTO {
     public JobDTO() {
     }
 
-    public JobDTO(String comparisonMethod, String aggregationMethod, String dataRepresentationFormat,
+    public JobDTO(String command, String comparisonMethod, String aggregationMethod, String dataRepresentationFormat,
                   String resultFormat, String dataLocation, String reportLocation) {
+        this.command = command;
         this.comparisonMethod = comparisonMethod;
         this.aggregationMethod = aggregationMethod;
         this.dataRepresentationFormat = dataRepresentationFormat;
         this.resultFormat = resultFormat;
         this.dataLocation = dataLocation;
         this.reportLocation = reportLocation;
+    }
+
+    public String getCommand() {
+        return command;
+    }
+
+    public void setCommand(String command) {
+        this.command = command;
     }
 
     public String getComparisonMethod() {
@@ -71,5 +81,18 @@ public class JobDTO {
 
     public void setReportLocation(String reportLocation) {
         this.reportLocation = reportLocation;
+    }
+
+    @Override
+    public String toString() {
+        return "JobDTO{" +
+                "command='" + command + '\'' +
+                ", comparisonMethod='" + comparisonMethod + '\'' +
+                ", aggregationMethod='" + aggregationMethod + '\'' +
+                ", dataRepresentationFormat='" + dataRepresentationFormat + '\'' +
+                ", resultFormat='" + resultFormat + '\'' +
+                ", dataLocation='" + dataLocation + '\'' +
+                ", reportLocation='" + reportLocation + '\'' +
+                '}';
     }
 }

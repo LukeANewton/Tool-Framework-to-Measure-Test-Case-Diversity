@@ -1,27 +1,27 @@
-package core;
+package test.java.core;
 
-
-import jdk.nashorn.internal.ir.annotations.Ignore;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import main.java.core.Reflector;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.net.MalformedURLException;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.Assert.assertNotNull;
 
 
 public class ReflectorTest {
 
     private static Reflector reflector;
 
-    @BeforeEach
-    private void setup() {
+    @Before
+    public void setup() {
         reflector = new Reflector();
     }
 
     @Test
     public void testReflectNoArgsConstructor() {
-        reflector.setClassSource("metrics.pairwise.");
+        reflector.setClassSource("main.java.metrics.pairwise.");
         Object instance = null;
         String className = "DistanceMetric";
 
@@ -34,7 +34,7 @@ public class ReflectorTest {
         } catch (InstantiationException e) {
             System.err.println("Failed to create instance of " + className);
         }
-        assertNotNull(instance, "Failed to instantiate class '" + className + "'.");
+        assertNotNull("Failed to instantiate class '" + className + "'.", instance);
     }
 
     @Test
@@ -50,7 +50,7 @@ public class ReflectorTest {
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
         }
-        assertNotNull(instance, "Failed to instantiate class '" + className + "'.");
+        assertNotNull("Failed to instantiate class '" + className + "'.", instance);
     }
 
 }

@@ -19,4 +19,6 @@
 # IntelliJ settings
 *.idea
 
+# build directories
 out
+target

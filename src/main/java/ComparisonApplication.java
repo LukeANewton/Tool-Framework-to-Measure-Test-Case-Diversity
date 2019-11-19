@@ -1,4 +1,6 @@
-import core.Controller;
+package main.java;
+
+import main.java.core.Controller;
 
 public class ComparisonApplication {
 
