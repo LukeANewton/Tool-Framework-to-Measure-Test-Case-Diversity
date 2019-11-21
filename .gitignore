@@ -18,6 +18,7 @@
 
 # IntelliJ settings
 *.idea
+*.iml
 
 # build directories
 out

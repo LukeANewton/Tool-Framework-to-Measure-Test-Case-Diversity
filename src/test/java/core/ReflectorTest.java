@@ -1,4 +1,4 @@
-package test.java.core;
+package core;
 
 import main.java.core.Reflector;
 import org.junit.Before;
@@ -21,7 +21,7 @@ public class ReflectorTest {
 
     @Test
     public void testReflectNoArgsConstructor() {
-        reflector.setClassSource("main.java.metrics.pairwise.");
+        reflector.setClassSource("main.java.comparison.");
         Object instance = null;
         String className = "DistanceMetric";
 
@@ -41,7 +41,7 @@ public class ReflectorTest {
     @Ignore
     public void testReflectCustomPath() {
         Object instance = null;
-        String className = "metrics.DistanceMetric";
+        String className = "metrics.comparison.DistanceMetric";
         String classPath = "C:\\Users\\Shoyu\\code\\4907-Project\\out\\production\\4907-Project\\";
         try {
             instance = reflector.loadClass(classPath, className);

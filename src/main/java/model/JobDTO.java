@@ -1,4 +1,4 @@
-package main.java.model;
+package model;
 
 /**
  * Data transfer object used by a user interface to transfer request data to test.java.core.

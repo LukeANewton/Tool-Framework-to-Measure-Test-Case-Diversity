@@ -1,6 +1,6 @@
-package main.java.console;
+package user_interface;
 
-import main.java.model.JobDTO;
+import model.JobDTO;
 
 import java.util.Arrays;
 import java.util.Collections;

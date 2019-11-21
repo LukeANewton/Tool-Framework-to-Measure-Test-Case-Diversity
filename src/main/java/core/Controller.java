@@ -1,7 +1,7 @@
-package main.java.core;
+package core;
 
-import main.java.console.Console;
-import main.java.model.JobDTO;
+import model.JobDTO;
+import user_interface.Console;
 
 public class Controller {
 
@@ -13,7 +13,7 @@ public class Controller {
     }
 
     public void run() {
-        // Start the console to receive input
+        // Start the user_interface to receive input
         Console gui = new Console();
         JobDTO job = gui.receiveInput();
         while (!job.getCommand().equals("quit")) {
