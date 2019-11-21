@@ -1,4 +1,4 @@
-package pairwiseComparisons;
+package metrics.comparison;
 
 /**
  * An exception thrown when the two test cases in a comparison are of different formats

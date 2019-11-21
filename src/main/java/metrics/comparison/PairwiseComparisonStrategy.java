@@ -1,6 +1,6 @@
-package pairwiseComparisons;
+package metrics.comparison;
 
-import capstone.DataRepresentation;
+import data_representation.DataRepresentation;
 
 /**
  * The interface for all pairwise comparison metrics to implement. This interface ensures that each metric has a function 

@@ -1,6 +1,8 @@
-package capstone;
+package data_representation;
 
 import java.util.Iterator;
+
+import core.InvalidFormatException;
 
 /**
  * The interface for different test case formats to follow. This interface provides a means for a test case format

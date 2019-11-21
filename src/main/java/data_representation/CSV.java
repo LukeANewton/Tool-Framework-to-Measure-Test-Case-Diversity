@@ -1,4 +1,6 @@
-package capstone;
+package data_representation;
+
+import core.InvalidFormatException;
 
 /**
  * an implementation of a DataRepresentation for comma separated values

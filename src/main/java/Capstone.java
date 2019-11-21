@@ -1,11 +1,14 @@
-package capstone;
+
 
 import java.io.FileNotFoundException;
 
-import pairwiseComparisons.CommonElements;
-import pairwiseComparisons.JaccardIndex;
-import pairwiseComparisons.PairwiseComparisonStrategy;
-import pairwiseComparisons.TestCaseFormatMismatchException;
+import core.FileReader;
+import core.InvalidFormatException;
+import data_representation.CSV;
+import metrics.comparison.CommonElements;
+import metrics.comparison.JaccardIndex;
+import metrics.comparison.PairwiseComparisonStrategy;
+import metrics.comparison.TestCaseFormatMismatchException;
 
 /**
  * Drivers for testing this subsection of the project

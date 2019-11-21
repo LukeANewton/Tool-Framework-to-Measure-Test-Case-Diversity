@@ -1,8 +1,10 @@
-package capstone;
+package core;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
+
+import data_representation.DataRepresentation;
 
 /**
  * Handles the system functionalities for reading test cases from files.

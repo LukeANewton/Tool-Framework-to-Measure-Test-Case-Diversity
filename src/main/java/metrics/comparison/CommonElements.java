@@ -1,6 +1,6 @@
-package pairwiseComparisons;
+package metrics.comparison;
 
-import capstone.DataRepresentation;
+import data_representation.DataRepresentation;
 
 /**
  * A pairwise comparison metrics which counts the number of elements in a pair of test cases that have the same values and are in the same positions

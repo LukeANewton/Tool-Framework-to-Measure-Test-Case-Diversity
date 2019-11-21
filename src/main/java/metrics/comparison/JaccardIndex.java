@@ -1,8 +1,8 @@
-package pairwiseComparisons;
+package metrics.comparison;
 
 import java.util.HashSet;
 
-import capstone.DataRepresentation;
+import data_representation.DataRepresentation;
 
 /**
  * A pairwise comparison metric which provides a ratio of the size of the intersection of sets of 

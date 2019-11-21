@@ -1,4 +1,4 @@
-package capstone;
+package core;
 
 /**
  * An exception thrown when a test case in a file does not conform to the format specified in the DataRepresentation being used.
