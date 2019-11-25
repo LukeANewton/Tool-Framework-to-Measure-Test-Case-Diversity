@@ -1,6 +1,5 @@
 package core;
 
-import main.java.core.Reflector;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -21,9 +20,9 @@ public class ReflectorTest {
 
     @Test
     public void testReflectNoArgsConstructor() {
-        reflector.setClassSource("main.java.comparison.");
+        reflector.setClassSource("metrics.comparison.");
         Object instance = null;
-        String className = "DistanceMetric";
+        String className = "CommonElements";
 
         try {
             instance = reflector.loadClass(className);

@@ -20,6 +20,10 @@
 *.idea
 *.iml
 
+# Eclipse settings
+.classpath
+.project
+
 # build directories
 out
 target
