@@ -1,0 +1,98 @@
+options
+{
+    LOOKAHEAD=2;
+}
+PARSER_BEGIN(CommandParser)
+public class CommandParser
+{
+}
+PARSER_END(CommandParser)
+<*> SKIP :
+{
+    " "
+|   "\r"
+|   "\t"
+|	"\n"
+|	"\r\n"
+}
+TOKEN:
+{
+	< EXIT: "quit" | "exit" >
+|	< UPDATE: "update" >
+|	< HELP: "help" >
+|   < NUMBER: (<DIGIT>)+ ( "." (<DIGIT>)+ )? >
+|   < DIGIT: ["0"-"9"] >
+|  	< CHARACTER: ["a"-"z"] | ["A"-"Z"] >
+|	< WORD: (<CHARACTER>|<DIGIT>)+ >
+}
+DataTransferObject parse():
+{
+    DataTransferObject dto;
+}
+{
+    dto=command()    { return dto; }
+  | <EOF>               
+}
+DataTransferObject command():
+{
+	DataTransferObject dto;
+}
+{
+    (
+        dto=exit()
+    |   dto=update()	
+	|	dto=help()										
+    )
+									{ return dto; }
+}
+
+DataTransferObject exit():
+{
+}
+{
+	<EXIT>		{ return new ExitDTO(); }
+}
+
+DataTransferObject update():
+{
+	DataTransferObject dto;
+}
+{
+	(
+		<UPDATE> dto=updateFlags(new UpdateDTO())
+	|	<UPDATE> 									{ dto = new UpdateDTO(); }
+	)
+													{ return dto; }
+}
+
+DataTransferObject updateFlags(UpdateDTO dto):
+{
+	Token location;
+}
+{
+	"-l" location=<WORD>	{ dto.setLocation(location.toString()); return dto; }
+}
+
+DataTransferObject help():
+{
+	DataTransferObject dto;
+}
+{
+	(
+		<HELP> dto=helpFlags(new HelpDTO())
+	|	<HELP>								{ dto = new HelpDTO(); dto.setHelpType(HelpType.Command);}	
+	)
+											{ return dto; }
+}
+
+DataTransferObject helpFlags(HelpDTO dto):
+{
+}
+{
+	(
+		"-a"	{ dto.setHelpType(HelpType.AggregationMethod); }
+	|	"-d"	{ dto.setHelpType(HelpType.PairwiseMetric); }
+	|	"-f"	{ dto.setHelpType(HelpType.DataRepresentation); }
+	)
+				{ return dto; }
+}
