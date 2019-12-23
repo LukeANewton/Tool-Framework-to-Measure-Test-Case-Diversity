@@ -216,8 +216,6 @@ public class InputParser {
 					} else {
 						return commandErrorMessage("Delimiter should be enclosed in quotation marks.");
 					}
-					
-					
 				}
 			} else if(token.equals(NUMBER_THREADS_FLAG)) {//found a flag to set number of threads
 				if(!tokenIterator.hasNext()) {//reached the end of the tokens, so there is no value after the flag
