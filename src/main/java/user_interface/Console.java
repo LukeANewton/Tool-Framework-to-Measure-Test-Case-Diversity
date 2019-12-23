@@ -1,6 +1,8 @@
 package user_interface;
 
 import model.DataTransferObject;
+import model.HelpDTO;
+import model.HelpType;
 
 import java.util.Scanner;
 
@@ -34,7 +36,18 @@ public class Console {
         input.close();
         
         //parse input into DataTransferObject
-        return parser.parse(command);
+        DataTransferObject dto;
+        try {
+			dto = parser.parse(command);
+		} catch (InvalidCommandException e) {
+			/*if we have an invalid command, display an error message and list the 
+			valid commands through issuing a HelpDTO*/
+			System.out.println(e.getErrorMessage() + "Valid commands are:");
+	    	HelpDTO help = new HelpDTO();
+			help.setHelpType(HelpType.Command);
+			dto = help;
+		}
+        return dto;
     }
     
     /**
