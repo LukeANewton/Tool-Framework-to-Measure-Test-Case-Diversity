@@ -14,11 +14,22 @@ import java.util.Scanner;
  *
  */
 public class Console {	
+	//the parser used to check input
 	private InputParser parser;
+	//the scanner used to obtain user input
+	private Scanner input;
 	
 	/**Constructor*/
 	public Console() {
+		input = new Scanner(System.in);
 		parser = new InputParser();
+	}
+	
+	/**
+	 * function to close scanner on system exit
+	 */
+	public void closeScanner() {
+		input.close();
 	}
 	
 	/**
@@ -30,10 +41,8 @@ public class Console {
 	 */
     public DataTransferObject receiveInput() {
     	//get user input
-        Scanner input = new Scanner(System.in);
-        System.out.print("Enter command: ");
+        System.out.print("\nEnter command: ");
         String command = input.nextLine();
-        input.close();
         
         //parse input into DataTransferObject
         DataTransferObject dto;
@@ -42,7 +51,7 @@ public class Console {
 		} catch (InvalidCommandException e) {
 			/*if we have an invalid command, display an error message and list the 
 			valid commands through issuing a HelpDTO*/
-			System.out.println(e.getErrorMessage() + "Valid commands are:");
+			System.out.println(e.getErrorMessage() + " Valid commands are:");
 	    	HelpDTO help = new HelpDTO();
 			help.setHelpType(HelpType.Command);
 			dto = help;
