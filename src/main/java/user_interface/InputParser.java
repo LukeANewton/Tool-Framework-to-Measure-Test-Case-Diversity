@@ -1,5 +1,6 @@
 package user_interface;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -52,7 +53,8 @@ public class InputParser {
     	String stripedCommand = command.strip();
     	
     	//next, break command into tokens
-    	List<String> tokens = Arrays.asList(stripedCommand.split(" "));
+    	ArrayList<String> tokens = new ArrayList<>(Arrays.asList(stripedCommand.split(" ")));
+    	System.out.println("tokens:" + tokens);
     	
     	//the type of command is determined by the first token
     	String commandType = tokens.remove(0);
