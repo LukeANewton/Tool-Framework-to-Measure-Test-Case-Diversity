@@ -27,7 +27,7 @@ public class ReflectorTest {
         try {
             instance = reflector.loadClass(className);
         } catch (ClassNotFoundException e) {
-            System.err.println("Failed to find class " + className);
+            System.err.println("Failed to find class " + reflector.getClassSource() + className);
         } catch (IllegalAccessException e) {
             System.err.println("Restricted access to file; cannot load " + className);
         } catch (InstantiationException e) {

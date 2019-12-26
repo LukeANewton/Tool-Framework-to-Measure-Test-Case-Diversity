@@ -16,7 +16,7 @@ public class Reflector {
     }
 
     public Reflector(String source) {
-        classSource = source;
+        classSource = endsWithPeriod(source);
     }
 
     /**
@@ -69,11 +69,23 @@ public class Reflector {
         return cls.newInstance();
     }
 
+    /**
+     * Ensures that the source ends with a period for proper formatting the path
+     * @param source the package source string delimited with periods
+     * @return the new source string
+     */
+    private String endsWithPeriod(String source) {
+        if ((source.substring(source.length() - 1)).equals(".")) {
+            source = source + ".";
+        }
+        return source;
+    }
+
     public String getClassSource() {
         return classSource;
     }
 
     public void setClassSource(String classSource) {
-        this.classSource = classSource;
+        this.classSource = endsWithPeriod(classSource);
     }
 }
