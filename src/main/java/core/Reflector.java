@@ -25,10 +25,10 @@ public class Reflector {
      * @return an instance of the loaded class.
      */
     public Object loadClass(String className)
-            throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+            throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         Class<?> myClass = Class.forName(classSource + className);
         System.out.println("Successfully loaded " + myClass.getName());
-        return myClass.newInstance();
+        return myClass.getDeclaredConstructor().newInstance();
     }
 
     /**
@@ -44,29 +44,6 @@ public class Reflector {
         Class<?> myClass = Class.forName(classSource + className);
         Constructor<?> constructor = myClass.getConstructor(Object.class);
         return constructor.newInstance(constructorArgs);
-    }
-
-    /**
-     * Loads a class at the given root directory
-     * @param systemRootPath the folder the class is in
-     * @param className the class name
-     * @return an instance of the class
-     * @throws MalformedURLException when the url isn't formatted properly
-     * @throws ClassNotFoundException when the class doesn't exist
-     * @throws IllegalAccessException when there isn't sufficient access privilege to the class
-     * @throws InstantiationException when the class fails to be instantiated
-     */
-    public Object loadClass(String systemRootPath, String className)
-            throws MalformedURLException, ClassNotFoundException, IllegalAccessException, InstantiationException {
-        File file = new File(systemRootPath);
-
-        // Convert File to a URL
-        // C:/myclasses -> file:/C:/myclasses/ for example
-        URL url = file.toURI().toURL();
-        URL[] urls = new URL[]{url};
-        ClassLoader cl = new URLClassLoader(urls);
-        Class cls = cl.loadClass(className);
-        return cls.newInstance();
     }
 
     /**

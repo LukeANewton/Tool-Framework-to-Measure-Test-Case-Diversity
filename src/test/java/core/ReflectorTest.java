@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 
 import static org.junit.Assert.assertNotNull;
@@ -32,24 +33,11 @@ public class ReflectorTest {
             System.err.println("Restricted access to file; cannot load " + className);
         } catch (InstantiationException e) {
             System.err.println("Failed to create instance of " + className);
-        }
-        assertNotNull("Failed to instantiate class '" + className + "'.", instance);
-    }
-
-    @Test
-    @Ignore
-    public void testReflectCustomPath() {
-        Object instance = null;
-        String className = "metrics.comparison.DistanceMetric";
-        String classPath = "C:\\Users\\Shoyu\\code\\4907-Project\\out\\production\\4907-Project\\";
-        try {
-            instance = reflector.loadClass(classPath, className);
-        } catch (MalformedURLException e) {
+        } catch (NoSuchMethodException e) {
             e.printStackTrace();
-        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+        } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
         assertNotNull("Failed to instantiate class '" + className + "'.", instance);
     }
-
 }
