@@ -19,6 +19,8 @@ public class Config {
     private String outputFileName;
     private String outputFileLocation;
 
+    public Config() {
+    }
 
     public String getComparisonMethod() {
         return comparisonMethod;
