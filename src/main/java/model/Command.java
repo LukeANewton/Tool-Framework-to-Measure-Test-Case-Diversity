@@ -4,8 +4,13 @@ import java.util.concurrent.Callable;
 import data_representation.DataRepresentation;
 import metrics.comparison.PairwiseComparisonStrategy;
 
+/**
+ * Commands will contain the information needed to compare two tests
+ * 
+ * @author Eric
+ *
+ */
 public class Command implements Callable<Object>{
-	
 	private PairwiseComparisonStrategy compairison;
 	private DataRepresentation Data1, Data2;
 	
@@ -27,7 +32,11 @@ public class Command implements Callable<Object>{
 		return Data2;
 	}
 
-	@Override
+	/**
+	 * calculate the difference between two give tests
+	 * 
+	 * @return a double representing the similarity between the two tests
+	 */
 	public Object call() throws Exception {
 		return compairison.compare(Data1, Data2);
 	}
