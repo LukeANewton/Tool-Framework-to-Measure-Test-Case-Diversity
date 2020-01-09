@@ -1,7 +1,6 @@
 package metrics.aggregation;
 
 import java.util.List;
-import java.util.concurrent.Future;
 
 /**
  * Interface for all aggregation strategies that will be implemented. It ensures
@@ -20,5 +19,5 @@ public interface Aggregation {
 	 * @param List<Future<Object>> the
 	 * @return Double
 	 */
-	public Double aggregate(List<Future<Object>> list);
+	public Double aggregate(List<Double> list);
 }

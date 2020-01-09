@@ -6,7 +6,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import data_representation.DataRepresentation;
 import metrics.aggregation.Aggregation;
@@ -22,29 +21,29 @@ import model.Command;
  * @author Eric
  *
  */
-public class Camparator {
+public class Comparator {
 	private ExecutorService threadPool;
 
-	public Camparator(int threads) {
+	public Comparator(int threads) {
 		threadPool = Executors.newFixedThreadPool(threads);
 	}
 
 	/**
 	 * Compares the two tests provided using the given comparison strategy
 	 * 
-	 * @param test1 the first test too compare
-	 * @param test2 the second test to compare
+	 * @param test1    the first test too compare
+	 * @param test2    the second test to compare
 	 * @param strategy the strategy used to compare the tests
 	 * @return a double representing the similarity between the two tests
 	 * @throws InterruptedException
 	 * @throws ExecutionException
 	 */
-	public double compareTestCase(DataRepresentation test1, DataRepresentation test2, PairwiseComparisonStrategy strategy)
-			throws InterruptedException, ExecutionException {
-		Command c = new Command(strategy, test1, test2);
-		Future<Object> result = threadPool.submit(c);
-		threadPool.awaitTermination(5, TimeUnit.SECONDS);
-		return (double) result.get();
+	public double compareTestCase(DataRepresentation test1, DataRepresentation test2,
+			PairwiseComparisonStrategy strategy) throws InterruptedException, ExecutionException {
+		Command command = new Command(strategy, test1, test2);
+		Future<Object> result = threadPool.submit(command);
+		threadPool.shutdown();
+		return (Double) result.get();
 	}
 
 	/**
@@ -61,18 +60,25 @@ public class Camparator {
 	 */
 	public double compareTestCase(DataRepresentation[] testList1, DataRepresentation[] testList2,
 			PairwiseComparisonStrategy strategy, Aggregation aggregation) {
-		List<Future<Object>> resultList = new ArrayList<>();
-		// compare each item in t1 to each item in t2
+		List<Future<Object>> futureList = new ArrayList<>();
 		for (int i = 0; i < testList1.length; i++) {
-			for (int y = i + 1; y < testList2.length; y++) {
-				// y is set to i+1 too avoid duplicate comparisons
+			for (int y = 0; y < testList2.length; y++) {
 				Command c = new Command(strategy, testList1[i], testList2[y]);
-				Future<Object> compairison = threadPool.submit(c);
-				resultList.add(compairison);
+				Future<Object> comparison = threadPool.submit(c);
+				futureList.add(comparison);
 			}
 		}
 		threadPool.shutdown();
-		Double total = aggregation.aggregate(resultList);
+		ArrayList<Double> results = new ArrayList<Double>();
+		for (Future<Object> future : futureList) {
+			try {
+				results.add((Double) future.get());
+			} catch (InterruptedException | ExecutionException e) {
+				// TODO decide how to throw exceptions
+				e.printStackTrace();
+			}
+		}
+		Double total = aggregation.aggregate(results);
 		return total;
 	}
 
