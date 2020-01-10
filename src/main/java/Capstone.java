@@ -19,8 +19,8 @@ public class Capstone {
 
 	public static void main(String[] args) {
 		try {
-			String testCase1 = getTestCase("data.txt");
-			String testCase2 = getTestCase("data2.txt");
+			String testCase1 = getTestCase("data");
+			String testCase2 = getTestCase("data2");
 			
 			System.out.println("test case 1: " + testCase1);
 			System.out.println("test case 2: " + testCase2);
@@ -42,8 +42,7 @@ public class Capstone {
 	
 	public static String getTestCase(String filename) throws FileNotFoundException, InvalidFormatException {
 		FileReader reader = new FileReader();
-		reader.setParser(new CSV());
-		return reader.readTestCase(filename);
+		return reader.read(filename, new CSV());
 	}
 
 }
