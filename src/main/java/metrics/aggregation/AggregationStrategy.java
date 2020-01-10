@@ -10,15 +10,22 @@ import java.util.List;
  * @author Eric
  *
  */
-public interface Aggregation {
+public interface AggregationStrategy {
 
     /**
-     * compiles all the similarity measure provided into a final similarity
+     * Compiles all the similarity measure provided into a final similarity
      * measurement for the whole list
      *
      * @param similarities List<Double> the similarities
      * @return the aggregated similarity
+     * @throws NullPointerException when there is no resulting aggregate value created
      */
     double aggregate(List<Double> similarities) throws NullPointerException;
 
+    /**
+     * Provides a description of how the aggregation strategy works
+     *
+     * @return a description of how the aggregation strategy works
+     */
+    String getDescription();
 }

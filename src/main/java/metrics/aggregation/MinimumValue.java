@@ -7,7 +7,7 @@ import java.util.List;
  *
  * @author crushton
  */
-public class MinimumValue implements Aggregation {
+public class MinimumValue implements AggregationStrategy {
 
     public MinimumValue() {
     }
@@ -22,5 +22,15 @@ public class MinimumValue implements Aggregation {
     @Override
     public double aggregate(List<Double> similarities) throws NullPointerException {
         return similarities.stream().min(Double::compare).orElseThrow(NullPointerException::new);
+    }
+
+    /**
+     * Provides a description of how the aggregation strategy works
+     *
+     * @return a description of how the aggregation strategy works
+     */
+    @Override
+    public String getDescription() {
+        return "Chooses the lowest similarity value to represent the overall similarity of the test cases compared.";
     }
 }
