@@ -6,21 +6,21 @@ package model;
  * @author crushton
  */
 public class Config {
-    String comparisonMethod;
-    String comparisonMethodLocation;
-    String dataRepresentation;
-    String getDataRepresentationLocation;
-    char delimiter; // delimiter used when separating values for comparison
-    String aggregationMethod;
-    String aggregationMethodLocation;
-    String reportFormat;
-    String reportFormatLocation;
-    int numThreads;
-    int resultRoundingScale; // Scale used when calling setScale() on BigDecimals
-    String resultRoundingMode; // Rounding mode used when calling setScale() on BigDecimals
-    String outputFileName;
-    String outputFileLocation;
+    private String comparisonMethod;
+    private String comparisonMethodLocation;
+    private String dataRepresentation;
+    private String getDataRepresentationLocation;
+    private String delimiter; // delimiter used when separating values for comparison
+    private String aggregationMethod;
+    private String aggregationMethodLocation;
+    private int numThreads;
+    private int resultRoundingScale; // Scale used when calling setScale() on BigDecimals
+    private String resultRoundingMode; // Rounding mode used when calling setScale() on BigDecimals
+    private String outputFileName;
+    private String outputFileLocation;
 
+    public Config() {
+    }
 
     public String getComparisonMethod() {
         return comparisonMethod;
@@ -54,11 +54,11 @@ public class Config {
         this.getDataRepresentationLocation = getDataRepresentationLocation;
     }
 
-    public char getDelimiter() {
+    public String getDelimiter() {
         return delimiter;
     }
 
-    public void setDelimiter(char delimiter) {
+    public void setDelimiter(String delimiter) {
         this.delimiter = delimiter;
     }
 
@@ -76,22 +76,6 @@ public class Config {
 
     public void setAggregationMethodLocation(String aggregationMethodLocation) {
         this.aggregationMethodLocation = aggregationMethodLocation;
-    }
-
-    public String getReportFormat() {
-        return reportFormat;
-    }
-
-    public void setReportFormat(String reportFormat) {
-        this.reportFormat = reportFormat;
-    }
-
-    public String getReportFormatLocation() {
-        return reportFormatLocation;
-    }
-
-    public void setReportFormatLocation(String reportFormatLocation) {
-        this.reportFormatLocation = reportFormatLocation;
     }
 
     public int getNumThreads() {
@@ -144,8 +128,6 @@ public class Config {
                 ", delimiter=" + delimiter +
                 ", aggregationMethod='" + aggregationMethod + '\'' +
                 ", aggregationMethodLocation='" + aggregationMethodLocation + '\'' +
-                ", reportFormat='" + reportFormat + '\'' +
-                ", reportFormatLocation='" + reportFormatLocation + '\'' +
                 ", numThreads=" + numThreads +
                 ", resultRoundingScale=" + resultRoundingScale +
                 ", resultRoundingMode='" + resultRoundingMode + '\'' +
