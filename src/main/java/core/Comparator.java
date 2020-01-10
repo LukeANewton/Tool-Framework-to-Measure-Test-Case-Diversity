@@ -59,7 +59,7 @@ public class Comparator {
 	 * @return a double representing the similarity between the two list of tests
 	 */
 	public double compareTestCase(DataRepresentation[] testList1, DataRepresentation[] testList2,
-			PairwiseComparisonStrategy strategy, Aggregation aggregation) {
+			PairwiseComparisonStrategy strategy, Aggregation aggregation) throws ExecutionException, InterruptedException {
 		List<Future<Object>> futureList = new ArrayList<>();
 		for (int i = 0; i < testList1.length; i++) {
 			for (int y = 0; y < testList2.length; y++) {
@@ -71,15 +71,9 @@ public class Comparator {
 		threadPool.shutdown();
 		ArrayList<Double> results = new ArrayList<Double>();
 		for (Future<Object> future : futureList) {
-			try {
-				results.add((Double) future.get());
-			} catch (InterruptedException | ExecutionException e) {
-				// TODO decide how to throw exceptions
-				e.printStackTrace();
-			}
+			results.add((Double) future.get());
 		}
-		Double total = aggregation.aggregate(results);
-		return total;
+		return aggregation.aggregate(results);
 	}
 
 }
