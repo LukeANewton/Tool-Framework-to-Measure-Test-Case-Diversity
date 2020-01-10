@@ -23,6 +23,9 @@ public class FileReader {
 	 * @throws InvalidFormatException thrown when the format of the test case found does not match the expected format
 	 */
 	public String read(String filename, DataRepresentation format) throws FileNotFoundException, InvalidFormatException {
+		if (format == null)
+			throw new InvalidFormatException();
+
 		String s = readFile(filename);
 		return format.parse(s.toString());
 	}
@@ -35,6 +38,9 @@ public class FileReader {
 	 * @throws FileNotFoundException thrown when no file with the specified name is found
 	 */
 	private String readFile(String filename) throws FileNotFoundException {
+		if(filename.equals(""))
+			throw new FileNotFoundException();
+
 		File file = new File(filename);
 
 		Scanner sc = new Scanner(file);
@@ -60,10 +66,18 @@ public class FileReader {
 	 * @throws InvalidFormatException thrown when the format of the test case found does not match the expected format
 	 */
 	public String[] read(String filename, String delimiter, DataRepresentation format) throws FileNotFoundException, InvalidFormatException {
+		if (format == null)
+			throw new InvalidFormatException();
+
 		String s = readFile(filename);
 
 		//at this point, we have all the file read in, so we can split up the test cases
-		String[] testCases = s.split(delimiter);
+		String[] testCases;
+		if (delimiter == null){
+			testCases = new String[] {s};
+		} else{
+			testCases = s.split(delimiter);
+		}
 
 		for(int i = 0; i < testCases.length; i++){
 			testCases[i] = format.parse(testCases[i]);
