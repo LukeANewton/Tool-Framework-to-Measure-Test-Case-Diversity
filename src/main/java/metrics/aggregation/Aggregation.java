@@ -18,6 +18,7 @@ public interface Aggregation {
      *
      * @param similarities List<Double> the similarities
      * @return the aggregated similarity
+     * @throws NullPointerException when there is no similarity to be calculated
      */
     double aggregate(List<Double> similarities) throws NullPointerException;
 
