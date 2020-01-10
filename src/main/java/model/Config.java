@@ -10,7 +10,7 @@ public class Config {
     private String comparisonMethodLocation;
     private String dataRepresentation;
     private String getDataRepresentationLocation;
-    private char delimiter; // delimiter used when separating values for comparison
+    private String delimiter; // delimiter used when separating values for comparison
     private String aggregationMethod;
     private String aggregationMethodLocation;
     private int numThreads;
@@ -54,11 +54,11 @@ public class Config {
         this.getDataRepresentationLocation = getDataRepresentationLocation;
     }
 
-    public char getDelimiter() {
+    public String getDelimiter() {
         return delimiter;
     }
 
-    public void setDelimiter(char delimiter) {
+    public void setDelimiter(String delimiter) {
         this.delimiter = delimiter;
     }
 
