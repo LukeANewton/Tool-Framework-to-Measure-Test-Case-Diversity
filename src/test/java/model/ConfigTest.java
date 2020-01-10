@@ -14,23 +14,20 @@ import static org.junit.Assert.*;
 
 public class ConfigTest {
 
-        private Config config;
         private String configPath = "TestConfig.json";
         private String testValue = "TestCompareMethod";
+        private String testJson = "{\"comparisonMethod\":\"TestCompareMethod\",\"numThreads\":0,\"resultRoundingScale\":0}";
 
         /**
          * Make a json file exclusively for testing purposes.
          */
         @Before
         public void setup() {
-                config = new Config();
-                config.setComparisonMethod(testValue);
-                Gson gson = new Gson();
                 FileWriter writer = null;
 
                 try {
                         writer = new FileWriter(configPath);
-                        gson.toJson(config, writer);
+                        writer.write(testJson);
                 } catch (IOException e) {
                         System.err.println("Failed to create dummy json file for testing Config.java.");
                         e.printStackTrace();
@@ -91,6 +88,7 @@ public class ConfigTest {
         public void writeConfigJson() {
                 FileReader reader = null;
                 FileWriter writer = null;
+                Config config = new Config();
                 config.setComparisonMethod(testValue);
                 Gson gson = new Gson();
                 try {
