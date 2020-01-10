@@ -1,12 +1,14 @@
 package core;
-import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-//TODO: be able to take a file path url that leads to the class
+/**
+ * Creates instances of classes using their constructor and arguments provided by the caller.
+ *
+ * @author crushton
+ */
 public class Reflector {
 
     private String classSource;
@@ -21,52 +23,55 @@ public class Reflector {
 
     /**
      * Loads a class with a no-args constructor.
+     *
      * @param className the path of the class to load relative to the root of the project.
      * @return an instance of the loaded class.
      */
     public Object loadClass(String className)
-            throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        Class<?> myClass = Class.forName(classSource + className);
-        System.out.println("Successfully loaded " + myClass.getName());
-        return myClass.newInstance();
+            throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException, InvalidFormatException {
+
+        Class<?> myClass = Class.forName(checkFormat(className));
+        return myClass.getDeclaredConstructor().newInstance();
     }
 
     /**
-     * Loads a class with a constructor that takes one Object argument.
-     * TODO: Use varargs instead of Object[] and destructure the args when calling a constructor like what can be done
-     *          in javascript ES6. Java doesn't currently support this.
+     * Loads a class with a constructor that takes arguments.
+     * Example inputs: when classSource is "java.awt.":
+     * ("Rectangle", new Class[] {int.class, int.class}, new Object[] {5, 10})
+     *
      * @param className the path of the class to load relative to the root of the project.
-     * @param constructorArgs an array of parameters that a loaded class may need passed into its constructor.
-     * @return an instance of the loaded class.
+     * @param initArgsClasses the classes array that the constructor takes.
+     * @param constructorArgs an array of object parameters that a loaded class may need passed into it's constructor.
+     * @return an instance of the loaded class to be type casted by the caller.
      */
-    public Object loadClass(String className, Object[] constructorArgs)
-            throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        Class<?> myClass = Class.forName(classSource + className);
-        Constructor<?> constructor = myClass.getConstructor(Object.class);
-        return constructor.newInstance(constructorArgs);
+    public Object loadClass(String className, Class[] initArgsClasses, Object[] constructorArgs)
+            throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException, InvalidFormatException {
+
+        Class<?> definition;
+        Constructor<?> initArgsConstructor;
+        definition = Class.forName(checkFormat(className));
+        initArgsConstructor = definition.getConstructor(initArgsClasses);
+        return initArgsConstructor.newInstance(constructorArgs);
     }
 
     /**
-     * Loads a class at the given root directory
-     * @param systemRootPath the folder the class is in
-     * @param className the class name
-     * @return an instance of the class
-     * @throws MalformedURLException when the url isn't formatted properly
-     * @throws ClassNotFoundException when the class doesn't exist
-     * @throws IllegalAccessException when there isn't sufficient access privilege to the class
-     * @throws InstantiationException when the class fails to be instantiated
+     * Ensures that the path is the correct format.
+     * For example, src/main/java/ 'my_package.my_other_package.class_name' is the path with the quoted part the full path used.
+     *
+     * @param className the package source string delimited with periods
+     * @return the new source string
+     * @throws InvalidFormatException when the path to the class isn't specified like above
      */
-    public Object loadClass(String systemRootPath, String className)
-            throws MalformedURLException, ClassNotFoundException, IllegalAccessException, InstantiationException {
-        File file = new File(systemRootPath);
+    private String checkFormat(String className) throws InvalidFormatException {
+        String pathToClass = classSource + className;
+        Pattern pathPatternToClass = Pattern.compile("([\\w]+\\.?)+");
+        Matcher matcher = pathPatternToClass.matcher(pathToClass);
+        if (matcher.find()) {
+            return pathToClass;
+        } else {
+            throw new InvalidFormatException();
+        }
 
-        // Convert File to a URL
-        // C:/myclasses -> file:/C:/myclasses/ for example
-        URL url = file.toURI().toURL();
-        URL[] urls = new URL[]{url};
-        ClassLoader cl = new URLClassLoader(urls);
-        Class cls = cl.loadClass(className);
-        return cls.newInstance();
     }
 
     public String getClassSource() {
