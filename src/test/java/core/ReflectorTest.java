@@ -33,6 +33,9 @@ public class ReflectorTest {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
             e.printStackTrace();
+        } catch (InvalidFormatException e) {
+            System.err.println("Class path not correct format. Required: <classSource>.<class> Found: " + reflector.getClassSource() + className);
+            e.printStackTrace();
         }
         assertNotNull("Failed to instantiate class '" + className + "'.", instance);
     }
@@ -60,6 +63,9 @@ public class ReflectorTest {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
             e.printStackTrace();
+        } catch (InvalidFormatException e) {
+            System.err.println("Class path not correct format. Required: <classSource>.<class> Found: " + reflector.getClassSource() + className);
+            e.printStackTrace();
         }
         assertNotNull("Failed to instantiate class '" + className + "'.", instance);
 
@@ -71,18 +77,6 @@ public class ReflectorTest {
     @Test
     public void testGetClassSource() {
         Reflector reflector = new Reflector("metrics.comparison.");
-        assertEquals("Class source obtained from reflector is incorrect.", "metrics.comparison.", reflector.getClassSource());
-    }
-
-    @Test
-    public void testEndsWithPeriodAlreadyThere() {
-        Reflector reflector = new Reflector("metrics.comparison.");
-        assertEquals("Class source obtained from reflector is incorrect.", "metrics.comparison.", reflector.getClassSource());
-    }
-
-    @Test
-    public void testEndsWithPeriodNotThere() {
-        Reflector reflector = new Reflector("metrics.comparison");
         assertEquals("Class source obtained from reflector is incorrect.", "metrics.comparison.", reflector.getClassSource());
     }
 }

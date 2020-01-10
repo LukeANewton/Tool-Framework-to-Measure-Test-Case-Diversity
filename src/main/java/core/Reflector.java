@@ -1,9 +1,13 @@
 package core;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Creates instances of classes using their constructor and arguments provided by the caller.
+ *
+ * @author crushton
  */
 public class Reflector {
 
@@ -14,7 +18,7 @@ public class Reflector {
     }
 
     public Reflector(String source) {
-        classSource = endsWithPeriod(source);
+        classSource = source;
     }
 
     /**
@@ -24,8 +28,9 @@ public class Reflector {
      * @return an instance of the loaded class.
      */
     public Object loadClass(String className)
-            throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
-        Class<?> myClass = Class.forName(classSource + className);
+            throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException, InvalidFormatException {
+
+        Class<?> myClass = Class.forName(checkFormat(className));
         return myClass.getDeclaredConstructor().newInstance();
     }
 
@@ -40,27 +45,33 @@ public class Reflector {
      * @return an instance of the loaded class to be type casted by the caller.
      */
     public Object loadClass(String className, Class[] initArgsClasses, Object[] constructorArgs)
-            throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException {
+            throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException, InvalidFormatException {
 
         Class<?> definition;
         Constructor<?> initArgsConstructor;
-        definition = Class.forName(classSource + className);
+        definition = Class.forName(checkFormat(className));
         initArgsConstructor = definition.getConstructor(initArgsClasses);
         return initArgsConstructor.newInstance(constructorArgs);
     }
 
     /**
-     * Ensures that the source ends with a period for properly formatting the path.
+     * Ensures that the path is the correct format.
      * For example, src/main/java/ 'my_package.my_other_package.class_name' is the path with the quoted part the full path used.
      *
-     * @param source the package source string delimited with periods
+     * @param className the package source string delimited with periods
      * @return the new source string
+     * @throws InvalidFormatException when the path to the class isn't specified like above
      */
-    private String endsWithPeriod(String source) {
-        if (!(source.substring(source.length() - 1)).equals(".")) {
-            source = source + ".";
+    private String checkFormat(String className) throws InvalidFormatException {
+        String pathToClass = classSource + className;
+        Pattern pathPatternToClass = Pattern.compile("([\\w]+\\.?)+");
+        Matcher matcher = pathPatternToClass.matcher(pathToClass);
+        if (matcher.find()) {
+            return pathToClass;
+        } else {
+            throw new InvalidFormatException();
         }
-        return source;
+
     }
 
     public String getClassSource() {
@@ -68,6 +79,6 @@ public class Reflector {
     }
 
     public void setClassSource(String classSource) {
-        this.classSource = endsWithPeriod(classSource);
+        this.classSource = classSource;
     }
 }
