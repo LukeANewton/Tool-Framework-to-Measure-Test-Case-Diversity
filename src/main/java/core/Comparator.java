@@ -8,7 +8,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import data_representation.DataRepresentation;
-import metrics.aggregation.Aggregation;
+import metrics.aggregation.AggregationStrategy;
 import metrics.comparison.PairwiseComparisonStrategy;
 import model.Command;
 
@@ -47,23 +47,23 @@ public class Comparator {
 	}
 
 	/**
-	 * Compares all the tests provided by testList1 with testList2 using the
+	 * Compares all the tests provided by testSuite1 with testSuite2 using the
 	 * provided strategy, then returns a final value using the provided aggregation
 	 * strategy
 	 * 
-	 * @param testList1   the first list of tests
-	 * @param testList2   the second list of tests
+	 * @param testSuite1   the first list of tests
+	 * @param testSuite2   the second list of tests
 	 * @param strategy    the strategy to use to compare the tests
 	 * @param aggregation the aggregation metric to use to assimilate all the
 	 *                    comparisons
 	 * @return a double representing the similarity between the two list of tests
 	 */
-	public double compareTestCase(DataRepresentation[] testList1, DataRepresentation[] testList2,
-			PairwiseComparisonStrategy strategy, Aggregation aggregation) throws ExecutionException, InterruptedException {
+	public double compareTestCase(DataRepresentation[] testSuite1, DataRepresentation[] testSuite2,
+			PairwiseComparisonStrategy strategy, AggregationStrategy aggregation) throws ExecutionException, InterruptedException {
 		List<Future<Object>> futureList = new ArrayList<>();
-		for (int i = 0; i < testList1.length; i++) {
-			for (int y = 0; y < testList2.length; y++) {
-				Command c = new Command(strategy, testList1[i], testList2[y]);
+		for (DataRepresentation testCase1 : testSuite1) {
+			for (DataRepresentation testCase2 : testSuite2) {
+				Command c = new Command(strategy, testCase1, testCase2);
 				Future<Object> comparison = threadPool.submit(c);
 				futureList.add(comparison);
 			}
