@@ -7,9 +7,9 @@ import java.util.List;
  *
  * @author crushton
  */
-public class MinimumValueDouble implements Aggregation {
+public class MinimumValue implements Aggregation {
 
-    public MinimumValueDouble() {
+    public MinimumValue() {
     }
 
     /**
@@ -17,9 +17,10 @@ public class MinimumValueDouble implements Aggregation {
      *
      * @param similarities List<Double> the similarities
      * @return the lowest similarity value
+     * @throws NullPointerException when there is no final similarity value caused by the similarities array being empty
      */
     @Override
-    public Double aggregate(List<Double> similarities) {
-        return similarities.stream().min(Double::compare).orElse(null);
+    public double aggregate(List<Double> similarities) throws NullPointerException {
+        return similarities.stream().min(Double::compare).orElseThrow(NullPointerException::new);
     }
 }
