@@ -15,7 +15,7 @@ public class ReflectorTest {
 
     @Test
     public void testReflectNoArgsConstructor() {
-        Reflector reflector = new Reflector();
+        ReflectionService reflector = new ReflectionService();
         reflector.setClassSource("metrics.comparison.");
         Object instance = null;
         String className = "CommonElements";
@@ -42,7 +42,7 @@ public class ReflectorTest {
 
     @Test
     public void testReflectArgsConstructor() {
-        Reflector reflector = new Reflector("java.awt.");
+        ReflectionService reflector = new ReflectionService("java.awt.");
 
         Object instance = null;
         String className = "Rectangle";
@@ -76,7 +76,7 @@ public class ReflectorTest {
 
     @Test
     public void testGetClassSource() {
-        Reflector reflector = new Reflector("metrics.comparison.");
+        ReflectionService reflector = new ReflectionService("metrics.comparison.");
         assertEquals("Class source obtained from reflector is incorrect.", "metrics.comparison.", reflector.getClassSource());
     }
 }
