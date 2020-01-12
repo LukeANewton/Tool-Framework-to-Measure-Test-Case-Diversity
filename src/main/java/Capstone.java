@@ -2,7 +2,7 @@
 
 import java.io.FileNotFoundException;
 
-import core.FileReader;
+import core.FileReaderService;
 import core.InvalidFormatException;
 import data_representation.CSV;
 import metrics.comparison.CommonElements;
@@ -41,7 +41,7 @@ public class Capstone {
 	}
 	
 	public static String getTestCase(String filename) throws FileNotFoundException, InvalidFormatException {
-		FileReader reader = new FileReader();
+		FileReaderService reader = new FileReaderService();
 		return reader.read(filename, new CSV());
 	}
 
