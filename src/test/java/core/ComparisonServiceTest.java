@@ -4,7 +4,7 @@ import data_representation.CSV;
 import data_representation.DataRepresentation;
 import javafx.util.Pair;
 import metrics.aggregation.AggregationStrategy;
-import metrics.aggregation.MinimumValue;
+import metrics.aggregation.AverageValue;
 import metrics.comparison.CommonElements;
 import metrics.comparison.PairwiseComparisonStrategy;
 import org.junit.After;
@@ -48,7 +48,7 @@ public class ComparisonServiceTest {
         }
 
         strategy = new CommonElements();
-        aggregationStrategy = new MinimumValue();
+        aggregationStrategy = new AverageValue();
         comparisonService = new ComparisonService(2);
 
     }
@@ -97,7 +97,7 @@ public class ComparisonServiceTest {
     @Test
     public void testCompareHalfSimilarPairs() {
         try {
-            assertEquals(0.0, comparisonService.compareTestCase(halfSimilarPairs, strategy, aggregationStrategy), TOLERANCE);
+            assertEquals(0.5, comparisonService.compareTestCase(halfSimilarPairs, strategy, aggregationStrategy), TOLERANCE);
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
