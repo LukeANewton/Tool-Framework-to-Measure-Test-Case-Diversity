@@ -9,7 +9,7 @@ public class Config {
     private String comparisonMethod;
     private String comparisonMethodLocation;
     private String dataRepresentation;
-    private String getDataRepresentationLocation;
+    private String dataRepresentationLocation;
     private String delimiter; // delimiter used when separating values for comparison
     private String aggregationMethod;
     private String aggregationMethodLocation;
@@ -47,11 +47,11 @@ public class Config {
     }
 
     public String getGetDataRepresentationLocation() {
-        return getDataRepresentationLocation;
+        return dataRepresentationLocation;
     }
 
     public void setGetDataRepresentationLocation(String getDataRepresentationLocation) {
-        this.getDataRepresentationLocation = getDataRepresentationLocation;
+        this.dataRepresentationLocation = getDataRepresentationLocation;
     }
 
     public String getDelimiter() {
@@ -124,7 +124,7 @@ public class Config {
                 "comparisonMethod='" + comparisonMethod + '\'' +
                 ", comparisonMethodLocation='" + comparisonMethodLocation + '\'' +
                 ", dataRepresentation='" + dataRepresentation + '\'' +
-                ", getDataRepresentationLocation='" + getDataRepresentationLocation + '\'' +
+                ", dataRepresentationLocation='" + dataRepresentationLocation + '\'' +
                 ", delimiter=" + delimiter +
                 ", aggregationMethod='" + aggregationMethod + '\'' +
                 ", aggregationMethodLocation='" + aggregationMethodLocation + '\'' +
