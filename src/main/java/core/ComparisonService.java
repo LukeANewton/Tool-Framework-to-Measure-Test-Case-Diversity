@@ -21,10 +21,10 @@ import model.Command;
  * @author Eric
  *
  */
-public class Comparator {
+public class ComparisonService {
 	private ExecutorService threadPool;
 
-	public Comparator(int threads) {
+	public ComparisonService(int threads) {
 		threadPool = Executors.newFixedThreadPool(threads);
 	}
 

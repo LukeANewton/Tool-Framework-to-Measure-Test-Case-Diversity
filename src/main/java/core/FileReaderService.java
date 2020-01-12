@@ -12,7 +12,7 @@ import data_representation.DataRepresentation;
  * @author luke
 
  */
-public class FileReader {
+public class FileReaderService {
 	/**
 	 * reads a file into the system which contains a single test case at the specified path 
 	 * 

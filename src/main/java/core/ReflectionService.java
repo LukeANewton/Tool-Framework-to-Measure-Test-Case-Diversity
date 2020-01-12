@@ -9,15 +9,15 @@ import java.util.regex.Pattern;
  *
  * @author crushton
  */
-public class Reflector {
+public class ReflectionService {
 
     private String classSource;
 
-    public Reflector() {
+    public ReflectionService() {
         classSource = "";
     }
 
-    public Reflector(String source) {
+    public ReflectionService(String source) {
         classSource = source;
     }
 
