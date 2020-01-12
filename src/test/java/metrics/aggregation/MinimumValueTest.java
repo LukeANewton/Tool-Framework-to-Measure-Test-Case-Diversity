@@ -8,6 +8,11 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
+/**
+ * test for the minimum value aggregation method
+ *
+ * @author luke
+ */
 public class MinimumValueTest {
     AggregationStrategy aggregationStrategy;
 
@@ -17,6 +22,9 @@ public class MinimumValueTest {
     }
 
     @Test
+    /**
+     * test the aggregation method. It should return the smallest number in a list.
+     */
     public void aggregate() {
         Double smallest = 1.11111;
 
@@ -34,6 +42,9 @@ public class MinimumValueTest {
     }
 
     @Test
+    /**
+     * test that the getDescription method does return a description of the method
+     */
     public void getDescription() {
         assertEquals(aggregationStrategy.getDescription(),
                 "Chooses the lowest similarity value to represent the overall similarity of the test cases compared.");
