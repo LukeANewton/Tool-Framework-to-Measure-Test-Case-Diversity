@@ -64,14 +64,12 @@ public class ReflectionService {
      */
     private String checkFormat(String className) throws InvalidFormatException {
         String pathToClass = classSource + className;
-        Pattern pathPatternToClass = Pattern.compile("([\\w]+\\.?)+");
-        Matcher matcher = pathPatternToClass.matcher(pathToClass);
-        if (matcher.find()) {
+        String regex = "([[A-Za-z0-9_-]]+\\.?)+";
+        if (pathToClass.matches(regex)) {
             return pathToClass;
         } else {
             throw new InvalidFormatException();
         }
-
     }
 
     public String getClassSource() {

@@ -5,13 +5,12 @@ import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  * A test suite for the Reflection service
  */
-public class ReflectorTest {
+public class ReflectionServiceTest {
 
     @Test
     public void testReflectNoArgsConstructor() {
@@ -78,5 +77,45 @@ public class ReflectorTest {
     public void testGetClassSource() {
         ReflectionService reflector = new ReflectionService("metrics.comparison.");
         assertEquals("Class source obtained from reflector is incorrect.", "metrics.comparison.", reflector.getClassSource());
+    }
+
+    @Test
+    /**
+     * test for when reflection is invoked with a malformed pathname.
+     * an InvalidFormat Exception should be thrown
+     */
+    public void testInvalidPathFormatNoArgs(){
+        ReflectionService reflector = new ReflectionService();
+        reflector.setClassSource("metrics,comparison,");
+        Object instance = null;
+        String className = "CommonElements";
+
+        try {
+            instance = reflector.loadClass(className);
+            fail();
+        } catch (Exception e) {
+            assertTrue(e instanceof InvalidFormatException);
+        }
+    }
+
+    @Test
+    /**
+     * test for when reflection is invoked with a malformed pathname.
+     * an InvalidFormat Exception should be thrown
+     */
+    public void testInvalidPathFormatArgs(){
+        ReflectionService reflector = new ReflectionService("java/awt/");
+
+        Object instance = null;
+        String className = "Rectangle";
+        Class[] constructorTemplate = new Class[] {int.class, int.class};
+        Object[] constructorValues = new Object[] {5, 10};
+
+        try {
+            instance = reflector.loadClass(className, constructorTemplate, constructorValues);
+            fail();
+        } catch (Exception e) {
+            assertTrue(e instanceof InvalidFormatException);
+        }
     }
 }
