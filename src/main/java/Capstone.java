@@ -1,14 +1,14 @@
 
 
-import java.io.FileNotFoundException;
-
-import core.FileReader;
+import core.FileReaderService;
 import core.InvalidFormatException;
 import data_representation.CSV;
 import metrics.comparison.CommonElements;
 import metrics.comparison.JaccardIndex;
 import metrics.comparison.PairwiseComparisonStrategy;
 import metrics.comparison.TestCaseFormatMismatchException;
+
+import java.io.FileNotFoundException;
 
 /**
  * Drivers for testing this subsection of the project
@@ -41,7 +41,7 @@ public class Capstone {
 	}
 	
 	public static String getTestCase(String filename) throws FileNotFoundException, InvalidFormatException {
-		FileReader reader = new FileReader();
+		FileReaderService reader = new FileReaderService();
 		return reader.read(filename, new CSV());
 	}
 

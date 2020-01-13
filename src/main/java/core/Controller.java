@@ -2,12 +2,12 @@ package core;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
+import model.Config;
+import model.DataTransferObject;
+import user_interface.Console;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import model.Config;
-import model.JobDTO;
-import user_interface.Console;
 
 public class Controller {
 
@@ -37,8 +37,8 @@ public class Controller {
             Config config = gson.fromJson(jsonReader, Config.class);
         }
 
-        JobDTO job = console.receiveInput();
-        while (!job.getCommand().equals("quit")) {
+        DataTransferObject job = console.receiveInput();
+        while (!job.getCommandType().equals("quit")) {
             //console.displayResults("Input received: " + job.toString());
             // Start processing input here
             job = console.receiveInput();

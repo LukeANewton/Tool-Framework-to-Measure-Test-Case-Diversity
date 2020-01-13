@@ -15,12 +15,12 @@ import static org.junit.Assert.*;
 
 public class FileReaderTest {
 
-    private static FileReader fileReader;
+    private static FileReaderService fileReader;
 
     @Before
      /**setup to perform before each test case*/
     public void setup() {
-        fileReader = new FileReader();
+        fileReader = new FileReaderService();
     }
 
     /**

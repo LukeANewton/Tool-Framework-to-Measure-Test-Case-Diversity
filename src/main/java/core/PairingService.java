@@ -50,9 +50,9 @@ public class PairingService {
                 // Loop through each other column after the observed column
                 for (int k = i + 1; k < testSuites.length; k++) {
                     // Loop through each element in that other column
-                    for (int l = 0; l < testSuites[k].length; l++) {
+                    for (int m = 0; m < testSuites[k].length; m++) {
                         // Pair the observed element(Test Case) in the observed column(Test Suite) with the other element(TC) in the other column(TS)
-                        pairs.add(new Tuple<>(testSuites[i][j], testSuites[k][l]));
+                        pairs.add(new Tuple<>(testSuites[i][j], testSuites[k][m]));
                     }
                 }
             }

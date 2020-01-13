@@ -4,6 +4,10 @@ import data_representation.CSV;
 import data_representation.DataRepresentation;
 import org.junit.Before;
 import org.junit.Test;
+import utilities.Tuple;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -45,8 +49,16 @@ public class PairingServiceTest {
     public void testSingleSuite() {
         assertEquals("Failed to correctly pair test cases using a single suite.",
                 3, pairingService.makePairs(representations1).size());
-        assertEquals("Failed to correctly pair test cases using a single, large suite.",
-                39, pairingService.makePairs(largeSuite).size());
+    }
+
+    /**
+     * Tests that each element in a large test suite is paired with another element in the same suite at least once that is not itself.
+     */
+    @Test
+    public void testLargeSingleSuite() {
+        List<Tuple<DataRepresentation, DataRepresentation>> pairs = pairingService.makePairs(largeSuite);
+        assertEquals("Failed to correctly pair test cases using a single, large suite. Pairs: " + Arrays.toString(pairs.toArray()),
+                36, pairs.size());
     }
 
     /**

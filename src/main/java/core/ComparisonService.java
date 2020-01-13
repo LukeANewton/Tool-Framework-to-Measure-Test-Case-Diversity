@@ -15,7 +15,7 @@ import java.util.concurrent.*;
  * commands to compare each test and assigns the commands to a thread. when the
  * calculations are done, it will use the given Aggregation Strategy to return a
  * final similarity measurement
- * 
+ *
  * @author Eric
  *
  */
@@ -30,7 +30,7 @@ public class ComparisonService {
 	 * Compares all the tests provided by testSuite1 with testSuite2 using the
 	 * provided strategy, then returns a final value using the provided aggregation
 	 * strategy
-	 * 
+	 *
 	 * @param testCasePairs the list of test case pairs
 	 * @param strategy    	the strategy to use to compare the tests
 	 * @param aggregation 	the aggregation metric to use to assimilate all the
@@ -38,7 +38,7 @@ public class ComparisonService {
 	 * @return a double representing the similarity between the two list of tests
 	 */
 	public double compareTestCase(List<Tuple<DataRepresentation, DataRepresentation>> testCasePairs,
-			PairwiseComparisonStrategy strategy, AggregationStrategy aggregation) throws ExecutionException, InterruptedException {
+								  PairwiseComparisonStrategy strategy, AggregationStrategy aggregation) throws ExecutionException, InterruptedException {
 		List<Future<Object>> futureList = new ArrayList<>();
 		for (Tuple testCasePair : testCasePairs) {
 			Command task = new Command(strategy, (DataRepresentation)testCasePair.getLeft(), (DataRepresentation)testCasePair.getRight());
