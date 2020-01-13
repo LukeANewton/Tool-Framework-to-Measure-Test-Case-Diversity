@@ -2,13 +2,12 @@ package core;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
+import model.Config;
+import model.DataTransferObject;
+import user_interface.Console;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import model.Config;
-import model.DataTransferObject;
-import model.JobDTO;
-import user_interface.Console;
 
 public class Controller {
 

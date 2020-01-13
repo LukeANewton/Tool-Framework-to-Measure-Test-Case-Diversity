@@ -1,7 +1,5 @@
 
 
-import java.io.FileNotFoundException;
-
 import core.FileReaderService;
 import core.InvalidFormatException;
 import data_representation.CSV;
@@ -9,6 +7,8 @@ import metrics.comparison.CommonElements;
 import metrics.comparison.JaccardIndex;
 import metrics.comparison.PairwiseComparisonStrategy;
 import metrics.comparison.TestCaseFormatMismatchException;
+
+import java.io.FileNotFoundException;
 
 /**
  * Drivers for testing this subsection of the project
