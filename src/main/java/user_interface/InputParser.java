@@ -50,7 +50,7 @@ public class InputParser {
 	 */
 	public DataTransferObject parse(String command) throws InvalidCommandException {
 		//first, strip any whitespace preceding or following the command
-		String stripedCommand = command.strip();
+		String stripedCommand = command.trim();
 
 		//next, break command into tokens
 		ArrayList<String> tokens = new ArrayList<>(Arrays.asList(stripedCommand.split(" ")));
