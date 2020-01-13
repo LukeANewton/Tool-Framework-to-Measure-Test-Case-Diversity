@@ -2,7 +2,6 @@ package core;
 
 import data_representation.CSV;
 import data_representation.DataRepresentation;
-import javafx.util.Pair;
 import metrics.aggregation.AggregationStrategy;
 import metrics.aggregation.AverageValue;
 import metrics.comparison.CommonElements;
@@ -10,9 +9,10 @@ import metrics.comparison.PairwiseComparisonStrategy;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import utilities.Tuple;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
@@ -22,7 +22,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class ComparisonServiceTest {
 
-    private Set<Pair<DataRepresentation, DataRepresentation>> differentTestCasePairs, sameTestCasePairs, halfSimilarPairs;
+    private List<Tuple<DataRepresentation, DataRepresentation>> differentTestCasePairs, sameTestCasePairs, halfSimilarPairs;
     private PairwiseComparisonStrategy strategy;
     private AggregationStrategy aggregationStrategy;
     private ComparisonService comparisonService;
@@ -30,18 +30,18 @@ public class ComparisonServiceTest {
 
     @Before
     public void setup() {
-        differentTestCasePairs = new HashSet<>();
-        sameTestCasePairs = new HashSet<>();
-        halfSimilarPairs = new HashSet<>();
+        differentTestCasePairs = new ArrayList<>();
+        sameTestCasePairs = new ArrayList<>();
+        halfSimilarPairs = new ArrayList<>();
         int dissimilarValue;
         int value = 0;
         try {
             for (int i = 0; i < 10; i++) {
                 value = i;
-                differentTestCasePairs.add(new Pair<>(new CSV(value + ""), new CSV(++value + "")));
-                sameTestCasePairs.add(new Pair<>(new CSV(value + ""), new CSV(value + "")));
+                differentTestCasePairs.add(new Tuple<>(new CSV(value + ""), new CSV(++value + "")));
+                sameTestCasePairs.add(new Tuple<>(new CSV(value + ""), new CSV(value + "")));
                 dissimilarValue = (i < 5)? value : 99;
-                halfSimilarPairs.add(new Pair<>(new CSV(value + ""), new CSV(dissimilarValue + "")));
+                halfSimilarPairs.add(new Tuple<>(new CSV(value + ""), new CSV(dissimilarValue + "")));
             }
         } catch (InvalidFormatException e) {
             e.printStackTrace();

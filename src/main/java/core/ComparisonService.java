@@ -1,14 +1,13 @@
 package core;
 
 import data_representation.DataRepresentation;
-import javafx.util.Pair;
 import metrics.aggregation.AggregationStrategy;
 import metrics.comparison.PairwiseComparisonStrategy;
 import model.Command;
+import utilities.Tuple;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.*;
 
 /**
@@ -38,11 +37,11 @@ public class ComparisonService {
 	 *                    	comparisons
 	 * @return a double representing the similarity between the two list of tests
 	 */
-	public double compareTestCase(Set<Pair<DataRepresentation, DataRepresentation>> testCasePairs,
+	public double compareTestCase(List<Tuple<DataRepresentation, DataRepresentation>> testCasePairs,
 			PairwiseComparisonStrategy strategy, AggregationStrategy aggregation) throws ExecutionException, InterruptedException {
 		List<Future<Object>> futureList = new ArrayList<>();
-		for (Pair testCasePair : testCasePairs) {
-			Command task = new Command(strategy, (DataRepresentation)testCasePair.getKey(), (DataRepresentation)testCasePair.getValue());
+		for (Tuple testCasePair : testCasePairs) {
+			Command task = new Command(strategy, (DataRepresentation)testCasePair.getLeft(), (DataRepresentation)testCasePair.getRight());
 			Future<Object> comparison = threadPool.submit(task);
 			futureList.add(comparison);
 		}
