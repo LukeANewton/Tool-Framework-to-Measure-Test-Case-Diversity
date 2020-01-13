@@ -38,7 +38,21 @@ public class MinimumValueTest {
         list.add(42.0);
 
         assertEquals(aggregationStrategy.aggregate(list), smallest, 0.01);
+    }
 
+    @Test
+    /**
+     * test the aggregation method when passed an empty list. It should throw a NullPointerException.
+     */
+    public void aggregateEmptyList() {
+        List<Double> list = new ArrayList<>();
+
+        try {
+            aggregationStrategy.aggregate(list);
+            fail();
+        }catch(Exception e){
+            assertTrue(e instanceof NullPointerException);
+        }
     }
 
     @Test
