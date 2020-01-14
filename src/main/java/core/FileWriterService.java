@@ -13,10 +13,13 @@ import java.util.Objects;
  */
 public class FileWriterService {
 	private String path;
-	
-	public FileWriterService(String path) {
-		this.path = path;
-	}
+
+	/**
+	 * FileWriterService will write to the given path
+	 *
+	 * @param path used to decide where to write or find the file
+	 */
+	public FileWriterService(String path) { this.path = path; }
 
 	/**
 	 * This method will write the given string to the file with the given name at the path location.
@@ -29,17 +32,17 @@ public class FileWriterService {
 	 * @throws IOException
 	 */
 	public void write(String name, String text, boolean overwrite, boolean append) throws IOException {
-		if(overwrite) {
-			File oldFile = new File(path + name);
-			oldFile.delete();
-		}
 		File file = new File(path + name);
+		if(overwrite) {
+			file.delete();
+		} else if(file.exists()) {
+			throw new IOException(name + " already exists and overwrite is not enabled");
+		}
 		if(!append) {
 			file.createNewFile();
 		}
 		FileWriter writer = new FileWriter(file, append);
-		writer.write(text);
-		writer.write(System.lineSeparator());
+		writer.write(text + System.lineSeparator());
 		writer.close();
 	}
 
