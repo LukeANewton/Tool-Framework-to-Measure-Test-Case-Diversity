@@ -5,9 +5,7 @@ import com.google.gson.stream.JsonReader;
 import model.Config;
 import org.junit.Test;
 import java.awt.*;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -136,6 +134,49 @@ public class ReflectionServiceTest {
         try {
             Object[] list = reflector.searchPackage("metrics.comparison", "PairwiseComparisonStrategy");
             assertEquals(2, list.length);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    /**
+     * test for the searchPackage() method, which searches a package for all objects that implement a specified interface.
+     * This method introduces a non-class file, to ensure that it is skipped over and does not cause any errors
+     */
+    public void testSearchPackageWithNonClassFile(){
+        //create file
+        File file = new File("target/classes/metrics/comparison/banana");
+        try {
+            file.createNewFile();
+        } catch (Exception e) {
+            fail();
+        }
+
+        //do the test
+        ReflectionService reflector = new ReflectionService();
+        try {
+            Object[] list = reflector.searchPackage("metrics.comparison", "PairwiseComparisonStrategy");
+            assertEquals(2, list.length);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+
+        file.delete();
+    }
+
+    @Test
+    /**
+     * test for the searchPackage() method, which searches a package for all objects that implement a specified interface.
+     * this test is for the case where the package being searched for does not exist
+     */
+    public void testSearchPackageNoSuchDirectory(){
+        ReflectionService reflector = new ReflectionService();
+        try {
+            Object[] list = reflector.searchPackage("banana", "PairwiseComparisonStrategy");
+            assertNull(list);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
