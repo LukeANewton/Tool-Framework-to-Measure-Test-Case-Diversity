@@ -118,4 +118,17 @@ public class ReflectionServiceTest {
             assertTrue(e instanceof InvalidFormatException);
         }
     }
+
+    @Test
+    public void testSearchPackage(){
+        ReflectionService reflector = new ReflectionService();
+        try {
+            Object[] list = reflector.searchPackage("metrics.comparison", "PairwiseComparisonStrategy");
+            assertEquals(2, list.length);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+
+    }
 }

@@ -1,6 +1,12 @@
 package core;
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,6 +58,44 @@ public class ReflectionService {
         definition = Class.forName(checkFormat(className));
         initArgsConstructor = definition.getConstructor(initArgsClasses);
         return initArgsConstructor.newInstance(constructorArgs);
+    }
+
+    /**
+     * instantiates an object from each file in a package that matches a specified interface
+     *
+     * @param packageName the name of the package to instantiate objects from
+     * @param interfaceName the name of the interface which classes must implement to be instantiated
+     * @return a list of objects from the specified package that implement the specified interface
+     */
+    public Object[] searchPackage(String packageName, String interfaceName) throws IllegalAccessException, InvocationTargetException, InstantiationException, ClassNotFoundException, NoSuchMethodException {
+        String directoryName = "target/classes/" + packageName.replace('.', '/');
+
+        File directory = new File(directoryName);
+        ArrayList<Class> classes = new ArrayList<Class>();
+        if (!directory.exists())
+            return null;
+
+        //get classes from each class file
+        File[] files = directory.listFiles();
+        for (int i = 0; i < files.length; i++) {
+                if (files[i].getName().endsWith(".class")) {
+                    System.out.println(files[i].getName());
+                    classes.add(Class.forName(packageName + '.' +
+                            files[i].getName().substring(0, files[i].getName().length() - 6)));
+                }
+        }
+
+        for(Class c : classes)
+            System.out.println(c.getName());
+
+        //instantiate each found class that implements the interface
+        ArrayList<Object> objects = new ArrayList<Object>();
+        for(int i = 0; i < classes.size(); i++) {
+            if(Class.forName(packageName + '.' + interfaceName).isAssignableFrom(classes.get(i)) &&
+                    !classes.get(i).isInterface())
+                objects.add(classes.get(i).getConstructor().newInstance());
+        }
+        return objects.toArray();
     }
 
     /**

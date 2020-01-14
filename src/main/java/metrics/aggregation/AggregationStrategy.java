@@ -1,5 +1,7 @@
 package metrics.aggregation;
 
+import core.HelpTarget;
+
 import java.util.List;
 
 /**
@@ -10,7 +12,7 @@ import java.util.List;
  * @author Eric
  *
  */
-public interface AggregationStrategy {
+public interface AggregationStrategy extends HelpTarget {
 
     /**
      * Compiles all the similarity measure provided into a final similarity
@@ -21,11 +23,4 @@ public interface AggregationStrategy {
      * @throws NullPointerException when there is no resulting aggregate value created
      */
     double aggregate(List<Double> similarities) throws NullPointerException;
-
-    /**
-     * Provides a description of how the aggregation strategy works
-     *
-     * @return a description of how the aggregation strategy works
-     */
-    String getDescription();
 }

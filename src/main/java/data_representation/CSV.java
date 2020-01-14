@@ -60,6 +60,11 @@ public class CSV implements DataRepresentation {
 	}
 
 	@Override
+	public String getDescription() {
+		return "comma separated value";
+	}
+
+	@Override
 	public boolean checkFormat(String s){
 		String regex = "(.+?)(?:,\\s*|$)";
 		return s.matches(regex);
