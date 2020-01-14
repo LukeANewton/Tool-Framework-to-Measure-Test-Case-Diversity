@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
@@ -72,9 +73,8 @@ public class Controller {
      * @throws IOException when there is an error with the FileWriter
      */
     private void writeConfig(String filename, Config config) throws IOException {
-        FileWriter writer = null;
+        FileWriter writer = new FileWriter(filename);
         Gson gson = new Gson();
-        writer = new FileWriter(filename);
         gson.toJson(config, writer); // Write to json file
         Objects.requireNonNull(writer).close();
     }
@@ -113,6 +113,41 @@ public class Controller {
      * @param dto data transfer object containing information on the requested configure command
      */
     private void processConfigureCommand(ConfigDTO dto) {
+        //check if there is a setter for the parameter we are trying to set
+        Method setter = null;
+        //the value may be a String or and integer, so we need to try both
+        Class[] classes = new Class[]{String.class, int.class};
+        int validIndex = -1;
+        for(int i = 0; i < classes.length; i++){
+            try {
+                setter = reflectionService.retrieveConfigSetter(config, classes[i], dto.getParameterName());
+                validIndex = i;
+                break;
+            } catch (NoSuchMethodException e) {
+                continue;
+            }
+        }
+        System.out.println(validIndex);
+        if (validIndex == -1)//if we make it here, then we know that the parameter to set does not exist
+            console.displayResults("The parameter " + dto.getParameterName() + " is not valid");
+        else {
+            try {
+                //invoke the setter
+                switch(validIndex){
+                    case 1: //the value should be an integer, so it must be cast as this
+                        setter.invoke(config, Integer.parseInt(dto.getParameterValue()));
+                        break;
+                    default:
+                        setter.invoke(config, dto.getParameterValue());
+                }
+
+                //as long as there is no REPL, any config command must save the value to a file, whether -s is specified or not
+                writeConfig(CONFIG_FILE, config);
+                console.displayResults("Successfully set " + dto.getParameterName() + " to the value " + dto.getParameterValue());
+            } catch (Exception e) {
+                console.displayResults("Failed to set " + dto.getParameterName() + " to the value " + dto.getParameterValue() +": " + e.toString());
+            }
+        }
     }
 
     /**
@@ -126,7 +161,8 @@ public class Controller {
 
         String packageName = null;
         String interfaceName = null;
-        switch(helpType){//determine which type of help is needed, each works the same way except for Command
+        //determine which type of help is needed, each works the same way except for Command help
+        switch(helpType){
             case Command:
                 result.append("\tcompare <filename> [<filename>] <data-representation>\n");
                 result.append("\t\tperforms a diversity calculation within a test suite, or between test suites at the specified filenames(s)\n");
@@ -162,6 +198,8 @@ public class Controller {
                 break;
         }
 
+        /* for comparison metrics, aggregation methods, and data representations, we search for every
+            class of the method and get the description from each*/
         try {
             Object[] objects = reflectionService.searchPackage(packageName, interfaceName);
             result.append("Available " + helpType + "s are:\n");
@@ -183,17 +221,8 @@ public class Controller {
                 result.append("\t\t" + description + "\n");
             }
             console.displayResults(result.toString());
-        } catch (IllegalAccessException e) {
-            console.displayResults("failed to fetch information due to IllegalAccess of " + packageName);
-        } catch (InvocationTargetException e) {
-            console.displayResults("failed to fetch information due to IllegalAccess of " + packageName);
-        } catch (InstantiationException e) {
-            console.displayResults("class " + e.getCause() + " could not be instantiated to obtain description");
-        } catch (NoSuchMethodException e) {
-            console.displayResults("method " + e.getCause() + " could not be found to obtain description");
-        } catch (ClassNotFoundException e) {
-            console.displayResults("class " + e.getCause() + " could not be found to obtain description");
-            e.printStackTrace();
+        } catch (Exception e){
+            console.displayResults("failed to retrieve object descriptions: " + e.getMessage());
         }
     }
 

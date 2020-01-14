@@ -1,7 +1,10 @@
 package core;
+import model.Config;
+
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -92,6 +95,20 @@ public class ReflectionService {
                 objects.add(classes.get(i).getConstructor().newInstance());
         }
         return objects.toArray();
+    }
+
+    /**
+     * attempt to retrieve the setter for a field in the config file, it it exists
+     *
+     * @param c the config file to get the setter from
+     * @param fieldName the name of the field that we want to find a setter for
+     * @return a method for setting the passed fieldName to a new value
+     */
+    public Method retrieveConfigSetter(Config c, Class type, String fieldName) throws NoSuchMethodException {
+        //change the first character of the fieldName to uppercase and prepend 'set' to get setter name
+        String methodName = "set" + String.valueOf(fieldName.charAt(0)).toUpperCase() + fieldName.substring(1);
+
+        return c.getClass().getMethod(methodName, type);
     }
 
     /**

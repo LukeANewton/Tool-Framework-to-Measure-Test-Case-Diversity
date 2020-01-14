@@ -1,9 +1,17 @@
 package core;
 
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
+import model.Config;
 import org.junit.Test;
 import java.awt.*;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Objects;
 
 import static org.junit.Assert.*;
 
@@ -120,6 +128,9 @@ public class ReflectionServiceTest {
     }
 
     @Test
+    /**
+     * test for the searchPackage() method, which searches a package for all objects that implement a specified interface
+     */
     public void testSearchPackage(){
         ReflectionService reflector = new ReflectionService();
         try {
@@ -129,6 +140,82 @@ public class ReflectionServiceTest {
             e.printStackTrace();
             fail();
         }
+    }
 
+    @Test
+    /**
+     * test for the retrieveConfigSetter() method, which looks to see if there is a setter in the Config object for a
+     * given field. This is for the positive case, where the setter can be found
+     */
+    public void testRetrieveConfigSetterExists(){
+        ReflectionService reflector = new ReflectionService();
+
+        //read JSON
+        JsonReader jsonReader = null;
+        try {
+            jsonReader = new JsonReader(new FileReader("config.json"));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            fail();
+        }
+        Gson gson = new Gson();
+        Config config = gson.fromJson(jsonReader, Config.class);
+
+        //attempt to find setter for a field
+        String fieldName = "comparisonMethod";
+        Method setter = null;
+        try {
+            setter = reflector.retrieveConfigSetter(config, String.class, fieldName);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            fail();
+        }
+
+        //call the obtained method
+        String currentValue = config.getComparisonMethod();
+        String newValue = "banana";
+        try {
+            setter.invoke(config, newValue);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            fail();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+            fail();
+        }
+        assertEquals(newValue, config.getComparisonMethod());
+
+        //restore old value in config file
+        config.setComparisonMethod(currentValue);
+    }
+
+    @Test
+    /**
+     * test for the retrieveConfigSetter() method, which looks to see if there is a setter in the Config object for a
+     * given field.This is for the negative case, where the setter does not exist
+     */
+    public void testRetrieveConfigSetterNotExists(){
+        ReflectionService reflector = new ReflectionService();
+
+        //read JSON
+        JsonReader jsonReader = null;
+        try {
+            jsonReader = new JsonReader(new FileReader("config.json"));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            fail();
+        }
+        Gson gson = new Gson();
+        Config config = gson.fromJson(jsonReader, Config.class);
+
+        //attempt to find setter for a field
+        String fieldName = "banana";
+        Method setter = null;
+        try {
+            setter = reflector.retrieveConfigSetter(config, String.class, fieldName);
+            fail();
+        } catch (Exception e) {
+            assertTrue(e instanceof  NoSuchMethodException);
+        }
     }
 }
