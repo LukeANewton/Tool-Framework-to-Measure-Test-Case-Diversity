@@ -128,16 +128,24 @@ public class Controller {
         String interfaceName = null;
         switch(helpType){//determine which type of help is needed, each works the same way except for Command
             case Command:
-                result.append("\tcompare\n");
-                result.append("\tperforms a diversity measurement within a test suite, or between test suites\n\n");
-                result.append("\tconfig\n");
-                result.append("\tsets the value of parameters read from the configuration file\n\n");
+                result.append("\tcompare <filename> [<filename>] <data-representation>\n");
+                result.append("\t\tperforms a diversity calculation within a test suite, or between test suites at the specified filenames(s)\n");
+                result.append("\t\t\t-m <metric>: set the diversity metric to use in the calculation. Available metrics can be found with 'help -m'\n");
+                result.append("\t\t\t-a <method>: set the method to use for aggregating results. Available methods can be found with 'help -a'\n");
+                result.append("\t\t\t-d <delimiter>: set the delimiter that separates test cases within the passed test suite file(s). This can be a character, string, or regular expression\n");
+                result.append("\t\t\t-s <filename>: denote that the results of the operation should be saved to a file named <filename>\n");
+                result.append("\t\t\t-t [<integer>]: denote that the operation should use a thread pool for concurrency, and optionally specify the number of threads\n");
+                result.append("\tconfig <parameter> <value>\n");
+                result.append("\t\tsets the value of a parameter read from the configuration file\n");
                 result.append("\thelp\n");
-                result.append("\tlists information on the requested topic\n\n");
+                result.append("\t\tlists information on the requested topic\n");
+                result.append("\t\t\t-m: lists the available comparison metrics in the system\n");
+                result.append("\t\t\t-a: lists the available aggregation methods in the system\n");
+                result.append("\t\t\t-f: lists the available data representations in the system\n");
                 result.append("\tupdate\n");
-                result.append("\tnot implemented\n\n");
+                result.append("\t\tnot implemented\n");
                 result.append("\texit\n");
-                result.append("\tnot implemented");
+                result.append("\t\tnot implemented");
                 console.displayResults(result.toString());
                 return;
             case PairwiseMetric:
