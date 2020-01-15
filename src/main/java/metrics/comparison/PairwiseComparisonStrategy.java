@@ -1,5 +1,6 @@
 package metrics.comparison;
 
+import core.HelpTarget;
 import data_representation.DataRepresentation;
 
 /**
@@ -9,13 +10,7 @@ import data_representation.DataRepresentation;
  * @author luke
  *
  */
-public interface PairwiseComparisonStrategy {
-	/**
-	 * provides a description of how the comparison metric works
-	 * 
-	 * @return a description of how the comparison metrics works
-	 */
-	public String getDescription();
+public interface PairwiseComparisonStrategy extends HelpTarget {
 	/**
 	 * compares two test cases and provides some measure of the similarity between the two
 	 * 

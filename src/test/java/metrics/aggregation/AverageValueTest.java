@@ -44,7 +44,7 @@ public class AverageValueTest {
             sum += value;
         }
         double average = sum/SIMILARITY_VALUES;
-        assertEquals(average, aggregationStrategy.aggregate(similarityValues), TOLERANCE);
+        assertEquals(average, Double.valueOf(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
     }
 
     /**
@@ -54,7 +54,7 @@ public class AverageValueTest {
     @Test
     public void testHalfAverageValue() {
         List<Double> similarityValues = new ArrayList<>(Arrays.asList(0.0, 0.0, 0.25, 0.5, 0.75, 1.0, 1.0));
-        assertEquals(0.5, aggregationStrategy.aggregate(similarityValues), TOLERANCE);
+        assertEquals(0.5, Double.valueOf(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
     }
 
     /**
@@ -64,7 +64,7 @@ public class AverageValueTest {
     @Test
     public void testNegativeAverageValue() {
         List<Double> similarityValues = new ArrayList<>(Arrays.asList(0.0, 0.0, 1.0, -1.0, -1.0));
-        assertEquals(-0.2, aggregationStrategy.aggregate(similarityValues), TOLERANCE);
+        assertEquals(-0.2, Double.valueOf(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
     }
 
     /**

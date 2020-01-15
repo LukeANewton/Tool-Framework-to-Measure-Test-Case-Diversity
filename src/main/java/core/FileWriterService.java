@@ -33,9 +33,9 @@ public class FileWriterService {
 	 */
 	public void write(String name, String text, boolean overwrite, boolean append) throws IOException {
 		File file = new File(path + name);
-		if(overwrite) {
+		if(overwrite && !append) {
 			file.delete();
-		} else if(file.exists()) {
+		} else if(!append && file.exists()) {
 			throw new IOException(name + " already exists and overwrite is not enabled");
 		}
 		if(!append) {

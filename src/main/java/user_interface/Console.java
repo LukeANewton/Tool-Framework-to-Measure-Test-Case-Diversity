@@ -45,18 +45,7 @@ public class Console {
         String command = input.nextLine();
         
         //parse input into DataTransferObject
-        DataTransferObject dto;
-        try {
-			dto = parser.parse(command);
-		} catch (InvalidCommandException e) {
-			/*if we have an invalid command, display an error message and list the 
-			valid commands through issuing a HelpDTO*/
-			System.out.println(e.getErrorMessage() + " Valid commands are:");
-	    	HelpDTO help = new HelpDTO();
-			help.setHelpType(HelpType.Command);
-			dto = help;
-		}
-        return dto;
+        return processInstruction(command);
     }
     
     /**
@@ -76,4 +65,48 @@ public class Console {
         // https://stackoverflow.com/questions/1001290/console-based-progress-in-java (Just use carriage return)
     }
 
+    public OverwriteOption getOverwriteChoice(String filename){
+    	String choicesMessage = "([y]es/[n]o/[a]ppend)";
+
+    	System.out.print("The file: " + filename + " already exists.\n" +
+				"Do you wish to overwrite it?" + choicesMessage +  ":");
+		System.out.print("");
+
+		OverwriteOption result = null;
+		do {
+			String choice = input.nextLine();
+			if (choice.equalsIgnoreCase("y"))
+				result = OverwriteOption.Yes;
+			else if (choice.equalsIgnoreCase("n"))
+				result = OverwriteOption.No;
+			else if (choice.equalsIgnoreCase("a"))
+				result = OverwriteOption.Append;
+			else
+				System.out.print("Invalid choice, options are " + choicesMessage + ": ");
+		}while(result == null);
+    	return result;
+	}
+
+	/**
+	 * takes a string containing a command as input, and packages the relevant information into a DataTransferObject
+	 *
+	 * in order to perform instructions passed by the command line, this has been pulled out of the receiveInput method
+	 *
+	 * @param command a string of the command to parse
+	 * @return a DataTransferObject with the necessary information to perform a the passed command
+	 */
+	public DataTransferObject processInstruction(String command) {
+		DataTransferObject dto;
+		try {
+			dto = parser.parse(command);
+		} catch (InvalidCommandException e) {
+			/*if we have an invalid command, display an error message and list the
+			valid commands through issuing a HelpDTO*/
+			System.out.println(e.getErrorMessage() + " Valid commands are:");
+			HelpDTO help = new HelpDTO();
+			help.setHelpType(HelpType.Command);
+			dto = help;
+		}
+		return dto;
+	}
 }

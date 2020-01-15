@@ -68,7 +68,7 @@ public class ComparisonServiceTest {
     @Test
     public void testCompareSimilarPairs() {
         try {
-            assertEquals(1.0, comparisonService.compareTestCase(sameTestCasePairs, strategy, aggregationStrategy), TOLERANCE);
+            assertEquals(1.0, Double.valueOf(comparisonService.compareTestCase(sameTestCasePairs, strategy, aggregationStrategy)), TOLERANCE);
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -82,7 +82,7 @@ public class ComparisonServiceTest {
     @Test
     public void testCompareDissimilarPairs() {
         try {
-            assertEquals(0.0, comparisonService.compareTestCase(differentTestCasePairs, strategy, aggregationStrategy), TOLERANCE);
+            assertEquals(0.0, Double.valueOf(comparisonService.compareTestCase(differentTestCasePairs, strategy, aggregationStrategy)), TOLERANCE);
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -97,7 +97,7 @@ public class ComparisonServiceTest {
     @Test
     public void testCompareHalfSimilarPairs() {
         try {
-            assertEquals(0.5, comparisonService.compareTestCase(halfSimilarPairs, strategy, aggregationStrategy), TOLERANCE);
+            assertEquals(0.5, Double.valueOf(comparisonService.compareTestCase(halfSimilarPairs, strategy, aggregationStrategy)), TOLERANCE);
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {

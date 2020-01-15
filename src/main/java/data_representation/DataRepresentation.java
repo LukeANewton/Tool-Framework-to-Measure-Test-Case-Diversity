@@ -2,6 +2,7 @@ package data_representation;
 
 import java.util.Iterator;
 
+import core.HelpTarget;
 import core.InvalidFormatException;
 
 /**
@@ -10,7 +11,7 @@ import core.InvalidFormatException;
  * 
  * @author luke
  */
-public interface DataRepresentation extends Iterator<String> {
+public interface DataRepresentation extends Iterator<String>, HelpTarget {
 	/**
 	 * determines if there is another element in the test case being iterated over that has not yet been seen
 	 * 
@@ -24,7 +25,7 @@ public interface DataRepresentation extends Iterator<String> {
 	 */
 	public String next();
 	/**
-	 * parses a string into the iterator for the test case format
+	 * parses a string into the internal DataRepresentation to later be iterated over
 	 * 
 	 * @param s the string test case to iterate over
 	 * @throws InvalidFormatException thrown when the passed string does not conform to the test case format
