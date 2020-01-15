@@ -11,12 +11,9 @@ import user_interface.OverwriteOption;
 import utilities.Tuple;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 /**
  * The Controller is the main logic for the program. It pieces together the different services to
@@ -265,13 +262,10 @@ public class Controller {
             return;
         }
 
-        System.out.println("here");
-
         //output results to file, if required
         filename = dto.getOutputFilename();
         if(filename != null){
             File output = new File(filename);
-            System.out.println("here");
             try {
                 if(output.exists()){
                     OverwriteOption overwriteOption = console.getOverwriteChoice(filename);
