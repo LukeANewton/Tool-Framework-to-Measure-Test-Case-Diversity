@@ -21,7 +21,7 @@ public class CompareDTO extends DataTransferObject {
 	private Integer numberOfThreads;
 	//in the case of multiple test cases in a single file, specify the delimiter between them
 	private String delimiter;
-	//the DataRepresnetation test cases are formatted to
+	//the DataRepresentation test cases are formatted to
 	private String dataRepresentation;
 	//the location to save results to
 	private String outputFilename;
