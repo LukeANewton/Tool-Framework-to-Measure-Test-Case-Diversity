@@ -48,9 +48,10 @@ public class CSV implements DataRepresentation {
 
 	@Override
 	public String parse(String s) throws InvalidFormatException {	
-		if(this.checkFormat(s)) 
+		if(this.checkFormat(s)) {
+			this.testcase = s;
 			return s;
-		else 
+		}else
 			throw new InvalidFormatException();
 	}
 

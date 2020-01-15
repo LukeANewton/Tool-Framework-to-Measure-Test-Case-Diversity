@@ -37,7 +37,7 @@ public class ComparisonService {
 	 *                    	comparisons
 	 * @return a double representing the similarity between the two list of tests
 	 */
-	public double compareTestCase(List<Tuple<DataRepresentation, DataRepresentation>> testCasePairs,
+	public String compareTestCase(List<Tuple<DataRepresentation, DataRepresentation>> testCasePairs,
 								  PairwiseComparisonStrategy strategy, AggregationStrategy aggregation) throws ExecutionException, InterruptedException {
 		List<Future<Object>> futureList = new ArrayList<>();
 		for (Tuple testCasePair : testCasePairs) {

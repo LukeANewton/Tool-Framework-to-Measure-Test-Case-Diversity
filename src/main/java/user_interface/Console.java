@@ -65,6 +65,27 @@ public class Console {
         // https://stackoverflow.com/questions/1001290/console-based-progress-in-java (Just use carriage return)
     }
 
+    public OverwriteOption getOverwriteChoice(String filename){
+    	String choicesMessage = "([y]es/[n]o/[a]ppend)";
+
+    	System.out.println("The file: " + filename + "already exists.");
+    	System.out.print("Do you wish to overwrite it?" + choicesMessage +  ":");
+
+		OverwriteOption result = null;
+		do {
+			String choice = input.nextLine();
+			if (choice.equalsIgnoreCase("y"))
+				result = OverwriteOption.Yes;
+			else if (choice.equalsIgnoreCase("n"))
+				result = OverwriteOption.No;
+			else if (choice.equalsIgnoreCase("a"))
+				result = OverwriteOption.Append;
+			else
+				System.out.print("\nInvalid choice, options are " + choicesMessage + ": ");
+		}while(result == null);
+    	return result;
+	}
+
 	/**
 	 * takes a string containing a command as input, and packages the relevant information into a DataTransferObject
 	 *

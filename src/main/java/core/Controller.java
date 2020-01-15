@@ -2,16 +2,20 @@ package core;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
+import data_representation.DataRepresentation;
+import metrics.aggregation.AggregationStrategy;
+import metrics.comparison.PairwiseComparisonStrategy;
 import model.*;
 import user_interface.Console;
+import utilities.Tuple;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 /**
  * The Controller is the main logic for the program. It pieces together the different services to
@@ -100,11 +104,200 @@ public class Controller {
     }
 
     /**
+     * contains the logic for obtaining the DataRepresentation for a compare command
+     *
+     * @param dto the DataTransferObject containing information to run a compare command
+     * @return an instance of the DataRepresentation specified in the dto
+     */
+    private DataRepresentation loadDataRepresentation(CompareDTO dto){
+        String name = dto.getDataRepresentation();
+
+        if (name == null)//nothing specified in dto, so load default from config file
+            name = config.getDataRepresentation();
+
+        //set the package to look in
+        String packageName = config.getGetDataRepresentationLocation();
+        if (!packageName.endsWith("."))
+            packageName = packageName + ".";
+        reflectionService.setClassSource(packageName);
+
+        //try to load the class
+        try {
+            return (DataRepresentation) reflectionService.loadClass(name);
+        } catch (ClassNotFoundException | InvalidFormatException e) {
+            console.displayResults("no data representation named " + dto.getDataRepresentation() + " found");
+        }catch (ClassCastException e){
+            console.displayResults(dto.getDataRepresentation() + " does not implement the data representation interface");
+        } catch (Exception e) {
+            console.displayResults("failed to instantiate data representation: " + dto.getDataRepresentation() + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * contains the logic for obtaining the PairwiseComparisonStrategy for a compare command
+     *
+     * @param dto the DataTransferObject containing information to run a compare command
+     * @return an instance of the PairwiseComparisonStrategy specified in the dto
+     */
+    private PairwiseComparisonStrategy loadPairwiseStrategy(CompareDTO dto) {
+        String name = dto.getPairwiseMethod();
+
+        if (name == null)//nothing specified in dto, so load default from config file
+            name = config.getComparisonMethod();
+
+        //set the package to look in
+        String packageName = config.getComparisonMethodLocation();
+        if (!packageName.endsWith("."))
+            packageName = packageName + ".";
+        reflectionService.setClassSource(packageName);
+
+        //try to load the class
+        try {
+            return (PairwiseComparisonStrategy) reflectionService.loadClass(name);
+        } catch (ClassNotFoundException | InvalidFormatException e) {
+            console.displayResults("no pairwise metric named " + dto.getPairwiseMethod() + " found");
+        }catch (ClassCastException e){
+            console.displayResults(dto.getPairwiseMethod() + " does not implement the pairwise metric interface");
+        } catch (Exception e) {
+            console.displayResults("failed to instantiate pairwise metric: " + dto.getPairwiseMethod() + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * contains the logic for obtaining the PairwiseComparisonStrategy for a compare command
+     *
+     * @param dto the DataTransferObject containing information to run a compare command
+     * @return an instance of the PairwiseComparisonStrategy specified in the dto
+     */
+    private AggregationStrategy loadAggregationStrategy(CompareDTO dto) {
+        String name = dto.getAggregationMethod();
+
+        if (name == null)//nothing specified in dto, so load default from config file
+            name = config.getAggregationMethod();
+
+        //set the package to look in
+        String packageName = config.getAggregationMethodLocation();
+        if (!packageName.endsWith("."))
+            packageName = packageName + ".";
+        reflectionService.setClassSource(packageName);
+
+        //try to load the class
+        try {
+            return (AggregationStrategy) reflectionService.loadClass(name);
+        } catch (ClassNotFoundException | InvalidFormatException e) {
+            console.displayResults("no aggregation method named " + dto.getAggregationMethod() + " found");
+        }catch (ClassCastException e){
+            console.displayResults(dto.getAggregationMethod() + " does not implement the aggregation method interface");
+        } catch (Exception e) {
+            console.displayResults("failed to instantiate aggregation method: " + dto.getAggregationMethod() + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
      * performs a "compare" operation that is characterized by the contents of the passed CompareDTO
      *
      * @param dto data transfer object containing information on the requested compare command
      */
     private void processCompareCommand(CompareDTO dto) {
+        //load the data representation
+        DataRepresentation dataRepresentation = loadDataRepresentation(dto);
+        if(dataRepresentation == null)
+            return;
+
+        //load the pairwise comparison metric
+        PairwiseComparisonStrategy comparisonStrategy = loadPairwiseStrategy(dto);
+        if(comparisonStrategy == null)
+            return;
+
+        //load the aggregation method
+        AggregationStrategy aggregationStrategy = loadAggregationStrategy(dto);
+        if(aggregationStrategy == null)
+            return;
+
+        //read in the first test suite file
+        String filename = dto.getTestCaseLocationOne();
+        String delimiter = dto.getDelimiter();
+        if (delimiter == null)
+            delimiter = config.getDelimiter();
+        DataRepresentation[] testSuite1 = getTestSuite(filename, delimiter, dataRepresentation);
+        if(testSuite1 == null) //this triggers when an exception is thrown
+            return;
+        else if (testSuite1.length == 0){//if the file has not test cases, we cannot proceed with hte operation
+            console.displayResults("operation failed because " + filename + " does not contain any test cases");
+            return;
+        }
+
+        //if there is a second file, read it in as well
+        DataRepresentation[] testSuite2 = null;
+        if(dto.getTestCaseLocationTwo() != null) {
+            filename = dto.getTestCaseLocationTwo();
+            testSuite2 = getTestSuite(filename, delimiter, dataRepresentation);
+            if (testSuite2 == null) //this triggers when an exception is thrown
+                return;
+            else if (testSuite2.length == 0) {//if the file has not test cases, we cannot proceed with the operation
+                console.displayResults("operation failed because " + filename + " does not contain any test cases");
+                return;
+            }
+        }
+
+        //generate the pairs for comparison
+        List<Tuple<DataRepresentation, DataRepresentation>> pairs = null;
+        if(testSuite2 == null)
+            pairs = pairingService.makePairs(testSuite1);
+        else
+            pairs = pairingService.makePairs(testSuite1, testSuite2);
+
+        //now perform the actual comparison
+        if(dto.getNumberOfThreads() != null)//only update thread count if command specifies it
+            comparisonService = new ComparisonService(dto.getNumberOfThreads());
+        String result = null;
+        try {
+           result = comparisonService.compareTestCase(pairs, comparisonStrategy, aggregationStrategy);
+        } catch (Exception e) {
+            console.displayResults("Error in pairwise comparison calculation: " + e.getMessage());
+            return;
+        }
+
+        //output results to file, if required
+        if(dto.getOutputFilename() != null){
+            File output = new File(dto.getOutputFilename());
+        }
+
+
+        //output results to console
+        console.displayResults("result:\n\n" + result);
+
+
+
+
+        System.out.println("Data representation: " + comparisonStrategy.getClass().getName());
+        System.out.println("Pairwise metric: " + comparisonStrategy.getClass().getName());
+        System.out.println("Aggregation method: " + aggregationStrategy.getClass().getName());
+        System.out.println("Test suite: ");
+        for(DataRepresentation testCase: testSuite1)
+            System.out.println(testCase.toString());
+        if(testSuite2 != null){
+            System.out.println("Test suite 2: ");
+            for(DataRepresentation testCase: testSuite2)
+                System.out.println(testCase.toString());
+        }
+        System.out.println(result);
+    }
+
+    private DataRepresentation[] getTestSuite(String filename, String delimiter, DataRepresentation format){
+        try {
+             return fileReaderService.readIntoDataRepresentation(filename, delimiter, format);
+        } catch (InvalidFormatException e) {
+            console.displayResults("one or more test cases do not match the specified data representation: " + format);
+        } catch (FileNotFoundException e) {
+            console.displayResults("file: " + filename + " could not be found");
+        } catch (Exception e) {
+            console.displayResults("failed to instantiate data representation: " + e.getMessage());
+        }
+        return null;
     }
 
     /**
@@ -127,7 +320,7 @@ public class Controller {
                 continue;
             }
         }
-        System.out.println(validIndex);
+
         if (validIndex == -1)//if we make it here, then we know that the parameter to set does not exist
             console.displayResults("The parameter " + dto.getParameterName() + " is not valid");
         else {

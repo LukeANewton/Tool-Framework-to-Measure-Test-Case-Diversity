@@ -25,7 +25,7 @@ public interface DataRepresentation extends Iterator<String>, HelpTarget {
 	 */
 	public String next();
 	/**
-	 * parses a string into the iterator for the test case format
+	 * parses a string into the internal DataRepresentation to later be iterated over
 	 * 
 	 * @param s the string test case to iterate over
 	 * @throws InvalidFormatException thrown when the passed string does not conform to the test case format

@@ -164,6 +164,7 @@ public class ReflectionServiceTest {
             fail();
         }
 
+        //remove file
         file.delete();
     }
 
