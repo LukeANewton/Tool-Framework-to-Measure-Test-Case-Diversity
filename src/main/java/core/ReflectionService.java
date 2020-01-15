@@ -59,7 +59,7 @@ public class ReflectionService {
      * Gets and checks the desired class and interface exists and that the class implements the interface.
      *
      * @param classPath The full path and name of the class in the project.
-     * @param interfacePath The full path and name of the interface in the project.
+     * @param interfacePath The full path and name of the interface in the project (Can be null or empty to bypass the interface check).
      * @return The desired class.
      * @throws InvalidFormatException when the classPath or interfacePath is malformed.
      * @throws InstantiationException when an object of the class cannot be instantiated.
@@ -69,16 +69,20 @@ public class ReflectionService {
         if (!checkFormat(classPath)) {
             throw new InvalidFormatException("Invalid class path. Expected: <package>.<subPackage>.<className> with any number of subpackages. Actual: " + classPath);
         }
-        if (!checkFormat(interfacePath)) {
-            throw new InvalidFormatException("Invalid class path. Expected: <package>.<subPackage>.<interfaceName> with any number of subpackages. Actual: " + interfacePath);
-        }
         Class<?> myClass = Class.forName(classPath);
-        Class<?> myInterface = Class.forName(interfacePath);
 
-        if (myInterface.isAssignableFrom(myClass)) {
-            return myClass;
+        if (interfacePath != null && !interfacePath.isEmpty()) {
+            if (!checkFormat(interfacePath)) {
+                throw new InvalidFormatException("Invalid class path. Expected: <package>.<subPackage>.<interfaceName> with any number of subpackages. Actual: " + interfacePath);
+            }
+            Class<?> myInterface = Class.forName(interfacePath);
+
+            if (myInterface.isAssignableFrom(myClass)) {
+                return myClass;
+            }
+            throw new InstantiationException("Class '" + classPath + "' doesn't implement interface '" + interfacePath + "'.");
         }
-        throw new InstantiationException("Class '" + classPath + "' doesn't implement interface '" + interfacePath + "'.");
+        return myClass;
     }
 
     /**
