@@ -133,7 +133,7 @@ public class ReflectionServiceTest {
         ReflectionService reflector = new ReflectionService();
         try {
             Object[] list = reflector.searchPackage("metrics.comparison", "PairwiseComparisonStrategy");
-            assertEquals(2, list.length);
+            assertEquals(3, list.length);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -158,7 +158,7 @@ public class ReflectionServiceTest {
         ReflectionService reflector = new ReflectionService();
         try {
             Object[] list = reflector.searchPackage("metrics.comparison", "PairwiseComparisonStrategy");
-            assertEquals(2, list.length);
+            assertEquals(3, list.length);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
