@@ -7,6 +7,8 @@ import metrics.aggregation.AggregationStrategy;
 import metrics.comparison.PairwiseComparisonStrategy;
 import model.*;
 import user_interface.Console;
+import user_interface.InputParser;
+import user_interface.InvalidCommandException;
 import user_interface.OverwriteOption;
 import utilities.Tuple;
 
@@ -38,54 +40,50 @@ public class Controller {
     private PairingService pairingService;
     //service to perform comparisons
     private ComparisonService comparisonService;
+    //the service which parses commands
+    private InputParser inputParser;
 
     /**Constructor*/
     public Controller() {
+        fileReaderService = new FileReaderService();
+        console = new Console();
+        inputParser = new InputParser();
+        reflectionService = new ReflectionService();
+        fileWriterService = new FileWriterService("");
+        pairingService = new PairingService();
+
         //read config file
         try {
-            config = readConfig(CONFIG_FILE);
+            config = fileReaderService.readConfig(CONFIG_FILE);
         } catch (FileNotFoundException e) {
             System.err.println("Config file: " + CONFIG_FILE + " not found.");
             e.printStackTrace();
             System.exit(-1);
         }
 
-        console = new Console();
-        reflectionService = new ReflectionService();
-        fileReaderService = new FileReaderService();
-        fileWriterService = new FileWriterService("");
-        pairingService = new PairingService();
         comparisonService = new ComparisonService(config.getNumThreads());
     }
 
     /**
-     * reads a configuration file from the passed filename
-     * @param filename the name of the configuration file
-     * @throws FileNotFoundException thrown when passed filename can not be found
-     * @return a Config object containing all the information from the configuration file
-     */
-    private Config readConfig(String filename) throws FileNotFoundException {
-        JsonReader jsonReader = new JsonReader(new FileReader(filename));
-        Gson gson = new Gson();
-        return config = gson.fromJson(jsonReader, Config.class);
-    }
-
-    /**
-     * writes a Config object to a file
+     * the command to invoke in the Controller to process a system instruction
      *
-     * @param filename the name of the file to write to
-     * @param config the Config object to write to file
-     * @throws IOException when there is an error with the FileWriter
+     * @param command the command for the system to execute
      */
-    private void writeConfig(String filename, Config config) throws IOException {
-        FileWriter writer = new FileWriter(filename);
-        Gson gson = new Gson();
-        gson.toJson(config, writer); // Write to json file
-        Objects.requireNonNull(writer).close();
-    }
-
     public void processCommand(String command){
-        DataTransferObject dto = console.processInstruction(command);
+        //parse the command into a DTO
+        DataTransferObject dto;
+        try {
+            dto = inputParser.parse(command);
+        } catch (InvalidCommandException e) {
+			/*if we have an invalid command, display an error message and list the
+			valid commands through issuing a HelpDTO*/
+            console.displayResults(e.getErrorMessage() + " Valid commands are:");
+            HelpDTO help = new HelpDTO();
+            help.setHelpType(HelpType.Command);
+            dto = help;
+        }
+
+        //determine which command is being parsed
         CommandType commandType = dto.getCommandType();
         switch(commandType){
             case Exit:
@@ -291,6 +289,15 @@ public class Controller {
         return;
     }
 
+    /**
+     * loads a test suite from a given file into the system. The test cases in the system are expected to
+     * be seperated by the provided delimiter, and be formated according to the supplied data representation
+     *
+     * @param filename the name of the test suite file
+     * @param delimiter the character/string/regex that separates each file in the test suite
+     * @param format the data representation of the test cases
+     * @return an array of data representations where each data representation contains a test case
+     */
     private DataRepresentation[] getTestSuite(String filename, String delimiter, DataRepresentation format){
         try {
              return fileReaderService.readIntoDataRepresentation(filename, delimiter, format);
@@ -339,7 +346,7 @@ public class Controller {
                 }
 
                 //as long as there is no REPL, any config command must save the value to a file, whether -s is specified or not
-                writeConfig(CONFIG_FILE, config);
+                fileWriterService.writeConfig(CONFIG_FILE, config);
                 console.displayResults("Successfully set " + dto.getParameterName() + " to the value " + dto.getParameterValue());
             } catch (Exception e) {
                 console.displayResults("Failed to set " + dto.getParameterName() + " to the value " + dto.getParameterValue() +": " + e.toString());
@@ -441,5 +448,4 @@ public class Controller {
         controller.processCommand(stringBuilder.toString());
         System.exit(0);
     }
-
 }
