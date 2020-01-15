@@ -37,7 +37,7 @@ public class MinimumValueTest {
         list.add(2.72);
         list.add(42.0);
 
-        assertEquals(aggregationStrategy.aggregate(list), smallest, 0.01);
+        assertEquals(Double.valueOf(aggregationStrategy.aggregate(list)), smallest, 0.01);
     }
 
     @Test
