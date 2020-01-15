@@ -68,8 +68,9 @@ public class Console {
     public OverwriteOption getOverwriteChoice(String filename){
     	String choicesMessage = "([y]es/[n]o/[a]ppend)";
 
-    	System.out.println("The file: " + filename + "already exists.");
-    	System.out.print("Do you wish to overwrite it?" + choicesMessage +  ":");
+    	System.out.print("The file: " + filename + " already exists.\n" +
+				"Do you wish to overwrite it?" + choicesMessage +  ":");
+		System.out.print("");
 
 		OverwriteOption result = null;
 		do {
@@ -81,7 +82,7 @@ public class Console {
 			else if (choice.equalsIgnoreCase("a"))
 				result = OverwriteOption.Append;
 			else
-				System.out.print("\nInvalid choice, options are " + choicesMessage + ": ");
+				System.out.print("Invalid choice, options are " + choicesMessage + ": ");
 		}while(result == null);
     	return result;
 	}

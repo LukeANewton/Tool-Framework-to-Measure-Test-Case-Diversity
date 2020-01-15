@@ -7,6 +7,7 @@ import metrics.aggregation.AggregationStrategy;
 import metrics.comparison.PairwiseComparisonStrategy;
 import model.*;
 import user_interface.Console;
+import user_interface.OverwriteOption;
 import utilities.Tuple;
 
 import java.io.*;
@@ -34,6 +35,8 @@ public class Controller {
     private ReflectionService reflectionService;
     //service to read files into system
     private FileReaderService fileReaderService;
+    //service to write output files
+    private FileWriterService fileWriterService;
     //service to generate pairs of test cases from test suite(s)
     private PairingService pairingService;
     //service to perform comparisons
@@ -53,6 +56,7 @@ public class Controller {
         console = new Console();
         reflectionService = new ReflectionService();
         fileReaderService = new FileReaderService();
+        fileWriterService = new FileWriterService("");
         pairingService = new PairingService();
         comparisonService = new ComparisonService(config.getNumThreads());
     }
@@ -261,30 +265,36 @@ public class Controller {
             return;
         }
 
-        //output results to file, if required
-        if(dto.getOutputFilename() != null){
-            File output = new File(dto.getOutputFilename());
-        }
+        System.out.println("here");
 
+        //output results to file, if required
+        filename = dto.getOutputFilename();
+        if(filename != null){
+            File output = new File(filename);
+            System.out.println("here");
+            try {
+                if(output.exists()){
+                    OverwriteOption overwriteOption = console.getOverwriteChoice(filename);
+                    switch (overwriteOption) {
+                        case Yes:
+                            fileWriterService.write(filename, result, true, false);
+                            break;
+                        case No:
+                            console.displayResults("file writing cancelled since file already exists");
+                            break;
+                        case Append:
+                            fileWriterService.write(filename, result, false, true);
+                    }
+                } else
+                    fileWriterService.write(filename, result, false, false);
+            }catch(IOException e){
+                console.displayResults("failed to write to " + filename + ": " + e.getMessage());
+            }
+        }
 
         //output results to console
         console.displayResults("result:\n\n" + result);
-
-
-
-
-        System.out.println("Data representation: " + comparisonStrategy.getClass().getName());
-        System.out.println("Pairwise metric: " + comparisonStrategy.getClass().getName());
-        System.out.println("Aggregation method: " + aggregationStrategy.getClass().getName());
-        System.out.println("Test suite: ");
-        for(DataRepresentation testCase: testSuite1)
-            System.out.println(testCase.toString());
-        if(testSuite2 != null){
-            System.out.println("Test suite 2: ");
-            for(DataRepresentation testCase: testSuite2)
-                System.out.println(testCase.toString());
-        }
-        System.out.println(result);
+        return;
     }
 
     private DataRepresentation[] getTestSuite(String filename, String delimiter, DataRepresentation format){
@@ -435,6 +445,7 @@ public class Controller {
             stringBuilder.append(args[i]);
 
         controller.processCommand(stringBuilder.toString());
+        System.exit(0);
     }
 
 }
