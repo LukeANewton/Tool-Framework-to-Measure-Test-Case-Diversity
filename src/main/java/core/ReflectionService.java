@@ -74,25 +74,21 @@ public class ReflectionService {
         String directoryName = "target/classes/" + packageName.replace('.', '/');
 
         File directory = new File(directoryName);
-        ArrayList<Class> classes = new ArrayList<Class>();
         if (!directory.exists())
             return null;
 
-        //get classes from each class file
+        //look at each file in the directory, and attempt to instantiate each class that implements the given interface
         File[] files = directory.listFiles();
+        ArrayList<Object> objects = new ArrayList<Object>();
         for (int i = 0; i < files.length; i++) {
                 if (files[i].getName().endsWith(".class")) {
-                    classes.add(Class.forName(packageName + '.' +
-                            files[i].getName().substring(0, files[i].getName().length() - 6)));
-                }
-        }
+                    Class c = Class.forName(packageName + '.' +
+                            files[i].getName().substring(0, files[i].getName().length() - 6));
+                    if(Class.forName(packageName + '.' + interfaceName).isAssignableFrom(c) &&
+                            !c.isInterface())
+                        objects.add(c.getConstructor().newInstance());
 
-        //instantiate each found class that implements the interface
-        ArrayList<Object> objects = new ArrayList<Object>();
-        for(int i = 0; i < classes.size(); i++) {
-            if(Class.forName(packageName + '.' + interfaceName).isAssignableFrom(classes.get(i)) &&
-                    !classes.get(i).isInterface())
-                objects.add(classes.get(i).getConstructor().newInstance());
+                }
         }
         return objects.toArray();
     }
