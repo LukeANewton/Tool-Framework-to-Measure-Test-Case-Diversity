@@ -2,6 +2,8 @@ package core;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import data_representation.DataRepresentation;
@@ -85,5 +87,37 @@ public class FileReaderService {
 
 		return testCases;
 	}
-	
+
+	/**
+	 * reads a test suite file located at filename into the passed DataRepresentation for later iteration over
+	 *
+	 * @param filename the test suite file containing test cases
+	 * @param delimiter the character(s)/pattern that separates each test case in the file
+	 * @param format the data representation that the test cases are read into
+	 * @return
+	 */
+	public DataRepresentation[] readIntoDataRepresentation(String filename, String delimiter, DataRepresentation format) throws InvalidFormatException, FileNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+		if (format == null)
+			throw new InvalidFormatException();
+
+		String s = readFile(filename);
+
+		//at this point, we have all the file read in, so we can split up the test cases
+		String[] testCases;
+		if (delimiter == null){
+			testCases = new String[] {s};
+		} else{
+			testCases = s.split(delimiter);
+		}
+
+		//all the file contents is in the system, now we need to read them into data representations
+		ArrayList<DataRepresentation> list = new ArrayList<>();
+		for(int i = 0; i < testCases.length; i++){
+			DataRepresentation d = format.getClass().getConstructor().newInstance();
+			d.parse(testCases[i]);
+			list.add(d);
+		}
+		return list.toArray(new DataRepresentation[0]);
+	}
+
 }

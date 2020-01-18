@@ -1,7 +1,15 @@
 package core;
 
+import model.Config;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Creates instances of classes using their constructor and arguments provided by the caller.
@@ -56,8 +64,45 @@ public class ReflectionService {
     }
 
     /**
-     * Gets and checks the desired class and interface exists and that the class implements the interface.
+     * instantiates an object from each file in a package that matches a specified interface
      *
+     * @param packageName the name of the package to instantiate objects from
+     * @param interfacePath the path and name of the interface which classes must implement to be instantiated
+     * @return a list of objects from the specified package that implement the specified interface
+     */
+    public Object[] searchPackage(String packageName, String interfacePath)
+            throws IllegalAccessException, InvocationTargetException, InstantiationException, ClassNotFoundException, NoSuchMethodException, InvalidFormatException {
+
+        ArrayList<Object> objects = new ArrayList<>();
+        Reflections reflections = new Reflections(packageName, new SubTypesScanner(false));
+        Set<Class<?>> allClasses = reflections.getSubTypesOf(Object.class).stream().filter(c -> !c.isInterface()).collect(Collectors.toSet());
+
+        if (!checkFormat(interfacePath)) {
+            throw new InvalidFormatException("Invalid class path when retrieving all classes. Expected: <package>.<subPackage>.<interfaceName> with any number of subpackages. Actual: " + interfacePath);
+        }
+        Class<?> myInterface = Class.forName(interfacePath);
+        for (Class<?> myClass : allClasses) {
+            objects.add(checkClassTypes(myClass, myInterface).getConstructor().newInstance());
+        }
+        return objects.toArray();
+    }
+
+    /**
+     * attempt to retrieve the setter for a field in the config file, it it exists
+     *
+     * @param c the config file to get the setter from
+     * @param fieldName the name of the field that we want to find a setter for
+     * @return a method for setting the passed fieldName to a new value
+     */
+    public Method retrieveConfigSetter(Config c, Class type, String fieldName) throws NoSuchMethodException {
+        //change the first character of the fieldName to uppercase and prepend 'set' to get setter name
+        String methodName = "set" + String.valueOf(fieldName.charAt(0)).toUpperCase() + fieldName.substring(1);
+
+        return c.getClass().getMethod(methodName, type);
+    }
+
+    /**
+     * Gets and checks the desired class and interface exists and that the class implements the interface.
      * @param classPath The full path and name of the class in the project.
      * @param interfacePath The full path and name of the interface in the project.
      * @return The desired class.
@@ -75,10 +120,29 @@ public class ReflectionService {
         Class<?> myClass = Class.forName(classPath);
         Class<?> myInterface = Class.forName(interfacePath);
 
+        return checkClassTypes(myClass, myInterface);
+    }
+
+    /**
+     * Checks that a class directly implements an interface and that the class is a class and interface is an interface.
+     *
+     * @param myClass a class that implements the given interface
+     * @param myInterface the interface that myClass implements
+     * @return myClass when it's confirmed that myClass implements myInterface
+     * @throws InstantiationException when the check fails
+     */
+    private Class<?> checkClassTypes(Class<?> myClass, Class<?> myInterface) throws InstantiationException {
+        if (myClass.isInterface()) {
+            throw new InstantiationException(myClass.getSimpleName() + " is a " + myClass.getTypeName() + ". Expected a class.");
+        }
+        if (!myInterface.isInterface()) {
+            throw new InstantiationException(myInterface.getSimpleName() + " is a " + myInterface.getTypeName() + ". Expected an interface.");
+        }
+
         if (myInterface.isAssignableFrom(myClass)) {
             return myClass;
         }
-        throw new InstantiationException("Class '" + classPath + "' doesn't implement interface '" + interfacePath + "'.");
+        throw new InstantiationException("Class '" + myClass.getSimpleName() + "' doesn't implement interface '" + myInterface.getSimpleName() + "'.");
     }
 
     /**
