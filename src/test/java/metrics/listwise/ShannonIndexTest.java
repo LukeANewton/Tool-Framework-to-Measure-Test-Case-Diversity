@@ -8,6 +8,9 @@ import metrics.comparison.TestCaseFormatMismatchException;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 public class ShannonIndexTest {
@@ -22,9 +25,10 @@ public class ShannonIndexTest {
     /**test for the compare method on a small test suite*/
     public void testCompare() throws InvalidFormatException, TestCaseFormatMismatchException {
         //create a test suite
-        DataRepresentation[] testsuite = {new CSV("1,2,3,4,5,6"),
-                                          new CSV("5,4,8,5,2,4,7"),
-                                          new CSV("1,1,1,4,5,8")};
+        List<DataRepresentation> testsuite = new ArrayList<>();
+        testsuite.add(new CSV("1,2,3,4,5,6"));
+        testsuite.add(new CSV("5,4,8,5,2,4,7"));
+        testsuite.add(new CSV("1,1,1,4,5,8"));
 
         double result = strategy.compare(testsuite);
         double expected = 2.512; //hand-calculated value
@@ -32,9 +36,9 @@ public class ShannonIndexTest {
     }
 
     @Test
-    /**test for the comapre method on an empty test suite should yield 0*/
+    /**test for the compare method on an empty test suite should yield 0*/
     public void testCompareEmpty() throws TestCaseFormatMismatchException {
-        DataRepresentation[] testsuite = {};
+        List<DataRepresentation> testsuite = new ArrayList<>();
         double result = strategy.compare(testsuite);
         assertEquals(0, result, 0.05);
     }

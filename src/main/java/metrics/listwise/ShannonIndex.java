@@ -5,13 +5,14 @@ import metrics.comparison.TestCaseFormatMismatchException;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class ShannonIndex implements ListwiseComparisonStrategy{
     DataRepresentation[] testSuite;
 
     @Override
-    public double compare(DataRepresentation[] testsuite) throws TestCaseFormatMismatchException {
+    public double compare(List<DataRepresentation> testsuite) throws TestCaseFormatMismatchException {
         //the result comes from the equation: -sum(p*ln(p)), where p is a type of element in the test suite
         double result = 0;
         //to calculate this, you need to find all the possible elements in the test suite, and compare the relative frequencies
@@ -19,7 +20,7 @@ public class ShannonIndex implements ListwiseComparisonStrategy{
 
         //get the frequencies
         for(DataRepresentation testcase: testsuite){
-            if(!testcase.getClass().equals(testsuite[0].getClass()))
+            if(!testcase.getClass().equals(testsuite.get(0).getClass()))
                 throw new TestCaseFormatMismatchException();
 
             while(testcase.hasNext()) {

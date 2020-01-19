@@ -4,6 +4,8 @@ import core.HelpTarget;
 import data_representation.DataRepresentation;
 import metrics.comparison.TestCaseFormatMismatchException;
 
+import java.util.List;
+
 /**
  * An interface for any listwise metrics to implement. listwise metrics are
  * those metrics that compare a whole list at once, rather than doing the
@@ -17,5 +19,5 @@ public interface ListwiseComparisonStrategy extends HelpTarget {
      * @return the result of the comparison
      * @throws TestCaseFormatMismatchException thrown when there are multiple different data representations in the test suite
      */
-     public double compare(DataRepresentation[] testsuite) throws TestCaseFormatMismatchException;
+     public double compare(List<DataRepresentation> testsuite) throws TestCaseFormatMismatchException;
 }
