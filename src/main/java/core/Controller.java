@@ -1,17 +1,23 @@
 package core;
 
-import com.google.gson.Gson;
 import data_representation.DataRepresentation;
 import metrics.aggregation.AggregationStrategy;
 import metrics.comparison.PairwiseComparisonStrategy;
 import model.*;
 import user_interface.Console;
+import user_interface.InputParser;
+import user_interface.InvalidCommandException;
 import user_interface.OverwriteOption;
 import utilities.Tuple;
 
-import java.io.*;
-import java.lang.reflect.Method;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 /**
  * The Controller is the main logic for the program. It pieces together the different services to
@@ -20,10 +26,6 @@ import java.util.List;
  * @author luke
  */
 public class Controller {
-    //the name of the configuration file containing system defaults
-    private static final String CONFIG_FILE = "/config.json";
-    //configuration object containing config file values
-    private Config config;
     //console to obtain user input and display output
     private Console console;
     //service to load class instances
@@ -36,54 +38,44 @@ public class Controller {
     private PairingService pairingService;
     //service to perform comparisons
     private ComparisonService comparisonService;
+    //the service which parses commands
+    private InputParser inputParser;
+    // The preferences of the application
+    private Preferences preferences;
 
     /**Constructor*/
-    public Controller() {
-        //read config file
-        try {
-            config = readConfig(CONFIG_FILE);
-        } catch (NullPointerException e) {
-            System.err.println("Config file: " + CONFIG_FILE + " not found.");
-            System.exit(1);
-        }
-
-        console = new Console();
-        reflectionService = new ReflectionService();
+    public Controller(Preferences prefs) {
+        preferences = prefs;
         fileReaderService = new FileReaderService();
+        console = new Console();
+        inputParser = new InputParser();
+        reflectionService = new ReflectionService();
         fileWriterService = new FileWriterService("");
         pairingService = new PairingService();
-        comparisonService = new ComparisonService(config.getNumThreads());
+
+        comparisonService = new ComparisonService(prefs.getInt(Configuration.THREAD_COUNT.name(), Integer.parseInt(Configuration.THREAD_COUNT.getBackupValue())));
     }
 
     /**
-     * reads a configuration file from the passed filename
-     * @param filename the name of the configuration file
-     * @return a Config object containing all the information from the configuration file
-     */
-    private Config readConfig(String filename) {
-        InputStream configStream = this.getClass().getResourceAsStream(filename);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(configStream));
-        Gson gson = new Gson();
-        return config = gson.fromJson(reader, Config.class);
-    }
-
-    /**
-     * writes a Config object to a file
+     * the command to invoke in the Controller to process a system instruction
      *
-     * @param filename the name of the file to write to
-     * @param config the Config object to write to file
-     * @throws IOException when there is an error with the FileWriter
+     * @param command the command for the system to execute
      */
-    private void writeConfig(String filename, Config config) throws IOException {
-        OutputStream s = new FileOutputStream(filename);
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s));
-        Gson gson = new Gson();
-        gson.toJson(config, writer); // Write to json file
-        writer.close();
-    }
-
     public void processCommand(String command){
-        DataTransferObject dto = console.processInstruction(command);
+        //parse the command into a DTO
+        DataTransferObject dto;
+        try {
+            dto = inputParser.parse(command);
+        } catch (InvalidCommandException e) {
+			/*if we have an invalid command, display an error message and list the
+			valid commands through issuing a HelpDTO*/
+            console.displayResults(e.getErrorMessage() + " Valid commands are:");
+            HelpDTO help = new HelpDTO();
+            help.setHelpType(HelpType.Command);
+            dto = help;
+        }
+
+        //determine which command is being parsed
         CommandType commandType = dto.getCommandType();
         switch(commandType){
             case Exit:
@@ -112,10 +104,10 @@ public class Controller {
         String name = dto.getDataRepresentation();
 
         if (name == null)//nothing specified in dto, so load default from config file
-            name = config.getDataRepresentation();
+            name = preferences.get(Configuration.DATA_REPRESENTATION.name(), Configuration.DATA_REPRESENTATION.getBackupValue());
 
         //set the package to look in
-        String packageName = config.getGetDataRepresentationLocation();
+        String packageName = Configuration.DATA_REPRESENTATION_LOCATION.getBackupValue();
         if (!packageName.endsWith("."))
             packageName = packageName + ".";
         reflectionService.setClassSource(packageName);
@@ -143,10 +135,10 @@ public class Controller {
         String name = dto.getPairwiseMethod();
 
         if (name == null)//nothing specified in dto, so load default from config file
-            name = config.getComparisonMethod();
+            name = preferences.get(Configuration.COMPARISON_METHOD.name(), Configuration.COMPARISON_METHOD.getBackupValue());
 
         //set the package to look in
-        String packageName = config.getComparisonMethodLocation();
+        String packageName = preferences.get(Configuration.COMPARISON_METHOD_LOCATION.name(), Configuration.COMPARISON_METHOD_LOCATION.getBackupValue());
         if (!packageName.endsWith("."))
             packageName = packageName + ".";
         reflectionService.setClassSource(packageName);
@@ -174,10 +166,10 @@ public class Controller {
         String name = dto.getAggregationMethod();
 
         if (name == null)//nothing specified in dto, so load default from config file
-            name = config.getAggregationMethod();
+            name = preferences.get(Configuration.AGGREGATION_METHOD.name(), Configuration.AGGREGATION_METHOD.getBackupValue());
 
         //set the package to look in
-        String packageName = config.getAggregationMethodLocation();
+        String packageName = preferences.get(Configuration.AGGREGATION_METHOD_LOCATION.name(), Configuration.AGGREGATION_METHOD_LOCATION.getBackupValue());
         if (!packageName.endsWith("."))
             packageName = packageName + ".";
         reflectionService.setClassSource(packageName);
@@ -220,7 +212,7 @@ public class Controller {
         String filename = dto.getTestCaseLocationOne();
         String delimiter = dto.getDelimiter();
         if (delimiter == null)
-            delimiter = config.getDelimiter();
+            delimiter = preferences.get(Configuration.DELIMITER.name(), Configuration.DELIMITER.getBackupValue());
         DataRepresentation[] testSuite1 = getTestSuite(filename, delimiter, dataRepresentation);
         if(testSuite1 == null) //this triggers when an exception is thrown
             return;
@@ -286,9 +278,17 @@ public class Controller {
 
         //output results to console
         console.displayResults("result:\n\n" + result);
-        return;
     }
 
+    /**
+     * loads a test suite from a given file into the system. The test cases in the system are expected to
+     * be separated by the provided delimiter, and be formatted according to the supplied data representation
+     *
+     * @param filename the name of the test suite file
+     * @param delimiter the character/string/regex that separates each file in the test suite
+     * @param format the data representation of the test cases
+     * @return an array of data representations where each data representation contains a test case
+     */
     private DataRepresentation[] getTestSuite(String filename, String delimiter, DataRepresentation format){
         try {
              return fileReaderService.readIntoDataRepresentation(filename, delimiter, format);
@@ -308,40 +308,25 @@ public class Controller {
      * @param dto data transfer object containing information on the requested configure command
      */
     private void processConfigureCommand(ConfigDTO dto) {
-        //check if there is a setter for the parameter we are trying to set
-        Method setter = null;
-        //the value may be a String or and integer, so we need to try both
-        Class[] classes = new Class[]{String.class, int.class};
-        int validIndex = -1;
-        for(int i = 0; i < classes.length; i++){
+        if (Objects.isNull(dto.getParameterName()) || Objects.isNull(dto)) {
+            console.displayResults("Current configuration:");
+            String[] keys = new String[0];
             try {
-                setter = reflectionService.retrieveConfigSetter(config, classes[i], dto.getParameterName());
-                validIndex = i;
-                break;
-            } catch (NoSuchMethodException e) {
-                continue;
+                keys = preferences.keys();
+            } catch (BackingStoreException e) {
+                console.displayResults("Failed to contact storage of OS's preference manager. Current configuration cannot be loaded.");
             }
+            for (String key : keys) {
+                console.displayResults(key + " = " + preferences.get(key, "No value for this key"));
+            }
+            return;
         }
-
-        if (validIndex == -1)//if we make it here, then we know that the parameter to set does not exist
-            console.displayResults("The parameter " + dto.getParameterName() + " is not valid");
+        Configuration configOption = Configuration.has(dto.getParameterName());
+        if (Objects.isNull(configOption))
+            console.displayResults("The parameter '" + dto.getParameterName() + "' is not valid. Valid values include:\n" + Arrays.toString(Configuration.values()));
         else {
-            try {
-                //invoke the setter
-                switch(validIndex){
-                    case 1: //the value should be an integer, so it must be cast as this
-                        setter.invoke(config, Integer.parseInt(dto.getParameterValue()));
-                        break;
-                    default:
-                        setter.invoke(config, dto.getParameterValue());
-                }
-
-                //as long as there is no REPL, any config command must save the value to a file, whether -s is specified or not
-                writeConfig(CONFIG_FILE, config);
-                console.displayResults("Successfully set " + dto.getParameterName() + " to the value " + dto.getParameterValue());
-            } catch (Exception e) {
-                console.displayResults("Failed to set " + dto.getParameterName() + " to the value " + dto.getParameterValue() +": " + e.toString());
-            }
+            preferences.put(configOption.name(), dto.getParameterValue());
+            console.displayResults("Successfully set '" + dto.getParameterName() + "' to the value '" + dto.getParameterValue() + "'.");
         }
     }
 
@@ -398,14 +383,14 @@ public class Controller {
         try {
             Object[] objects = reflectionService.searchPackage(packageName, interfaceName);
             result.append("Available " + helpType + "s are:\n");
-            for(int i = 0; i <objects.length; i++){//for each object, we want to print the name and description
-                HelpTarget h = (HelpTarget) objects[i];
+            for (Object object : objects) {//for each object, we want to print the name and description
+                HelpTarget h = (HelpTarget) object;
 
                 //get the class name
                 String name = h.getClass().getName();
                 //need to remove the preceding pathname from each class name
                 String[] parts = name.split("\\.");
-                name = parts[parts.length-1];
+                name = parts[parts.length - 1];
                 result.append("\t" + name + ":\n");
 
                 //get the class description
@@ -420,23 +405,4 @@ public class Controller {
             console.displayResults("failed to retrieve object descriptions: " + e.getMessage());
         }
     }
-
-    /**
-     * main function for the system
-     *
-     * @param args command line arguments
-     */
-    public static void main(String[] args){
-        Controller controller = new Controller();
-
-        /*in order to reuse the code from the Console, for now args must be
-          concatenated, even though it is then tokenized again in the near future
-         */
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String arg : args) stringBuilder.append(arg).append(" ");
-
-        controller.processCommand(stringBuilder.toString());
-        System.exit(0);
-    }
-
 }

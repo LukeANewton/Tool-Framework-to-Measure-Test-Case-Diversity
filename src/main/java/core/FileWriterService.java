@@ -3,7 +3,6 @@ package core;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Objects;
 
 /**
  * The FileWriterService will write the result of the comparisons to a file .
@@ -45,5 +44,4 @@ public class FileWriterService {
 		writer.write(text + System.lineSeparator());
 		writer.close();
 	}
-
 }

@@ -4,7 +4,6 @@ import model.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -95,7 +94,7 @@ public class InputParser {
 		ConfigDTO configure = new ConfigDTO();
 
 		if(tokens.size() == 0) {//no configuration was specified with command
-			throw new InvalidCommandException("No parameter name or value was specified.");
+			return configure; // Can also return null. This will trigger a the program to list the current configuration.
 		} else if (tokens.size() == 1) {//the command is too short
 			throw new InvalidCommandException("Command too short.");
 		} else if (tokens.size() == 2) { //expect this to be the parameter to configure and associated value
@@ -136,95 +135,92 @@ public class InputParser {
 		}
 
 		//after checking boundaries, we need to determine filenames and what flags have been set
-		Iterator<String> tokenIterator = tokens.iterator();
-		String token = tokenIterator.next();
-
 		//first, get the filenames and data representation, this should be everything before flags
 		ArrayList<String> tokensBeforeFlags = new ArrayList<>();
-		do {
-			if(isTokenCompareFlag(token)) {//is the token is a flag, we have found all the filenames and data representation
+
+		int i = 0;
+		for (; i < tokens.size(); i++) {
+			if(isTokenCompareFlag(tokens.get(i))) {//is the token is a flag, we have found all the filenames and data representation
 				break;
-			} else {
-				tokensBeforeFlags.add(token);
 			}
-			token = tokenIterator.next();
-		} while(tokenIterator.hasNext());
-
+			tokensBeforeFlags.add(tokens.get(i));
+		}
 		//now that we have all filenames and data representation, check the remainder for flags
-		do {
-			if(token.equals(DIVERISTY_METRIC_FLAG)) {// found a pairwise metric flag
-				//if a flag is found there should be a next token, and it should not also be a flag
-				if(!tokenIterator.hasNext()) {//reached the end of the tokens, so there is no value after the flag
-					throw new InvalidCommandException("No metric specified after pairwise flag.");
-				}
-				token = tokenIterator.next();
-				if(isTokenCompareFlag(token)) {// the next token is a flag, so there is no value after the flag
-					throw new InvalidCommandException("No metric specified after pairwise flag.");
-				} else { //the next token should be the pairwise metric name
-					compare.setPairwiseMethod(token);
-				}
-			} else if(token.equals(AGGREGATION_METHOD_FLAG)) {//found an aggregation method flag
-				if(!tokenIterator.hasNext()) {//reached the end of the tokens, so there is no value after the flag
-					throw new InvalidCommandException("No method specified after aggregation flag.");
-				}
-				token = tokenIterator.next();
-				if(isTokenCompareFlag(token)) {// the next token is a flag, so there is no value after the flag
-					throw new InvalidCommandException("No method specified after aggregation flag.");
-				} else { //the next token should be the aggregation method name
-					compare.setAggregationMethod(token);
-				}
-			} else if(token.equals(DELIMITER_FLAG)) {//found a delimiter flag
-				if(!tokenIterator.hasNext()) {//reached the end of the tokens, so there is no value after the flag
-					throw new InvalidCommandException("No delimiter specified after flag.");
-				}
-				token = tokenIterator.next();
-				if(isTokenCompareFlag(token)) {// the next token is a flag, so there is no value after the flag
-					throw new InvalidCommandException("No delimiter specified after flag.");
-				} else { //the next token should be the delimiter
-					//delimiters must be at least three characters: open quote, at least one character, close quote
-					if(token.length() < 3) {
-						throw new InvalidCommandException("Delimiter too short. Delimters should be enclosed in quotes and contain at leat one character.");
-					}
+		for (int j = i; j < tokens.size(); j++) {
+			boolean isAtLastElement = j == tokens.size() - 1;
+			switch (tokens.get(j)) {
+				case DIVERISTY_METRIC_FLAG: // found a pairwise metric flag
 
-					//the delimiter should be specified with surrounding quotes, which should be stripped
-					if(token.charAt(0) == '"' && token.charAt(token.length()-2) == '"') {
-						compare.setDelimiter(token.substring(1, token.length()-2));
-					} else {
-						throw new InvalidCommandException("Delimiter should be enclosed in quotation marks.");
+					//if a flag is found there should be a next token, and it should not also be a flag
+					if (isAtLastElement) {//reached the end of the tokens, so there is no value after the flag
+						throw new InvalidCommandException("No metric specified after pairwise flag.");
 					}
-				}
-			} else if(token.equals(NUMBER_THREADS_FLAG)) {//found a flag to set number of threads
-				if(!tokenIterator.hasNext()) {//reached the end of the tokens, so there is no value after the flag
-					throw new InvalidCommandException("No value specified after flag.");
-				}
-				token = tokenIterator.next();
-				if(isTokenCompareFlag(token)) {// the next token is a flag, so there is no value after the flag
-					throw new InvalidCommandException("No value specified after flag.");
-				} else { //the next token should be the number of threads to use
-					//must also check if the value is a valid integer
-					try {
-						Integer numThreads = Integer.parseInt(token);
-						compare.setNumberOfThreads(numThreads);
-					} catch (NumberFormatException e) {
-						throw new InvalidCommandException("Value specified after number of threads flag is not a number.");
+					if (isTokenCompareFlag(tokens.get(j))) {// the next token is a flag, so there is no value after the flag
+						throw new InvalidCommandException("No metric specified after pairwise flag.");
+					} else { //the next token should be the pairwise metric name
+						compare.setPairwiseMethod(tokens.get(j));
 					}
-				}
-			} else if(token.equals(SAVE_FLAG)) {//found a flag to specify if saving results to a file
-				if(!tokenIterator.hasNext()) {//reached the end of the tokens, so there is no value after the flag
-					throw new InvalidCommandException("No filename specified after save flag.");
-				}
-				token = tokenIterator.next();
-				if(isTokenCompareFlag(token)) {// the next token is a flag, so there is no value after the flag
-					throw new InvalidCommandException("No filename specified after save flag.");
-				} else { //the next token should be the filename to save output to
-					compare.setOutputFilename(token);
-				}
-			} else {//the token is not a flag, and should not be in the command
-				throw new InvalidCommandException("Unrecognized token '" + token + "'.");
+					break;
+				case AGGREGATION_METHOD_FLAG: //found an aggregation method flag
+					if (isAtLastElement) {//reached the end of the tokens, so there is no value after the flag
+						throw new InvalidCommandException("No method specified after aggregation flag.");
+					}
+					if (isTokenCompareFlag(tokens.get(j))) {// the next token is a flag, so there is no value after the flag
+						throw new InvalidCommandException("No method specified after aggregation flag.");
+					} else { //the next token should be the aggregation method name
+						compare.setAggregationMethod(tokens.get(j));
+					}
+					break;
+				case DELIMITER_FLAG: //found a delimiter flag
+					if (isAtLastElement) {//reached the end of the tokens, so there is no value after the flag
+						throw new InvalidCommandException("No delimiter specified after flag.");
+					}
+					if (isTokenCompareFlag(tokens.get(j))) {// the next token is a flag, so there is no value after the flag
+						throw new InvalidCommandException("No delimiter specified after flag.");
+					} else { //the next token should be the delimiter
+						//delimiters must be at least three characters: open quote, at least one character, close quote
+						if (tokens.get(j).length() < 3) {
+							throw new InvalidCommandException("Delimiter too short. Delimiters should be enclosed in quotes and contain at least one character.");
+						}
+
+						//the delimiter should be specified with surrounding quotes, which should be stripped
+						if (tokens.get(j).charAt(0) == '"' && tokens.get(j).charAt(tokens.get(j).length() - 2) == '"') {
+							compare.setDelimiter(tokens.get(j).substring(1, tokens.get(j).length() - 2));
+						} else {
+							throw new InvalidCommandException("Delimiter should be enclosed in quotation marks.");
+						}
+					}
+					break;
+				case NUMBER_THREADS_FLAG: //found a flag to set number of threads
+					if (isAtLastElement) {//reached the end of the tokens, so there is no value after the flag
+						throw new InvalidCommandException("No value specified after flag.");
+					}
+					if (isTokenCompareFlag(tokens.get(j))) {// the next token is a flag, so there is no value after the flag
+						throw new InvalidCommandException("No value specified after flag.");
+					} else { //the next token should be the number of threads to use
+						//must also check if the value is a valid integer
+						try {
+							Integer numThreads = Integer.parseInt(tokens.get(j));
+							compare.setNumberOfThreads(numThreads);
+						} catch (NumberFormatException e) {
+							throw new InvalidCommandException("Value specified after number of threads flag is not a number.");
+						}
+					}
+					break;
+				case SAVE_FLAG: //found a flag to specify if saving results to a file
+					if (isAtLastElement) {//reached the end of the tokens, so there is no value after the flag
+						throw new InvalidCommandException("No filename specified after save flag.");
+					}
+					if (isTokenCompareFlag(tokens.get(j))) {// the next token is a flag, so there is no value after the flag
+						throw new InvalidCommandException("No filename specified after save flag.");
+					} else { //the next token should be the filename to save output to
+						compare.setOutputFilename(tokens.get(j));
+					}
+					break;
+				default: //the token is not a flag, and should not be in the command
+					throw new InvalidCommandException("Unrecognized token '" + tokens.get(j) + "'.");
 			}
-			if (tokenIterator.hasNext())
-				token = tokenIterator.next();
-		} while(tokenIterator.hasNext());
+		}
 		
 		/*done iterating over tokens, all that is left is to check the filenames and 
 		 * data representation we found. There should be either two filenames and
@@ -238,7 +234,7 @@ public class InputParser {
 			compare.setTestCaseLocationTwo(tokensBeforeFlags.get(1));
 			compare.setDataRepresentation(tokensBeforeFlags.get(2));
 		} else {// the command is invalid
-			throw new InvalidCommandException("Wrong number of filenames or data represnetaion set.");
+			throw new InvalidCommandException("Wrong number of filenames or data representation set.\nExpected one or two files and one data representation.");
 		}
 		return compare;
 	}

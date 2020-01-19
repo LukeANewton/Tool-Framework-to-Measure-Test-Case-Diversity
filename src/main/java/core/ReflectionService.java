@@ -1,17 +1,9 @@
 package core;
-import model.Config;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Creates instances of classes using their constructor and arguments provided by the caller.
@@ -74,41 +66,23 @@ public class ReflectionService {
         String directoryName = "target/classes/" + packageName.replace('.', '/');
 
         File directory = new File(directoryName);
-        ArrayList<Class> classes = new ArrayList<Class>();
         if (!directory.exists())
             return null;
 
-        //get classes from each class file
+        //look at each file in the directory, and attempt to instantiate each class that implements the given interface
         File[] files = directory.listFiles();
+        ArrayList<Object> objects = new ArrayList<Object>();
         for (int i = 0; i < files.length; i++) {
                 if (files[i].getName().endsWith(".class")) {
-                    classes.add(Class.forName(packageName + '.' +
-                            files[i].getName().substring(0, files[i].getName().length() - 6)));
+                    Class c = Class.forName(packageName + '.' +
+                            files[i].getName().substring(0, files[i].getName().length() - 6));
+                    if(Class.forName(packageName + '.' + interfaceName).isAssignableFrom(c) &&
+                            !c.isInterface())
+                        objects.add(c.getConstructor().newInstance());
+
                 }
         }
-
-        //instantiate each found class that implements the interface
-        ArrayList<Object> objects = new ArrayList<Object>();
-        for(int i = 0; i < classes.size(); i++) {
-            if(Class.forName(packageName + '.' + interfaceName).isAssignableFrom(classes.get(i)) &&
-                    !classes.get(i).isInterface())
-                objects.add(classes.get(i).getConstructor().newInstance());
-        }
         return objects.toArray();
-    }
-
-    /**
-     * attempt to retrieve the setter for a field in the config file, it it exists
-     *
-     * @param c the config file to get the setter from
-     * @param fieldName the name of the field that we want to find a setter for
-     * @return a method for setting the passed fieldName to a new value
-     */
-    public Method retrieveConfigSetter(Config c, Class type, String fieldName) throws NoSuchMethodException {
-        //change the first character of the fieldName to uppercase and prepend 'set' to get setter name
-        String methodName = "set" + String.valueOf(fieldName.charAt(0)).toUpperCase() + fieldName.substring(1);
-
-        return c.getClass().getMethod(methodName, type);
     }
 
     /**

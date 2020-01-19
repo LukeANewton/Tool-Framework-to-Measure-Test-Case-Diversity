@@ -1,12 +1,12 @@
 package core;
 
+import data_representation.DataRepresentation;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Scanner;
-
-import data_representation.DataRepresentation;
 
 /**
  * Handles the system functionality for reading test cases from files.
@@ -29,7 +29,7 @@ public class FileReaderService {
 			throw new InvalidFormatException();
 
 		String s = readFile(filename);
-		return format.parse(s.toString());
+		return format.parse(s);
 	}
 
 	/**
@@ -119,5 +119,4 @@ public class FileReaderService {
 		}
 		return list.toArray(new DataRepresentation[0]);
 	}
-
 }

@@ -14,7 +14,7 @@
             <manifest>
               <addClasspath>true</addClasspath>
               <classpathPrefix>lib/</classpathPrefix>
-              <mainClass>core.Controller</mainClass>
+              <mainClass>ComparisonApp</mainClass>
             </manifest>
           </archive>
         </configuration>
