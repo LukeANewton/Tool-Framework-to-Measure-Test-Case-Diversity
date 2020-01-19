@@ -8,10 +8,8 @@ import java.util.List;
 import model.CompareDTO;
 import model.ConfigDTO;
 import model.DataTransferObject;
-import model.ExitDTO;
 import model.HelpDTO;
 import model.HelpType;
-import model.UpdateDTO;
 
 /**
  * The parser for commands input through the user interface. The parse() function takes
@@ -57,11 +55,7 @@ public class InputParser {
 
 		//the type of command is determined by the first token
 		String commandType = tokens.remove(0);
-		if(commandType.equals(EXIT_COMMAND)) {
-			return parseExitCommand(tokens);
-		} else if (commandType.equals(UPDATE_COMMAND)) {
-			return parseUpdateCommand(tokens);
-		} else if (commandType.equals(HELP_COMMAND)) {
+		if (commandType.equals(HELP_COMMAND)) {
 			return parseHelpCommand(tokens);
 		} else if (commandType.equals(CONFIG_COMMAND)) {
 			return parseConfigCommand(tokens);
@@ -69,23 +63,6 @@ public class InputParser {
 			return parseCompareCommand(tokens);
 		} else { // the command entered is not recognized
 			throw new InvalidCommandException("The command keyword entered is not recognized.");
-		}
-	}
-
-	/**
-	 * parse instructions for an exit command
-	 * 
-	 * @param tokens a list of any specified flags/values after the command keyword
-	 * @throws InvalidCommandException exception thrown when the command is determined invalid
-	 * @return a DataTransferObject containing the necessary information to issue the command input
-	 */
-	private DataTransferObject parseExitCommand(List<String> tokens) throws InvalidCommandException{
-		//expect command to match: exit
-
-		if (tokens.size() == 0) { //the exit command only contained "exit"
-			return new ExitDTO();
-		} else { //the command has unnecessary extra tokens
-			throw new InvalidCommandException("Unexpected additional tokens.");
 		}
 	}
 
@@ -289,32 +266,5 @@ public class InputParser {
 			help.setHelpType( HelpType.Command);
 		}
 		return help;
-	}
-
-	/**
-	 * parse instructions for an update command
-	 * 
-	 * @param tokens a list of any specified flags/values after the command keyword
-	 * @throws InvalidCommandException exception thrown when the command is determined invalid
-	 * @return a DataTransferObject containing the necessary information to issue the command input
-	 */
-	private DataTransferObject parseUpdateCommand(List<String> tokens) throws InvalidCommandException{
-		//expect command to match: update [-l <class-name>]
-		UpdateDTO update = new UpdateDTO();
-
-		if(tokens.size() == 0) {//need to restart without checking for new class on reboot
-			return update;
-		} else if (tokens.size() == 1) {//the command is either too short, or too long
-			throw new InvalidCommandException("Command is incorrect length.");
-		} else if (tokens.size() == 2) {
-			if (tokens.get(0).equals(UPDATE_LOACTION_FLAG)) {//need to check on restart whether the specified class can be found
-				update.setLocation(tokens.get(1));
-				return update;
-			} else { // the flags specified are not recognized
-				throw new InvalidCommandException("Options specified in command are not recognized.");
-			}
-		} else {//the command has unnecessary extra tokens
-			throw new InvalidCommandException("Unexpected additional tokens.");
-		}
 	}
 }

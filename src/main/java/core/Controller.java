@@ -86,10 +86,6 @@ public class Controller {
         //determine which command is being parsed
         CommandType commandType = dto.getCommandType();
         switch(commandType){
-            case Exit:
-            case Update:
-                console.displayResults("This command remains unimplemented while there is no REPL");
-                break;
             case Help:
                 processHelpCommand((HelpDTO)dto);
                 break;
