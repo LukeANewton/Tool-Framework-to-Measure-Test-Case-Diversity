@@ -1,7 +1,6 @@
 package core;
 
 import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
 import data_representation.DataRepresentation;
 import metrics.aggregation.AggregationStrategy;
 import metrics.comparison.PairwiseComparisonStrategy;
@@ -13,7 +12,6 @@ import utilities.Tuple;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * The Controller is the main logic for the program. It pieces together the different services to
@@ -23,7 +21,7 @@ import java.util.Objects;
  */
 public class Controller {
     //the name of the configuration file containing system defaults
-    private static final String CONFIG_FILE = "config.json";
+    private static final String CONFIG_FILE = "/config.json";
     //configuration object containing config file values
     private Config config;
     //console to obtain user input and display output
@@ -44,10 +42,9 @@ public class Controller {
         //read config file
         try {
             config = readConfig(CONFIG_FILE);
-        } catch (FileNotFoundException e) {
+        } catch (NullPointerException e) {
             System.err.println("Config file: " + CONFIG_FILE + " not found.");
-            e.printStackTrace();
-            System.exit(-1);
+            System.exit(1);
         }
 
         console = new Console();
@@ -61,13 +58,13 @@ public class Controller {
     /**
      * reads a configuration file from the passed filename
      * @param filename the name of the configuration file
-     * @throws FileNotFoundException thrown when passed filename can not be found
      * @return a Config object containing all the information from the configuration file
      */
-    private Config readConfig(String filename) throws FileNotFoundException {
-        JsonReader jsonReader = new JsonReader(new FileReader(filename));
+    private Config readConfig(String filename) {
+        InputStream configStream = this.getClass().getResourceAsStream(filename);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(configStream));
         Gson gson = new Gson();
-        return config = gson.fromJson(jsonReader, Config.class);
+        return config = gson.fromJson(reader, Config.class);
     }
 
     /**
@@ -78,10 +75,11 @@ public class Controller {
      * @throws IOException when there is an error with the FileWriter
      */
     private void writeConfig(String filename, Config config) throws IOException {
-        FileWriter writer = new FileWriter(filename);
+        OutputStream s = new FileOutputStream(filename);
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s));
         Gson gson = new Gson();
         gson.toJson(config, writer); // Write to json file
-        Objects.requireNonNull(writer).close();
+        writer.close();
     }
 
     public void processCommand(String command){
@@ -435,8 +433,7 @@ public class Controller {
           concatenated, even though it is then tokenized again in the near future
          */
         StringBuilder stringBuilder = new StringBuilder();
-        for(int i = 0; i < args.length; i++)
-            stringBuilder.append(args[i]);
+        for (String arg : args) stringBuilder.append(arg).append(" ");
 
         controller.processCommand(stringBuilder.toString());
         System.exit(0);

@@ -4,12 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import model.Config;
 import org.junit.Test;
+
 import java.awt.*;
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Objects;
 
 import static org.junit.Assert.*;
 
@@ -195,7 +197,7 @@ public class ReflectionServiceTest {
         //read JSON
         JsonReader jsonReader = null;
         try {
-            jsonReader = new JsonReader(new FileReader("config.json"));
+            jsonReader = new JsonReader(new FileReader("src/main/resources/config.json"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             fail();
@@ -242,7 +244,7 @@ public class ReflectionServiceTest {
         //read JSON
         JsonReader jsonReader = null;
         try {
-            jsonReader = new JsonReader(new FileReader("config.json"));
+            jsonReader = new JsonReader(new FileReader("src/main/resources/config.json"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             fail();

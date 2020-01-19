@@ -1,17 +1,11 @@
 package user_interface;
 
+import model.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
-import model.CompareDTO;
-import model.ConfigDTO;
-import model.DataTransferObject;
-import model.ExitDTO;
-import model.HelpDTO;
-import model.HelpType;
-import model.UpdateDTO;
 
 /**
  * The parser for commands input through the user interface. The parse() function takes
