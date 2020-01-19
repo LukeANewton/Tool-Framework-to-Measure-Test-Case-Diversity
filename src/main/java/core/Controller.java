@@ -10,6 +10,7 @@ import user_interface.Console;
 import user_interface.OverwriteOption;
 import utilities.Tuple;
 
+import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -256,9 +257,9 @@ public class Controller {
             comparisonService = new ComparisonService(dto.getNumberOfThreads());
         String result = null;
         try {
-           result = comparisonService.compareTestCase(pairs, comparisonStrategy, aggregationStrategy);
+           result = comparisonService.compareTestCase(pairs, comparisonStrategy, aggregationStrategy, console);
         } catch (Exception e) {
-            console.displayResults("Error in pairwise comparison calculation: " + e.getMessage());
+            console.displayResults("Error in pairwise comparison calculation: " + e.toString());
             return;
         }
 

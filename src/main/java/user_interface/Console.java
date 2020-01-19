@@ -4,6 +4,10 @@ import model.DataTransferObject;
 import model.HelpDTO;
 import model.HelpType;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Scanner;
 
 /**
@@ -13,7 +17,7 @@ import java.util.Scanner;
  * @author luke
  *
  */
-public class Console {	
+public class Console implements PropertyChangeListener {
 	//the parser used to check input
 	private InputParser parser;
 	//the scanner used to obtain user input
@@ -23,6 +27,9 @@ public class Console {
 	public Console() {
 		input = new Scanner(System.in);
 		parser = new InputParser();
+		completedComparisons = 0;
+		numberTasks = 0;
+		lastProgressMilestone = 0;
 	}
 	
 	/**
@@ -108,5 +115,36 @@ public class Console {
 			dto = help;
 		}
 		return dto;
+	}
+
+	private int completedComparisons;
+	private int numberTasks;
+	private double lastProgressMilestone;
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		if(evt.getPropertyName().equals("numberTasks"))
+			numberTasks = (Integer) evt.getNewValue();
+		else {
+			synchronized (this) {
+				completedComparisons++;
+				double percent = ((double) completedComparisons) / numberTasks;
+
+				if(percent - lastProgressMilestone >= 0.1) {
+					lastProgressMilestone = percent;
+					if (completedComparisons == numberTasks)
+						System.out.println("[==========]");
+					else {
+						int n = (int) (percent * 10);
+						System.out.print(
+								"[" +
+								String.format("%0" + n + "d", 0).replace("0", "=") +
+								String.format("%0" + (10 - n) + "d", 0).replace("0", " ")
+								+ "]\r"
+						);
+					}
+				}
+			}
+		}
 	}
 }

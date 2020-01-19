@@ -6,6 +6,9 @@ import metrics.comparison.PairwiseComparisonStrategy;
 import model.Command;
 import utilities.Tuple;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -21,9 +24,17 @@ import java.util.concurrent.*;
  */
 public class ComparisonService {
 	private ExecutorService threadPool;
+	private PropertyChangeSupport support;
 
 	public ComparisonService(int threads) {
 		threadPool = Executors.newFixedThreadPool(threads);
+		support = new PropertyChangeSupport(this);
+	}
+
+	public String compareTestCase(List<Tuple<DataRepresentation, DataRepresentation>> testCasePairs,
+								  PairwiseComparisonStrategy strategy,
+								  AggregationStrategy aggregation) throws ExecutionException, InterruptedException {
+		return compareTestCase(testCasePairs, strategy, aggregation, null);
 	}
 
 	/**
@@ -38,13 +49,19 @@ public class ComparisonService {
 	 * @return a double representing the similarity between the two list of tests
 	 */
 	public String compareTestCase(List<Tuple<DataRepresentation, DataRepresentation>> testCasePairs,
-								  PairwiseComparisonStrategy strategy, AggregationStrategy aggregation) throws ExecutionException, InterruptedException {
-		List<Future<Object>> futureList = new ArrayList<>();
+								  PairwiseComparisonStrategy strategy, AggregationStrategy aggregation,
+								  PropertyChangeListener pcl) throws ExecutionException, InterruptedException {
+		if (pcl != null)
+			support.addPropertyChangeListener(pcl);
+
+		List<Command> tasks = new ArrayList<>();
 		for (Tuple testCasePair : testCasePairs) {
-			Command task = new Command(strategy, (DataRepresentation)testCasePair.getLeft(), (DataRepresentation)testCasePair.getRight());
-			Future<Object> comparison = threadPool.submit(task);
-			futureList.add(comparison);
+			tasks.add(new Command(strategy, (DataRepresentation)testCasePair.getLeft(),
+					(DataRepresentation)testCasePair.getRight(), pcl));
 		}
+		support.firePropertyChange(new PropertyChangeEvent(this, "numberTasks", 0, tasks.size()));
+		List<Future<Object>> futureList = threadPool.invokeAll(tasks);
+
 		ArrayList<Double> results = new ArrayList<>();
 		for (Future<Object> future : futureList) {
 			results.add((Double) future.get());
