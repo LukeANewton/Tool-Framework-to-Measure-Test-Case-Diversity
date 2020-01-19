@@ -107,7 +107,7 @@ public class Controller {
             name = preferences.get(Configuration.DATA_REPRESENTATION.name(), Configuration.DATA_REPRESENTATION.getBackupValue());
 
         //set the package to look in
-        String packageName = Configuration.DATA_REPRESENTATION_LOCATION.getBackupValue();
+        String packageName = preferences.get(Configuration.DATA_REPRESENTATION_LOCATION.name(), Configuration.DATA_REPRESENTATION_LOCATION.getBackupValue());
         if (!packageName.endsWith("."))
             packageName = packageName + ".";
         reflectionService.setClassSource(packageName);
