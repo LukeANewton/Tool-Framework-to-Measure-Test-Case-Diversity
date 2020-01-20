@@ -3,7 +3,9 @@ package core;
 import data_representation.DataRepresentation;
 import metrics.aggregation.AggregationStrategy;
 import metrics.comparison.PairwiseComparisonStrategy;
-import model.Command;
+import metrics.listwise.ListwiseComparisonStrategy;
+import model.ListwiseCommand;
+import model.PairwiseCommand;
 import utilities.Tuple;
 
 import java.util.ArrayList;
@@ -28,7 +30,7 @@ public class ComparisonService {
 
 	/**
 	 * Compares all the tests provided by testSuite1 with testSuite2 using the
-	 * provided strategy, then returns a final value using the provided aggregation
+	 * provided pairwise metric, then returns a final value using the provided aggregation
 	 * strategy
 	 *
 	 * @param testCasePairs the list of test case pairs
@@ -39,17 +41,52 @@ public class ComparisonService {
 	 */
 	public String compareTestCase(List<Tuple<DataRepresentation, DataRepresentation>> testCasePairs,
 								  PairwiseComparisonStrategy strategy, AggregationStrategy aggregation) throws ExecutionException, InterruptedException {
+		List<Callable> tasks = new ArrayList<>();
+		for(Tuple pair: testCasePairs)
+			tasks.add(new PairwiseCommand(strategy, (DataRepresentation) pair.getLeft(),
+					(DataRepresentation) pair.getRight()));
+		return compareWithThreadPool(tasks, aggregation);
+	}
+
+	/**
+	 * private helper method to perform comparison with thread pool
+	 *
+	 * @param tasks the comparisons to make in the thread pool
+	 * @param aggregation the aggregation metric to use to assimilate all the
+	 * 	 *                    	comparisons
+	 * @return a double representing the diversity of the testsuite comparisons
+	 */
+	private String compareWithThreadPool(List<Callable> tasks, AggregationStrategy aggregation) throws ExecutionException, InterruptedException {
 		List<Future<Object>> futureList = new ArrayList<>();
-		for (Tuple testCasePair : testCasePairs) {
-			Command task = new Command(strategy, (DataRepresentation)testCasePair.getLeft(), (DataRepresentation)testCasePair.getRight());
+		for (Callable task : tasks) {
 			Future<Object> comparison = threadPool.submit(task);
 			futureList.add(comparison);
 		}
+
 		ArrayList<Double> results = new ArrayList<>();
-		for (Future<Object> future : futureList) {
+		for (Future<Object> future : futureList)
 			results.add((Double) future.get());
-		}
+
 		return aggregation.aggregate(results);
+	}
+
+
+	/**
+	 * Compares all the testsuites provided with the provided listwise metric,
+	 * then returns a final value using the provided aggregation strategy
+	 *
+	 * @param testsuites 	the list of test suites
+	 * @param strategy    	the strategy to use to calculate testsuite diversity
+	 * @param aggregation 	the aggregation metric to use to assimilate all the
+	 *                    	comparisons
+	 * @return a double representing the diversity of the testsuite comparisons
+	 */
+	public String compareTestCase(List<List<DataRepresentation>> testsuites,
+								  ListwiseComparisonStrategy strategy, AggregationStrategy aggregation) throws ExecutionException, InterruptedException {
+		List<Callable> tasks = new ArrayList<>();
+		for(List<DataRepresentation> testsuite: testsuites)
+			tasks.add(new ListwiseCommand(strategy, testsuite));
+		return compareWithThreadPool(tasks, aggregation);
 	}
 
 	/**

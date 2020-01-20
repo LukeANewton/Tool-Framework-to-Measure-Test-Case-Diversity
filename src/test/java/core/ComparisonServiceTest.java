@@ -6,6 +6,7 @@ import metrics.aggregation.AggregationStrategy;
 import metrics.aggregation.AverageValue;
 import metrics.comparison.CommonElements;
 import metrics.comparison.PairwiseComparisonStrategy;
+import metrics.listwise.ShannonIndex;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +51,6 @@ public class ComparisonServiceTest {
         strategy = new CommonElements();
         aggregationStrategy = new AverageValue();
         comparisonService = new ComparisonService(2);
-
     }
 
     @After
@@ -103,5 +103,20 @@ public class ComparisonServiceTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    /**Test for the Comparison service with a listwise comparison that uses the thread pool*/
+    public void testListwiseComparison() throws InvalidFormatException, ExecutionException, InterruptedException {
+       List<List<DataRepresentation>> testsuites = new ArrayList<>();
+        List<DataRepresentation> testsuite = new ArrayList<>();
+        testsuite.add(new CSV("1,2,3,4,5,6"));
+        testsuite.add(new CSV("5,4,8,5,2,4,7"));
+        testsuite.add(new CSV("1,1,1,4,5,8"));
+        testsuites.add(testsuite);
+
+        assertEquals(2.512,
+                Double.valueOf(comparisonService.compareTestCase(testsuites, new ShannonIndex(), aggregationStrategy)),
+                TOLERANCE);
     }
 }
