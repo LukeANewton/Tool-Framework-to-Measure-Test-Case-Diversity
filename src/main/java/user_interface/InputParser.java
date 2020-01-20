@@ -8,10 +8,8 @@ import java.util.List;
 import model.CompareDTO;
 import model.ConfigDTO;
 import model.DataTransferObject;
-import model.ExitDTO;
 import model.HelpDTO;
 import model.HelpType;
-import model.UpdateDTO;
 
 /**
  * The parser for commands input through the user interface. The parse() function takes
@@ -23,8 +21,6 @@ import model.UpdateDTO;
  */
 public class InputParser {
 	/*constants for the keywords to issue a command*/
-	private static final String EXIT_COMMAND = "exit";
-	private static final String UPDATE_COMMAND = "update";
 	private static final String HELP_COMMAND = "help";
 	private static final String CONFIG_COMMAND = "config";
 	private static final String COMPARE_COMMAND = "compare";
@@ -36,7 +32,6 @@ public class InputParser {
 	private static final String NUMBER_THREADS_FLAG = "-t";
 	private static final String SAVE_FLAG = "-s";
 	private static final String DATA_REPRESENTATION_FLAG = "-f";
-	private static final String UPDATE_LOACTION_FLAG = "-l";
 
 	/**
 	 * The main function provided by the InputParser object. parse() takes a
@@ -57,35 +52,14 @@ public class InputParser {
 
 		//the type of command is determined by the first token
 		String commandType = tokens.remove(0);
-		if(commandType.equals(EXIT_COMMAND)) {
-			return parseExitCommand(tokens);
-		} else if (commandType.equals(UPDATE_COMMAND)) {
-			return parseUpdateCommand(tokens);
-		} else if (commandType.equals(HELP_COMMAND)) {
+		if (commandType.equals(HELP_COMMAND)) {
 			return parseHelpCommand(tokens);
 		} else if (commandType.equals(CONFIG_COMMAND)) {
 			return parseConfigCommand(tokens);
 		} else if (commandType.equals(COMPARE_COMMAND)){
 			return parseCompareCommand(tokens);
 		} else { // the command entered is not recognized
-			throw new InvalidCommandException("The command keyword entered is not recognized.");
-		}
-	}
-
-	/**
-	 * parse instructions for an exit command
-	 * 
-	 * @param tokens a list of any specified flags/values after the command keyword
-	 * @throws InvalidCommandException exception thrown when the command is determined invalid
-	 * @return a DataTransferObject containing the necessary information to issue the command input
-	 */
-	private DataTransferObject parseExitCommand(List<String> tokens) throws InvalidCommandException{
-		//expect command to match: exit
-
-		if (tokens.size() == 0) { //the exit command only contained "exit"
-			return new ExitDTO();
-		} else { //the command has unnecessary extra tokens
-			throw new InvalidCommandException("Unexpected additional tokens.");
+			throw new InvalidCommandException("The command keyword entered is not recognized: " + commandType);
 		}
 	}
 
@@ -103,7 +77,7 @@ public class InputParser {
 		if(tokens.size() == 0) {//no configuration was specified with command
 			throw new InvalidCommandException("No parameter name or value was specified.");
 		} else if (tokens.size() == 1) {//the command is too short
-			throw new InvalidCommandException("Command too short.");
+			throw new InvalidCommandException("No value specified for parameter: " + tokens.get(0));
 		} else if (tokens.size() == 2) { //expect this to be the parameter to configure and associated value
 			configure.setParameterName(tokens.get(0));
 			configure.setParameterValue(tokens.get(1));
@@ -115,10 +89,10 @@ public class InputParser {
 				configure.setConfigSaved(true);
 				return configure;
 			} else {//the command has unrecognized or unnecessary extra tokens
-				throw new InvalidCommandException("Unrecognized or unexpected additional tokens.");
+				throw new InvalidCommandException("Unrecognized or unexpected additional tokens: " + tokens.subList(2, tokens.size()).toString());
 			}
 		} else { //the command has unnecessary extra tokens
-			throw new InvalidCommandException("Unexpected additional tokens.");
+			throw new InvalidCommandException("Unexpected additional tokens: " + tokens.subList(3, tokens.size()).toString());
 		}
 	}
 
@@ -138,99 +112,85 @@ public class InputParser {
 		if(tokens.size() <= 1) {//no test case files have been specified
 			throw new InvalidCommandException("No test case(s) or data representation specified.");
 		} else if(tokens.size() >= 14) {//if every option is specified in the command, there are 13 tokens. Any more than that are invalid
-			throw new InvalidCommandException("Unexpected additional tokens.");
+			throw new InvalidCommandException("Unexpected additional tokens: " + tokens.subList(13, tokens.size()).toString());
 		}
 
 		//after checking boundaries, we need to determine filenames and what flags have been set
-		Iterator<String> tokenIterator = tokens.iterator();
-		String token = tokenIterator.next();
-
 		//first, get the filenames and data representation, this should be everything before flags
 		ArrayList<String> tokensBeforeFlags = new ArrayList<>();
-		do {
-			if(isTokenCompareFlag(token)) {//is the token is a flag, we have found all the filenames and data representation
+		int i = 0;
+		for(; i < tokens.size(); i++){
+			if(isTokenCompareFlag(tokens.get(i))) {//is the token is a flag, we have found all the filenames and data representation
 				break;
 			} else {
-				tokensBeforeFlags.add(token);
+				tokensBeforeFlags.add(tokens.get(i));
 			}
-			token = tokenIterator.next();
-		} while(tokenIterator.hasNext());
+		}
 
 		//now that we have all filenames and data representation, check the remainder for flags
-		do {
-			if(token.equals(DIVERISTY_METRIC_FLAG)) {// found a pairwise metric flag
+		for(; i < tokens.size(); i++){
+			boolean isAtLastElement = i == tokens.size() - 1;
+			if(tokens.get(i).equals(DIVERISTY_METRIC_FLAG)) {// found a pairwise metric flag
 				//if a flag is found there should be a next token, and it should not also be a flag
-				if(!tokenIterator.hasNext()) {//reached the end of the tokens, so there is no value after the flag
+				if(isAtLastElement) {//reached the end of the tokens, so there is no value after the flag
 					throw new InvalidCommandException("No metric specified after pairwise flag.");
 				}
-				token = tokenIterator.next();
-				if(isTokenCompareFlag(token)) {// the next token is a flag, so there is no value after the flag
+				i++;
+				if(isTokenCompareFlag(tokens.get(i))) {// the next token is a flag, so there is no value after the flag
 					throw new InvalidCommandException("No metric specified after pairwise flag.");
 				} else { //the next token should be the pairwise metric name
-					compare.setPairwiseMethod(token);
+					compare.setPairwiseMethod(tokens.get(i));
 				}
-			} else if(token.equals(AGGREGATION_METHOD_FLAG)) {//found an aggregation method flag
-				if(!tokenIterator.hasNext()) {//reached the end of the tokens, so there is no value after the flag
+			} else if(tokens.get(i).equals(AGGREGATION_METHOD_FLAG)) {//found an aggregation method flag
+				if(isAtLastElement) {//reached the end of the tokens, so there is no value after the flag
 					throw new InvalidCommandException("No method specified after aggregation flag.");
 				}
-				token = tokenIterator.next();
-				if(isTokenCompareFlag(token)) {// the next token is a flag, so there is no value after the flag
+				i++;
+				if(isTokenCompareFlag(tokens.get(i))) {// the next token is a flag, so there is no value after the flag
 					throw new InvalidCommandException("No method specified after aggregation flag.");
 				} else { //the next token should be the aggregation method name
-					compare.setAggregationMethod(token);
+					compare.setAggregationMethod(tokens.get(i));
 				}
-			} else if(token.equals(DELIMITER_FLAG)) {//found a delimiter flag
-				if(!tokenIterator.hasNext()) {//reached the end of the tokens, so there is no value after the flag
+			} else if(tokens.get(i).equals(DELIMITER_FLAG)) {//found a delimiter flag
+				if(isAtLastElement) {//reached the end of the tokens, so there is no value after the flag
 					throw new InvalidCommandException("No delimiter specified after flag.");
 				}
-				token = tokenIterator.next();
-				if(isTokenCompareFlag(token)) {// the next token is a flag, so there is no value after the flag
+				i++;
+				if(isTokenCompareFlag(tokens.get(i))) {// the next token is a flag, so there is no value after the flag
 					throw new InvalidCommandException("No delimiter specified after flag.");
 				} else { //the next token should be the delimiter
-					//delimiters must be at least three characters: open quote, at least one character, close quote
-					if(token.length() < 3) {
-						throw new InvalidCommandException("Delimiter too short. Delimters should be enclosed in quotes and contain at leat one character.");
-					}
-
-					//the delimiter should be specified with surrounding quotes, which should be stripped
-					if(token.charAt(0) == '"' && token.charAt(token.length()-2) == '"') {
-						compare.setDelimiter(token.substring(1, token.length()-2));
-					} else {
-						throw new InvalidCommandException("Delimiter should be enclosed in quotation marks.");
-					}
+					compare.setDelimiter(tokens.get(i));
 				}
-			} else if(token.equals(NUMBER_THREADS_FLAG)) {//found a flag to set number of threads
-				if(!tokenIterator.hasNext()) {//reached the end of the tokens, so there is no value after the flag
+			} else if(tokens.get(i).equals(NUMBER_THREADS_FLAG)) {//found a flag to set number of threads
+				if(isAtLastElement) {//reached the end of the tokens, so there is no value after the flag
 					throw new InvalidCommandException("No value specified after flag.");
 				}
-				token = tokenIterator.next();
-				if(isTokenCompareFlag(token)) {// the next token is a flag, so there is no value after the flag
+				i++;
+				if(isTokenCompareFlag(tokens.get(i))) {// the next token is a flag, so there is no value after the flag
 					throw new InvalidCommandException("No value specified after flag.");
 				} else { //the next token should be the number of threads to use
 					//must also check if the value is a valid integer
 					try {
-						Integer numThreads = Integer.parseInt(token);
+						Integer numThreads = Integer.parseInt(tokens.get(i));
 						compare.setNumberOfThreads(numThreads);
 					} catch (NumberFormatException e) {
 						throw new InvalidCommandException("Value specified after number of threads flag is not a number.");
 					}
 				}
-			} else if(token.equals(SAVE_FLAG)) {//found a flag to specify if saving results to a file
-				if(!tokenIterator.hasNext()) {//reached the end of the tokens, so there is no value after the flag
+			} else if(tokens.get(i).equals(SAVE_FLAG)) {//found a flag to specify if saving results to a file
+				if(isAtLastElement) {//reached the end of the tokens, so there is no value after the flag
 					throw new InvalidCommandException("No filename specified after save flag.");
 				}
-				token = tokenIterator.next();
-				if(isTokenCompareFlag(token)) {// the next token is a flag, so there is no value after the flag
+				i++;
+				if(isTokenCompareFlag(tokens.get(i))) {// the next token is a flag, so there is no value after the flag
 					throw new InvalidCommandException("No filename specified after save flag.");
 				} else { //the next token should be the filename to save output to
-					compare.setOutputFilename(token);
+					compare.setOutputFilename(tokens.get(i));
 				}
 			} else {//the token is not a flag, and should not be in the command
-				throw new InvalidCommandException("Unrecognized token '" + token + "'.");
+				throw new InvalidCommandException("Unrecognized token '" + tokens.get(i) + "'.");
 			}
-			if (tokenIterator.hasNext())
-				token = tokenIterator.next();
-		} while(tokenIterator.hasNext());
+		}
 		
 		/*done iterating over tokens, all that is left is to check the filenames and 
 		 * data representation we found. There should be either two filenames and
@@ -244,7 +204,7 @@ public class InputParser {
 			compare.setTestCaseLocationTwo(tokensBeforeFlags.get(1));
 			compare.setDataRepresentation(tokensBeforeFlags.get(2));
 		} else {// the command is invalid
-			throw new InvalidCommandException("Wrong number of filenames or data represnetaion set.");
+			throw new InvalidCommandException("Wrong number of filenames or data representation set.");
 		}
 		return compare;
 	}
@@ -281,40 +241,11 @@ public class InputParser {
 			} else if (tokens.get(0).equals(DATA_REPRESENTATION_FLAG)) {//need to proved list of data representations
 				help.setHelpType(HelpType.DataRepresentation);
 			} else { //the type of help requested is not recognized
-				System.out.println("Help type not valid.");
-				help.setHelpType(HelpType.Command);
+				throw new InvalidCommandException("Help type not valid: " + tokens.get(0));
 			}
 		} else {//the command has unnecessary extra tokens
-			System.out.println("Unexpected additional tokens.");
-			help.setHelpType( HelpType.Command);
+			throw new InvalidCommandException("Unexpected additional tokens: " + tokens.subList(1, tokens.size()).toString());
 		}
 		return help;
-	}
-
-	/**
-	 * parse instructions for an update command
-	 * 
-	 * @param tokens a list of any specified flags/values after the command keyword
-	 * @throws InvalidCommandException exception thrown when the command is determined invalid
-	 * @return a DataTransferObject containing the necessary information to issue the command input
-	 */
-	private DataTransferObject parseUpdateCommand(List<String> tokens) throws InvalidCommandException{
-		//expect command to match: update [-l <class-name>]
-		UpdateDTO update = new UpdateDTO();
-
-		if(tokens.size() == 0) {//need to restart without checking for new class on reboot
-			return update;
-		} else if (tokens.size() == 1) {//the command is either too short, or too long
-			throw new InvalidCommandException("Command is incorrect length.");
-		} else if (tokens.size() == 2) {
-			if (tokens.get(0).equals(UPDATE_LOACTION_FLAG)) {//need to check on restart whether the specified class can be found
-				update.setLocation(tokens.get(1));
-				return update;
-			} else { // the flags specified are not recognized
-				throw new InvalidCommandException("Options specified in command are not recognized.");
-			}
-		} else {//the command has unnecessary extra tokens
-			throw new InvalidCommandException("Unexpected additional tokens.");
-		}
 	}
 }
