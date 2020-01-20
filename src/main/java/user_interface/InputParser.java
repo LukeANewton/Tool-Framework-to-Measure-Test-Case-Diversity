@@ -77,7 +77,7 @@ public class InputParser {
 		if(tokens.size() == 0) {//no configuration was specified with command
 			throw new InvalidCommandException("No parameter name or value was specified.");
 		} else if (tokens.size() == 1) {//the command is too short
-			throw new InvalidCommandException("Command too short.");
+			throw new InvalidCommandException("No value specified for parameter: " + tokens.get(0));
 		} else if (tokens.size() == 2) { //expect this to be the parameter to configure and associated value
 			configure.setParameterName(tokens.get(0));
 			configure.setParameterValue(tokens.get(1));
@@ -89,10 +89,10 @@ public class InputParser {
 				configure.setConfigSaved(true);
 				return configure;
 			} else {//the command has unrecognized or unnecessary extra tokens
-				throw new InvalidCommandException("Unrecognized or unexpected additional tokens.");
+				throw new InvalidCommandException("Unrecognized or unexpected additional tokens: " + tokens.subList(2, tokens.size()).toString());
 			}
 		} else { //the command has unnecessary extra tokens
-			throw new InvalidCommandException("Unexpected additional tokens.");
+			throw new InvalidCommandException("Unexpected additional tokens: " + tokens.subList(3, tokens.size()).toString());
 		}
 	}
 
