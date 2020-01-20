@@ -21,8 +21,6 @@ import model.HelpType;
  */
 public class InputParser {
 	/*constants for the keywords to issue a command*/
-	private static final String EXIT_COMMAND = "exit";
-	private static final String UPDATE_COMMAND = "update";
 	private static final String HELP_COMMAND = "help";
 	private static final String CONFIG_COMMAND = "config";
 	private static final String COMPARE_COMMAND = "compare";
@@ -34,7 +32,6 @@ public class InputParser {
 	private static final String NUMBER_THREADS_FLAG = "-t";
 	private static final String SAVE_FLAG = "-s";
 	private static final String DATA_REPRESENTATION_FLAG = "-f";
-	private static final String UPDATE_LOACTION_FLAG = "-l";
 
 	/**
 	 * The main function provided by the InputParser object. parse() takes a
