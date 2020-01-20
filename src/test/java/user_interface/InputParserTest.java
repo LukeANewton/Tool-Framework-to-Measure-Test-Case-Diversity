@@ -17,6 +17,12 @@ public class InputParserTest {
         input = new InputParser();
     }
 
+    @Test(expected = InvalidCommandException.class)
+    /**test for parsing unrecognized command*/
+    public void testInvalidCommand() throws InvalidCommandException {
+        DataTransferObject dto = input.parse("banana");
+    }
+
     @Test
     /**test for parsing command help*/
     public void testCommandHelp() throws InvalidCommandException {
@@ -49,19 +55,15 @@ public class InputParserTest {
         assertEquals(((HelpDTO) dto).getHelpType(), HelpType.DataRepresentation);
     }
 
-    @Test
+    @Test(expected = InvalidCommandException.class)
     /**test for parsing an invalid help with extra tokens*/
     public void testHelpExtraTokens() throws InvalidCommandException {
         DataTransferObject dto = input.parse("help -f -m");
-        assertEquals(dto.getCommandType(), CommandType.Help);
-        assertEquals(((HelpDTO) dto).getHelpType(), HelpType.Command);
     }
 
-    @Test
+    @Test(expected = InvalidCommandException.class)
     /**test for parsing an invalid help with invalid type*/
     public void testHelpInvalidType() throws InvalidCommandException {
         DataTransferObject dto = input.parse("help -x");
-        assertEquals(dto.getCommandType(), CommandType.Help);
-        assertEquals(((HelpDTO) dto).getHelpType(), HelpType.Command);
     }
 }
