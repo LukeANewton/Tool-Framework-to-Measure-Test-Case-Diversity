@@ -255,11 +255,11 @@ public class InputParser {
 			} else if (tokens.get(0).equals(DATA_REPRESENTATION_FLAG)) {//need to proved list of data representations
 				help.setHelpType(HelpType.DataRepresentation);
 			} else { //the type of help requested is not recognized
-				System.out.println("Help type not valid.");
+				System.out.println("Help type not valid: " + tokens.get(0));
 				help.setHelpType(HelpType.Command);
 			}
 		} else {//the command has unnecessary extra tokens
-			System.out.println("Unexpected additional tokens.");
+			System.out.println("Unexpected additional tokens: " + tokens.subList(1, tokens.size()).toString());
 			help.setHelpType( HelpType.Command);
 		}
 		return help;
