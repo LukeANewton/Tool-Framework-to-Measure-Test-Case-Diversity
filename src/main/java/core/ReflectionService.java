@@ -82,9 +82,11 @@ public class ReflectionService {
         ArrayList<Object> objects = new ArrayList<Object>();
         for (int i = 0; i < files.length; i++) {
                 if (files[i].getName().endsWith(".class")) {
-                    Class c = Class.forName(packageName + '.' +
+                    if(!packageName.endsWith("."))
+                        packageName = packageName + ".";
+                    Class c = Class.forName(packageName +
                             files[i].getName().substring(0, files[i].getName().length() - 6));
-                    if(Class.forName(packageName + '.' + interfaceName).isAssignableFrom(c) &&
+                    if(Class.forName(packageName + interfaceName).isAssignableFrom(c) &&
                             !c.isInterface())
                         objects.add(c.getConstructor().newInstance());
 

@@ -1,7 +1,5 @@
 package core;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
 import data_representation.DataRepresentation;
 import metrics.aggregation.AggregationStrategy;
 import metrics.comparison.PairwiseComparisonStrategy;
@@ -15,7 +13,6 @@ import utilities.Tuple;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * The Controller is the main logic for the program. It pieces together the different services to
@@ -44,7 +41,7 @@ public class Controller {
     private InputParser inputParser;
 
     /**Constructor*/
-    public Controller() {
+    private Controller() throws IOException {
         fileReaderService = new FileReaderService();
         console = new Console();
         inputParser = new InputParser();
@@ -53,15 +50,18 @@ public class Controller {
         pairingService = new PairingService();
 
         //read config file
-        try {
-            config = fileReaderService.readConfig(CONFIG_FILE);
-        } catch (FileNotFoundException e) {
-            System.err.println("Config file: " + CONFIG_FILE + " not found.");
-            e.printStackTrace();
-            System.exit(-1);
-        }
+        config = fileReaderService.readConfig(CONFIG_FILE);
 
         comparisonService = new ComparisonService(config.getNumThreads());
+    }
+
+    public static Controller getController(){
+        try{
+            return new Controller();
+        }catch (Exception e){
+            System.out.println("Failed to read from configuration file: " + CONFIG_FILE);
+            return null;
+        }
     }
 
     /**
@@ -77,7 +77,7 @@ public class Controller {
         } catch (InvalidCommandException e) {
 			/*if we have an invalid command, display an error message and list the
 			valid commands through issuing a HelpDTO*/
-            console.displayResults(e.getErrorMessage() + " Valid commands are:");
+            console.displayResults(e.getErrorMessage() + "Valid commands are:");
             HelpDTO help = new HelpDTO();
             help.setHelpType(HelpType.Command);
             dto = help;
@@ -378,22 +378,18 @@ public class Controller {
                 result.append("\t\t\t-m: lists the available comparison metrics in the system\n");
                 result.append("\t\t\t-a: lists the available aggregation methods in the system\n");
                 result.append("\t\t\t-f: lists the available data representations in the system\n");
-                result.append("\tupdate\n");
-                result.append("\t\tnot implemented\n");
-                result.append("\texit\n");
-                result.append("\t\tnot implemented");
                 console.displayResults(result.toString());
                 return;
             case PairwiseMetric:
-                packageName = "metrics.comparison";
+                packageName = config.getComparisonMethodLocation();
                 interfaceName = "PairwiseComparisonStrategy";
                 break;
             case AggregationMethod:
-                packageName = "metrics.aggregation";
+                packageName = config.getAggregationMethodLocation();
                 interfaceName = "AggregationStrategy";
                 break;
             case DataRepresentation:
-                packageName = "data_representation";
+                packageName = config.getGetDataRepresentationLocation();
                 interfaceName = "DataRepresentation";
                 break;
         }
@@ -402,27 +398,31 @@ public class Controller {
             class of the method and get the description from each*/
         try {
             Object[] objects = reflectionService.searchPackage(packageName, interfaceName);
-            result.append("Available " + helpType + "s are:\n");
-            for(int i = 0; i <objects.length; i++){//for each object, we want to print the name and description
-                HelpTarget h = (HelpTarget) objects[i];
+            result.append("Available ").append(helpType).append("s are:\n");
+            if(objects == null)
+                result.append("\tNone available at specified directory: " + packageName);
+            else{
+                for (Object object : objects) {//for each object, we want to print the name and description
+                    HelpTarget h = (HelpTarget) object;
 
-                //get the class name
-                String name = h.getClass().getName();
-                //need to remove the preceding pathname from each class name
-                String[] parts = name.split("\\.");
-                name = parts[parts.length-1];
-                result.append("\t" + name + ":\n");
+                    //get the class name
+                    String name = h.getClass().getName();
+                    //need to remove the preceding pathname from each class name
+                    String[] parts = name.split("\\.");
+                    name = parts[parts.length - 1];
+                    result.append("\t").append(name).append(":\n");
 
-                //get the class description
-                String description = h.getDescription();
-                //display an error message instead of null for missing descriptions
-                if (description == null)
-                    description = "no description available";
-                result.append("\t\t" + description + "\n");
+                    //get the class description
+                    String description = h.getDescription();
+                    //display an error message instead of null for missing descriptions
+                    if (description == null)
+                        description = "no description available";
+                    result.append("\t\t").append(description).append("\n");
+                }
             }
             console.displayResults(result.toString());
         } catch (Exception e){
-            console.displayResults("failed to retrieve object descriptions: " + e.getMessage());
+            console.displayResults("failed to retrieve object descriptions: " + e.toString());
         }
     }
 
@@ -432,16 +432,16 @@ public class Controller {
      * @param args command line arguments
      */
     public static void main(String[] args){
-        Controller controller = new Controller();
+        Controller controller = getController();
+        if (controller != null){
+            /*in order to reuse the code from the Console, for now args must be
+            concatenated, even though it is then tokenized again in the near future
+            */
+            StringBuilder stringBuilder = new StringBuilder();
+            for (String arg : args) stringBuilder.append(arg);
 
-        /*in order to reuse the code from the Console, for now args must be
-          concatenated, even though it is then tokenized again in the near future
-         */
-        StringBuilder stringBuilder = new StringBuilder();
-        for(int i = 0; i < args.length; i++)
-            stringBuilder.append(args[i]);
-
-        controller.processCommand(stringBuilder.toString());
+            controller.processCommand(stringBuilder.toString());
+        }
         System.exit(0);
     }
 }

@@ -14,15 +14,15 @@ import static org.junit.Assert.*;
 public class ConsoleTest {
     private Console console;
     private  ByteArrayOutputStream outContent;
-    private  PrintStream originalOut = System.out;
+    private  PrintStream originalOut;
     private InputStream originalIn;
 
     @Before
     public void setUp(){
         console = new Console();
         outContent = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outContent));
         originalOut = System.out;
+        System.setOut(new PrintStream(outContent));
         originalIn = System.in;
     }
 
