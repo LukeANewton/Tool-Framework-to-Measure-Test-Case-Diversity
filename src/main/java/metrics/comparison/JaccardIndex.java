@@ -22,6 +22,9 @@ public class JaccardIndex implements PairwiseComparisonStrategy {
 	@Override
 	public double compare(DataRepresentation testCase1, DataRepresentation testCase2)
 			throws TestCaseFormatMismatchException {
+		if (!testCase1.checkFormat(testCase2.toString()) || !testCase2.checkFormat(testCase1.toString()))
+			throw new TestCaseFormatMismatchException();
+
 		HashSet<String> set1 = new HashSet<>();
 		HashSet<String> set2 = new HashSet<>();
 		HashSet<String> union = new HashSet<>();
