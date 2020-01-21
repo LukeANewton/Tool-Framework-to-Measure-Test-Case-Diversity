@@ -121,4 +121,14 @@ public class CSVTest {
     public void testCheckIncorrectFormat() {
         assertFalse(csv.checkFormat(""));
     }
+
+
+    /**
+     * test that the getDescription method does return a description of the method
+     */
+    @Test
+    public void testGetDescription() {
+        assertEquals(csv.getDescription(),
+                "comma separated value");
+    }
 }

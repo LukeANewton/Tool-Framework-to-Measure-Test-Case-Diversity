@@ -76,4 +76,13 @@ public class AverageValueTest {
         List<Double> similarityValues = new ArrayList<>();
         aggregationStrategy.aggregate(similarityValues);
     }
+
+    @Test
+    /**
+     * test that the getDescription method does return a description of the method
+     */
+    public void testGetDescription() {
+        assertEquals(aggregationStrategy.getDescription(),
+                "Chooses the average similarity value to represent the overall similarity of the test cases compared.");
+    }
 }
