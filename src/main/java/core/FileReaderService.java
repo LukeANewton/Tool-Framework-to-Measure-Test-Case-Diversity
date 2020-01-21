@@ -3,6 +3,7 @@ package core;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -130,10 +131,12 @@ public class FileReaderService {
 	 * @throws FileNotFoundException thrown when passed filename can not be found
 	 * @return a Config object containing all the information from the configuration file
 	 */
-	public Config readConfig(String filename) throws FileNotFoundException {
+	public Config readConfig(String filename) throws IOException {
 		JsonReader jsonReader = new JsonReader(new FileReader(filename));
 		Gson gson = new Gson();
-		return gson.fromJson(jsonReader, Config.class);
+		Config result = gson.fromJson(jsonReader, Config.class);
+		jsonReader.close();
+		return result;
 	}
 
 }

@@ -15,7 +15,7 @@ public class InvalidCommandExceptionTest {
             DataTransferObject dto = input.parse("help -x");
             fail();
         } catch (InvalidCommandException e) {
-            assertEquals("Help type not valid: -x", e.getErrorMessage());
+            assertEquals("Help type not valid: -x ", e.getErrorMessage());
         }
     }
 }

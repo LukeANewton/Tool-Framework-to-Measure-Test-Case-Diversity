@@ -59,7 +59,7 @@ public class InputParser {
 		} else if (commandType.equals(COMPARE_COMMAND)){
 			return parseCompareCommand(tokens);
 		} else { // the command entered is not recognized
-			throw new InvalidCommandException("The command keyword entered is not recognized: " + commandType);
+			throw new InvalidCommandException("The keyword '" + commandType + "' is not recognized. ");
 		}
 	}
 
@@ -241,10 +241,10 @@ public class InputParser {
 			} else if (tokens.get(0).equals(DATA_REPRESENTATION_FLAG)) {//need to proved list of data representations
 				help.setHelpType(HelpType.DataRepresentation);
 			} else { //the type of help requested is not recognized
-				throw new InvalidCommandException("Help type not valid: " + tokens.get(0));
+				throw new InvalidCommandException("Help type not valid: " + tokens.get(0) + " ");
 			}
 		} else {//the command has unnecessary extra tokens
-			throw new InvalidCommandException("Unexpected additional tokens: " + tokens.subList(1, tokens.size()).toString());
+			throw new InvalidCommandException("Unexpected additional tokens: " + tokens.subList(1, tokens.size()).toString() + " ");
 		}
 		return help;
 	}
