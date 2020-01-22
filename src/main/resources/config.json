@@ -3,7 +3,7 @@
   "comparisonMethodLocation": "metrics.comparison.",
   "dataRepresentation": "CSV",
   "dataRepresentationLocation": "data_representation",
-  "delimiter": "\n",
+  "delimiter": "\r\n",
   "aggregationMethod": "",
   "aggregationMethodLocation": "metrics.aggregation.",
   "numThreads":  3,
