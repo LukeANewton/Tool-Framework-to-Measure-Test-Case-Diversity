@@ -365,7 +365,7 @@ public class Controller {
         switch(helpType){
             case Command:
                 result.append("\tcompare <filename> [<filename>] <data-representation>\n");
-                result.append("\t\tperforms a diversity calculation within a test suite, or between test suites at the specified filenames(s)\n");
+                result.append("\t\tperforms a diversity calculation within a test suite, or between test suites at the specified filename(s)\n");
                 result.append("\t\t\t-m <metric>: set the diversity metric to use in the calculation. Available metrics can be found with 'help -m'\n");
                 result.append("\t\t\t-a <method>: set the method to use for aggregating results. Available methods can be found with 'help -a'\n");
                 result.append("\t\t\t-d <delimiter>: set the delimiter that separates test cases within the passed test suite file(s). This can be a character, string, or regular expression\n");

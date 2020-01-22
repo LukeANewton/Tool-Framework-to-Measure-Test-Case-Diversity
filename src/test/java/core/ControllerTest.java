@@ -8,14 +8,19 @@ import org.junit.Test;
 import java.io.*;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class ControllerTest {
     private Controller c;
     private ByteArrayOutputStream outContent;
     private PrintStream originalOut;
+    private Config originalConfigFile;
+    private FileReaderService reader;
+    private FileWriterService writer;
+    private Config config;
     private final String configName = "config.json";
     private final String commandHelpString = "\tcompare <filename> [<filename>] <data-representation>\n" +
-                "\t\tperforms a diversity calculation within a test suite, or between test suites at the specified filenames(s)\n"+
+                "\t\tperforms a diversity calculation within a test suite, or between test suites at the specified filename(s)\n"+
                 "\t\t\t-m <metric>: set the diversity metric to use in the calculation. Available metrics can be found with 'help -m'\n"+
                 "\t\t\t-a <method>: set the method to use for aggregating results. Available methods can be found with 'help -a'\n"+
                 "\t\t\t-d <delimiter>: set the delimiter that separates test cases within the passed test suite file(s). This can be a character, string, or regular expression\n"+
@@ -30,26 +35,28 @@ public class ControllerTest {
                 "\t\t\t-f: lists the available data representations in the system\n\r\n";
 
     @Before
-    public void setUp(){
+    public void setUp() throws IOException {
         c = Controller.getController();
         outContent = new ByteArrayOutputStream();
         originalOut = System.out;
         System.setOut(new PrintStream(outContent));
+
+        //store the config file for to later restore
+        reader = new FileReaderService();
+        writer = new FileWriterService("");
+        config = reader.readConfig(configName);
+        originalConfigFile = reader.readConfig(configName);
     }
 
     @After
-    public void tearDown(){
+    public void tearDown() throws IOException {
         System.setOut(originalOut);
+        writer.writeConfig(configName, originalConfigFile);
     }
 
     @Test
     /*Test for the creation of a controller when no config file is present*/
     public void testControllerCreationWithoutConfigFile() throws IOException {
-        //store the config file for to later restore
-        FileReaderService reader = new FileReaderService();
-        FileWriterService writer = new FileWriterService("");
-        Config config = reader.readConfig(configName);
-
         //remove config file
         File file = new File(configName);
         assertTrue(file.delete());
@@ -62,17 +69,6 @@ public class ControllerTest {
 
         //restore config file
         writer.writeConfig(configName, config);
-    }
-
-    /**
-     * helper method used to enter a system command and compare it against an expected string output
-     *
-     * @param command the command for the system to execute
-     * @param expected the expected text output to System.out
-     */
-    private void compareAgainstString(String command, String expected){
-        c.processCommand(command);
-        assertEquals(expected, outContent.toString());
     }
 
     @Test
@@ -142,10 +138,6 @@ public class ControllerTest {
     /*test for a help command were there are no metrics available. One way to do this should
     * be to set the config file metric location to a non-existent directory*/
     public void testHelpNoneAvailable() throws IOException {
-        FileReaderService reader = new FileReaderService();
-        FileWriterService writer = new FileWriterService("");
-        Config config = reader.readConfig(configName);
-        String oldLocation = config.getComparisonMethodLocation();
         String fakeDirectory = "%&$%&^#@";
         config.setComparisonMethodLocation(fakeDirectory);
         writer.writeConfig(configName, config);
@@ -154,8 +146,53 @@ public class ControllerTest {
                 "\tNone available at specified directory: " + fakeDirectory + "\r\n";
         c = Controller.getController(); // need to get a new controller so it updates its internal config file
         compareAgainstString("help -m", expected);
+    }
 
-        config.setComparisonMethodLocation(oldLocation);
+    @Test
+    /*use a config command to set the string for the delimiter property*/
+    public void testProcessStringCommandConfig() throws IOException {
+        config.setDelimiter("banana");
         writer.writeConfig(configName, config);
+        config = reader.readConfig(configName);
+        assertEquals("Error setting config values for the test","banana", config.getDelimiter());
+
+        c.processCommand("config delimiter apple");
+        assertEquals("Successfully set delimiter to the value apple\r\n", outContent.toString());
+
+        config = reader.readConfig(configName);
+        assertEquals("Delimiter should be set to apple but is: " + config.getDelimiter(),"apple", config.getDelimiter());
+    }
+
+    @Test
+    /*Use a config command to set the int for the numThreads property*/
+    public void testProcessIntCommandConfig() throws IOException {
+        config.setNumThreads(0);
+        writer.writeConfig(configName, config);
+        config = reader.readConfig(configName);
+        assertEquals("Error setting config values for the test",0, config.getNumThreads());
+
+        c.processCommand("config numThreads 5");
+        assertEquals("Successfully set numThreads to the value 5\r\n", outContent.toString());
+
+        config = reader.readConfig(configName);
+        assertEquals("NumThreads should be set to 5 but is: " + config.getNumThreads(),5, config.getNumThreads());
+    }
+
+    @Test
+    /*Use a config command with an invalid property*/
+    public void testProcessInvalidCommandConfig() {
+        c.processCommand("config banana banana");
+        assertEquals("The parameter banana is not valid\r\n", outContent.toString());
+    }
+
+    /**
+     * helper method used to enter a system command and compare it against an expected string output
+     *
+     * @param command the command for the system to execute
+     * @param expected the expected text output to System.out
+     */
+    private void compareAgainstString(String command, String expected){
+        c.processCommand(command);
+        assertEquals(expected, outContent.toString());
     }
 }
