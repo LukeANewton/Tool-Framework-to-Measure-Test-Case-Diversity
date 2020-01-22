@@ -46,7 +46,7 @@ public class Controller {
         console = new Console();
         inputParser = new InputParser();
         reflectionService = new ReflectionService();
-        fileWriterService = new FileWriterService("");
+        fileWriterService = new FileWriterService();
         pairingService = new PairingService();
 
         //read config file

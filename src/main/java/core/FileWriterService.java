@@ -25,6 +25,11 @@ public class FileWriterService {
 	public FileWriterService(String path) { this.path = path; }
 
 	/**
+	 * FileWriterService will write to the path ""
+	 */
+	public FileWriterService() { path = ""; }
+
+	/**
 	 * This method will write the given string to the file with the given name at the path location.
 	 * It can create a new file, overwrite an existing file or append to an already existing file.
 	 *

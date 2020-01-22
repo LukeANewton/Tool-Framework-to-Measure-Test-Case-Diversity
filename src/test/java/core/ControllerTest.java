@@ -43,7 +43,7 @@ public class ControllerTest {
 
         //store the config file for to later restore
         reader = new FileReaderService();
-        writer = new FileWriterService("");
+        writer = new FileWriterService();
         config = reader.readConfig(configName);
         originalConfigFile = reader.readConfig(configName);
     }
@@ -176,6 +176,13 @@ public class ControllerTest {
 
         config = reader.readConfig(configName);
         assertEquals("NumThreads should be set to 5 but is: " + config.getNumThreads(),5, config.getNumThreads());
+    }
+
+    @Test
+    /*Use a config command to set the int for the numThreads property too a string*/
+    public void testProcessStringToIntParamCommandConfig() {
+        c.processCommand("config numThreads apple");
+        assertEquals("Failed to set numThreads to the value apple: java.lang.NumberFormatException: For input string: \"apple\"\r\n", outContent.toString());
     }
 
     @Test
