@@ -182,7 +182,7 @@ public class ControllerTest {
     /*Use a config command to set the int for the numThreads property too a string*/
     public void testProcessStringToIntParamCommandConfig() {
         c.processCommand("config numThreads apple");
-        assertEquals("Failed to set numThreads to the value apple: java.lang.NumberFormatException: For input string: \"apple\"\r\n", outContent.toString());
+        assertEquals("Failed to set numThreads to apple. The value for numThreads should be a number\r\n", outContent.toString());
     }
 
     @Test

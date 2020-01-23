@@ -344,8 +344,10 @@ public class Controller {
                 //as long as there is no REPL, any config command must save the value to a file, whether -s is specified or not
                 fileWriterService.writeConfig(CONFIG_FILE, config);
                 console.displayResults("Successfully set " + dto.getParameterName() + " to the value " + dto.getParameterValue());
+            }  catch (NumberFormatException e) {
+                console.displayResults("Failed to set " + dto.getParameterName() + " to " + dto.getParameterValue() + ". The value for " + dto.getParameterName() + " should be a number");
             } catch (Exception e) {
-                console.displayResults("Failed to set " + dto.getParameterName() + " to the value " + dto.getParameterValue() +": " + e.toString());
+                console.displayResults("Failed to set " + dto.getParameterName() + " to " + dto.getParameterValue() + ": " + e.toString());
             }
         }
     }
