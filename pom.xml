@@ -79,7 +79,7 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <finalName>JTCD</finalName>
+                            <finalName>a</finalName>
                             <archive>
                                 <manifest>
                                     <mainClass>

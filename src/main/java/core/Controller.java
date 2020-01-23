@@ -465,7 +465,7 @@ public class Controller {
             concatenated, even though it is then tokenized again in the near future
             */
             StringBuilder stringBuilder = new StringBuilder();
-            for (String arg : args) stringBuilder.append(arg);
+            for (String arg : args) stringBuilder.append(arg).append(" ");
 
             controller.processCommand(stringBuilder.toString());
         }
