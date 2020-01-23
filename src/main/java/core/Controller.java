@@ -56,11 +56,38 @@ public class Controller {
     }
 
     public static Controller getController(){
-        try{
-            return new Controller();
-        }catch (Exception e){
-            System.out.println("Failed to read from configuration file: " + CONFIG_FILE);
-            return null;
+        File file = new File(CONFIG_FILE);
+        String errorMsg = "Failed to read from configuration file: " + CONFIG_FILE + ". Ensure the file exists in the same directory as this program.";
+        if(file.exists()) {
+            try {
+                return new Controller();
+            } catch (Exception e) {
+                System.out.println(errorMsg);
+                return null;
+            }
+        }else {//the config file does not exist
+            //this determines if we are executing within the jar file or not
+            if(Controller.class.getResource("Controller.class").toString().startsWith("jar")) {
+                try{//try to create a jar in the proper spot from the default inside the jar
+                    //read in the config file from the jar
+                    InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(CONFIG_FILE);
+                    byte[] buffer = new byte[in.available()];
+                    in.read(buffer);
+
+                    //write the file to outside the jar
+                    OutputStream outStream = new FileOutputStream(file);
+                    outStream.write(buffer);
+                    outStream.close();
+
+                    return new Controller();
+                } catch(Exception ex){//this means we failed to create a new config file, so the Controller cannot be created
+                    System.out.println(errorMsg);
+                    return null;
+                }
+            } else{
+                System.out.println(errorMsg);
+                return null;
+            }
         }
     }
 
@@ -298,7 +325,7 @@ public class Controller {
         try {
              return fileReaderService.readIntoDataRepresentation(filename, delimiter, format);
         } catch (InvalidFormatException e) {
-            console.displayResults("one or more test cases do not match the specified data representation: " + format);
+            console.displayResults("one or more test cases do not match the specified data representation: " + format.getClass().getName());
         } catch (FileNotFoundException e) {
             console.displayResults("file: " + filename + " could not be found");
         } catch (Exception e) {
@@ -440,7 +467,7 @@ public class Controller {
             concatenated, even though it is then tokenized again in the near future
             */
             StringBuilder stringBuilder = new StringBuilder();
-            for (String arg : args) stringBuilder.append(arg);
+            for (String arg : args) stringBuilder.append(arg).append(" ");
 
             controller.processCommand(stringBuilder.toString());
         }

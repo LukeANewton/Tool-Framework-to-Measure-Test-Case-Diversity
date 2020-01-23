@@ -64,7 +64,7 @@ public class ControllerTest {
         //test the creation of a controller without a config file
         c = Controller.getController();
         assertNull(c);
-        String expected = "Failed to read from configuration file: " + configName + "\r\n";
+        String expected = "Failed to read from configuration file: config.json. Ensure the file exists in the same directory as this program.\r\n";
         assertEquals(expected, outContent.toString());
 
         //restore config file

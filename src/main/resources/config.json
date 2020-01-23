@@ -1,0 +1,14 @@
+{
+  "comparisonMethod": "CommonElements",
+  "comparisonMethodLocation": "metrics.comparison.",
+  "dataRepresentation": "CSV",
+  "dataRepresentationLocation": "data_representation",
+  "delimiter": "\r\n",
+  "aggregationMethod": "",
+  "aggregationMethodLocation": "metrics.aggregation.",
+  "numThreads":  3,
+  "resultRoundingScale": 2,
+  "resultRoundingMode": "HALF_UP",
+  "outputFileName": "comparison_result",
+  "outputFileLocation": ""
+}
