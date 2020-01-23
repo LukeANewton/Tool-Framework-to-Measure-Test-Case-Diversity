@@ -46,7 +46,7 @@ public class Controller {
         console = new Console();
         inputParser = new InputParser();
         reflectionService = new ReflectionService();
-        fileWriterService = new FileWriterService("");
+        fileWriterService = new FileWriterService();
         pairingService = new PairingService();
 
         //read config file
@@ -344,8 +344,10 @@ public class Controller {
                 //as long as there is no REPL, any config command must save the value to a file, whether -s is specified or not
                 fileWriterService.writeConfig(CONFIG_FILE, config);
                 console.displayResults("Successfully set " + dto.getParameterName() + " to the value " + dto.getParameterValue());
+            }  catch (NumberFormatException e) {
+                console.displayResults("Failed to set " + dto.getParameterName() + " to " + dto.getParameterValue() + ". The value for " + dto.getParameterName() + " should be a number");
             } catch (Exception e) {
-                console.displayResults("Failed to set " + dto.getParameterName() + " to the value " + dto.getParameterValue() +": " + e.toString());
+                console.displayResults("Failed to set " + dto.getParameterName() + " to " + dto.getParameterValue() + ": " + e.toString());
             }
         }
     }
@@ -365,7 +367,7 @@ public class Controller {
         switch(helpType){
             case Command:
                 result.append("\tcompare <filename> [<filename>] <data-representation>\n");
-                result.append("\t\tperforms a diversity calculation within a test suite, or between test suites at the specified filenames(s)\n");
+                result.append("\t\tperforms a diversity calculation within a test suite, or between test suites at the specified filename(s)\n");
                 result.append("\t\t\t-m <metric>: set the diversity metric to use in the calculation. Available metrics can be found with 'help -m'\n");
                 result.append("\t\t\t-a <method>: set the method to use for aggregating results. Available methods can be found with 'help -a'\n");
                 result.append("\t\t\t-d <delimiter>: set the delimiter that separates test cases within the passed test suite file(s). This can be a character, string, or regular expression\n");
