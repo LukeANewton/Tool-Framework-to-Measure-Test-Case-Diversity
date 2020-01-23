@@ -223,7 +223,7 @@ public class ReflectionServiceTest {
         ReflectionService reflector = new ReflectionService();
         try {
             Object[] list = reflector.searchPackage("metrics.comparison", "metrics.comparison.PairwiseComparisonStrategy");
-            assertEquals(2, list.length);
+            assertEquals(3, list.length);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -248,7 +248,7 @@ public class ReflectionServiceTest {
         ReflectionService reflector = new ReflectionService();
         try {
             Object[] list = reflector.searchPackage("metrics.comparison", "metrics.comparison.PairwiseComparisonStrategy");
-            assertEquals(2, list.length);
+            assertEquals(3, list.length);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -258,16 +258,20 @@ public class ReflectionServiceTest {
         file.delete();
     }
 
-    @Test(expected = Exception.class)
+    @Test
     /**
      * test for the searchPackage() method, which searches a package for all objects that implement a specified interface.
      * this test is for the case where the package being searched for does not exist
      */
-    public void testSearchPackageNoSuchDirectory()
-            throws IllegalAccessException, InvalidFormatException, InstantiationException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException {
+    public void testSearchPackageNoSuchDirectory() {
         ReflectionService reflector = new ReflectionService();
-        reflector.searchPackage("banana", "metrics.comparison.PairwiseComparisonStrategy");
-
+        try {
+            Object[] list = reflector.searchPackage("banana", "PairwiseComparisonStrategy");
+            assertNull(list);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
     }
 
     @Test
