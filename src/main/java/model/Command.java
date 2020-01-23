@@ -47,7 +47,6 @@ public class Command implements Callable<Object>{
 	 */
 	public Object call() throws Exception {
 		double result = compairison.compare(Data1, Data2);
-		Thread.sleep(500);
 		support.firePropertyChange(new PropertyChangeEvent(this, "complete",
 				null, null));
 		return result;

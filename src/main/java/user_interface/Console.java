@@ -22,6 +22,15 @@ public class Console implements PropertyChangeListener {
 	private InputParser parser;
 	//the scanner used to obtain user input
 	private Scanner input;
+	//used in displaying progress to denote the number of completed tasks
+	private int completedComparisons;
+	//used in displaying progress to denote the total number of tasks
+	private int numberTasks;
+	/*used in displaying progress for performance reasons. we keep track of every 0.1
+	increment in progress so that we only update the progress bar when another 10%
+	completion is made. This means we only have to print at most 10 times, instead of
+	every time a task is completed, which would be very slow*/
+	private double lastProgressMilestone;
 	
 	/**Constructor*/
 	public Console() {
@@ -62,14 +71,6 @@ public class Console implements PropertyChangeListener {
      */
     public void displayResults(String results) {
     	System.out.println(results);
-    }
-    
-    /**
-     * STUBBED UNTIL COMPARATOR COMPLETE
-     */
-    public void printProgress() {
-    	System.out.println("update");
-        // https://stackoverflow.com/questions/1001290/console-based-progress-in-java (Just use carriage return)
     }
 
     public OverwriteOption getOverwriteChoice(String filename){
@@ -116,10 +117,6 @@ public class Console implements PropertyChangeListener {
 		}
 		return dto;
 	}
-
-	private int completedComparisons;
-	private int numberTasks;
-	private double lastProgressMilestone;
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
