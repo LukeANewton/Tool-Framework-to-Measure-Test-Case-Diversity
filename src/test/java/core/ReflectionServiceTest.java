@@ -219,7 +219,7 @@ public class ReflectionServiceTest {
     /**
      * test for the searchPackage() method, which searches a package for all objects that implement a specified interface
      */
-    public void testSearchPackage(){
+    public void testSearchPackage() {
         ReflectionService reflector = new ReflectionService();
         try {
             Object[] list = reflector.searchPackage("metrics.comparison", "metrics.comparison.PairwiseComparisonStrategy");
@@ -235,7 +235,7 @@ public class ReflectionServiceTest {
      * test for the searchPackage() method, which searches a package for all objects that implement a specified interface.
      * This method introduces a non-class file in the package to ensure that it is skipped over and does not cause any errors
      */
-    public void testSearchPackageWithNonClassFile(){
+    public void testSearchPackageWithNonClassFile() {
         //create file
         File file = new File("target/classes/metrics/comparison/banana");
         try {

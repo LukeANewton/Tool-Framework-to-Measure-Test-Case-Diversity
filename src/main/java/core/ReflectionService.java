@@ -10,7 +10,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -73,38 +72,19 @@ public class ReflectionService {
      * @param interfacePath the path and name of the interface which classes must implement to be instantiated
      * @return a list of objects from the specified package that implement the specified interface
      */
-    public Object[] searchPackage(String packageName, String interfacePath) throws IllegalAccessException, InvocationTargetException, InstantiationException, ClassNotFoundException, NoSuchMethodException, IOException, URISyntaxException {
-        if(Controller.class.getResource("Controller.class").toString().startsWith("jar")) {
-            ArrayList<Object> objects = new ArrayList<>();
+    public Object[] searchPackage(String packageName, String interfacePath) throws IllegalAccessException, InvocationTargetException, InstantiationException, ClassNotFoundException, NoSuchMethodException, IOException, URISyntaxException, InvalidFormatException {
+        if (!packageName.endsWith("."))
+            packageName = packageName + ".";
+        ArrayList<Object> objects = new ArrayList<>();
+        if (Controller.class.getResource("Controller.class").toString().startsWith("jar")) {
             ZipInputStream zip = new ZipInputStream(new FileInputStream(new File(ReflectionService.class.getProtectionDomain().getCodeSource().getLocation().toURI())));
             for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
                 if (!entry.isDirectory() && entry.getName().endsWith(".class") && entry.getName().startsWith(packageName.replace('.', '/'))) {
                     // This ZipEntry represents a class. Now, what class does it represent?
                     String className = entry.getName().replace('/', '.');
-                    Class<?> c = Class.forName(className.substring(0, className.length() - ".class".length()));
-                    if(Class.forName(interfacePath).isAssignableFrom(c) &&
-                            !c.isInterface()) //if this is true, the class in an implementation of the required interface
-                        objects.add(c.getConstructor().newInstance());
+                    className = className.substring(0, className.length() - ".class".length());
+                    objects.add(loadClass(packageName + className, interfacePath));
                 }
-            }
-            return objects.toArray();
-        }
-        String directoryName = "target/classes/" + packageName.replace('.', '/');
-
-        File directory = new File(directoryName);
-        if (!directory.exists())
-            return null;
-
-        //look at each file in the directory, and attempt to instantiate each class that implements the given interface
-        File[] files = directory.listFiles();
-        ArrayList<Object> objects = new ArrayList<>();
-        for (File file : Objects.requireNonNull(files)) {
-            if (file.getName().endsWith(".class")) {
-                Class<?> c = Class.forName(packageName +
-                        file.getName().substring(0, file.getName().length() - 6));
-                if (Class.forName(packageName + interfacePath).isAssignableFrom(c) &&
-                        !c.isInterface())
-                    objects.add(c.getConstructor().newInstance());
             }
         }
         return objects.toArray();
