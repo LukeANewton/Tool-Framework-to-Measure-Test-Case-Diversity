@@ -10,6 +10,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -72,7 +74,9 @@ public class ReflectionService {
      * @param interfacePath the path and name of the interface which classes must implement to be instantiated
      * @return a list of objects from the specified package that implement the specified interface
      */
-    public Object[] searchPackage(String packageName, String interfacePath) throws IllegalAccessException, InvocationTargetException, InstantiationException, ClassNotFoundException, NoSuchMethodException, IOException, URISyntaxException, InvalidFormatException {
+    public Object[] searchPackage(String packageName, String interfacePath)
+            throws IllegalAccessException, InvocationTargetException, ClassNotFoundException,
+            NoSuchMethodException, IOException, URISyntaxException, InvalidFormatException {
         if (!packageName.endsWith("."))
             packageName = packageName + ".";
         ArrayList<Object> objects = new ArrayList<>();
@@ -83,8 +87,30 @@ public class ReflectionService {
                     // This ZipEntry represents a class. Now, what class does it represent?
                     String className = entry.getName().replace('/', '.');
                     className = className.substring(0, className.length() - ".class".length());
-                    objects.add(loadClass(packageName + className, interfacePath));
+                    try {
+                        objects.add(loadClass(className, interfacePath));
+                    } catch (InputMismatchException | InstantiationException ignore){}
                 }
+            }
+            return objects.toArray();
+        }
+
+        // This code is for testing
+        String directoryName = "target/classes/" + packageName.replace('.', '/');
+        File directory = new File(directoryName);
+        if (!directory.exists())
+            return null;
+
+        //look at each file in the directory, and attempt to instantiate each class that implements the given interface
+        File[] files = directory.listFiles();
+        for (File file : Objects.requireNonNull(files)) {
+            if (file.getName().endsWith(".class")) {
+                String classPath = packageName + file.getName().substring(0, file.getName().length() - ".class".length());
+                // We ignore these exceptions because when we scan the package, it's okay if we accidentally send in incorrect classes.
+                // We shouldn't check it here because it's already checked later as long as loadClass() works.
+                try {
+                    objects.add(loadClass(classPath, interfacePath));
+                } catch (InputMismatchException | InstantiationException ignore){}
             }
         }
         return objects.toArray();
@@ -112,8 +138,9 @@ public class ReflectionService {
      * @throws InvalidFormatException when the classPath or interfacePath is malformed.
      * @throws InstantiationException when an object of the class cannot be instantiated.
      * @throws ClassNotFoundException when the class or interface doesn't exist.
+     * @throws InputMismatchException when class is not a class and interface is not an interface
      */
-    private Class<?> loadClassHelper(String classPath, String interfacePath) throws InvalidFormatException, InstantiationException, ClassNotFoundException {
+    private Class<?> loadClassHelper(String classPath, String interfacePath) throws InvalidFormatException, InstantiationException, ClassNotFoundException, InputMismatchException {
         if (!checkFormat(classPath)) {
             throw new InvalidFormatException("Invalid class path. Expected: <package>.<subPackage>.<className> with any number of subpackages. Actual: " + classPath);
         }
@@ -135,14 +162,15 @@ public class ReflectionService {
      * @param myClass a class that implements the given interface
      * @param myInterface the interface that myClass implements
      * @return myClass when it's confirmed that myClass implements myInterface
-     * @throws InstantiationException when the check fails
+     * @throws InstantiationException when the check class implements interface fails
+     * @throws InputMismatchException when class is not a class and interface is not an interface
      */
-    private Class<?> checkClassTypes(Class<?> myClass, Class<?> myInterface) throws InstantiationException {
+    private Class<?> checkClassTypes(Class<?> myClass, Class<?> myInterface) throws InstantiationException, InputMismatchException {
         if (myClass.isInterface()) {
-            throw new InstantiationException(myClass.getSimpleName() + " is a " + myClass.getTypeName() + ". Expected a class.");
+            throw new InputMismatchException(myClass.getSimpleName() + " is a " + myClass.getTypeName() + ". Expected a class.");
         }
         if (!myInterface.isInterface()) {
-            throw new InstantiationException(myInterface.getSimpleName() + " is a " + myInterface.getTypeName() + ". Expected an interface.");
+            throw new InputMismatchException(myInterface.getSimpleName() + " is a " + myInterface.getTypeName() + ". Expected an interface.");
         }
 
         if (myInterface.isAssignableFrom(myClass)) {
