@@ -3,6 +3,7 @@ package core;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import model.Config;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.awt.*;
@@ -11,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.InputMismatchException;
 
 import static org.junit.Assert.*;
 
@@ -18,6 +20,13 @@ import static org.junit.Assert.*;
  * A test suite for the Reflection service.
  */
 public class ReflectionServiceTest {
+
+    private ReflectionService reflector;
+
+    @Before
+    public void setup() {
+        reflector = new ReflectionService();
+    }
 
     /**
      * Tests that a class with a no args constructor can be instantiated.
@@ -31,7 +40,6 @@ public class ReflectionServiceTest {
      */
     @Test
     public void testReflectNoArgsConstructor() throws InvalidFormatException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        ReflectionService reflector = new ReflectionService();
         Object instance = null;
         String classPath = "metrics.comparison.CommonElements";
         String implementedInterface = "metrics.comparison.PairwiseComparisonStrategy";
@@ -51,7 +59,6 @@ public class ReflectionServiceTest {
      */
     @Test
     public void testReflectNoArgsConstructorNullIF() throws InvalidFormatException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        ReflectionService reflector = new ReflectionService();
         Object instance = null;
         String classPath = "metrics.comparison.CommonElements";
         instance = reflector.loadClass(classPath, null);
@@ -73,7 +80,6 @@ public class ReflectionServiceTest {
      */
     @Test(expected = InstantiationException.class)
     public void testReflectNoArgsConstructorInvalidIF() throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException, ClassNotFoundException, InvalidFormatException {
-        ReflectionService reflector = new ReflectionService();
         Object instance;
         String className = "java.awt.Rectangle";
 
@@ -99,7 +105,6 @@ public class ReflectionServiceTest {
      */
     @Test
     public void testReflectArgsConstructor() throws NoSuchMethodException, InvalidFormatException, IllegalAccessException, InstantiationException, InvocationTargetException, ClassNotFoundException {
-        ReflectionService reflector = new ReflectionService();
         Object instance = null;
         String classPath = "java.awt.Rectangle";
         String implementedInterface = "java.io.Serializable";
@@ -125,7 +130,6 @@ public class ReflectionServiceTest {
      */
     @Test
     public void testReflectArgsConstructorInvalidIF() throws NoSuchMethodException, InvalidFormatException, IllegalAccessException, InstantiationException, InvocationTargetException, ClassNotFoundException {
-        ReflectionService reflector = new ReflectionService();
         Object instance = null;
         String classPath = "java.awt.Rectangle";
         String implementedInterface = null;
@@ -153,8 +157,6 @@ public class ReflectionServiceTest {
      */
     @Test
     public void testInvalidPathFormatNoArgs() {
-        ReflectionService reflector = new ReflectionService();
-
         String classPath = ".CommonElements";
         String implementedInterface = "PairwiseComparisonStrategy";
 
@@ -185,14 +187,28 @@ public class ReflectionServiceTest {
         }
     }
 
+    @Test(expected= InputMismatchException.class)
+    public void testClassNotClass() throws IllegalAccessException, InvocationTargetException, InvalidFormatException,
+            InstantiationException, NoSuchMethodException, ClassNotFoundException {
+        String classPath = "metrics.comparison.PairwiseComparisonStrategy";
+        String implementedInterface = "metrics.comparison.PairwiseComparisonStrategy";
+        reflector.loadClass(classPath, implementedInterface);
+    }
+
+    @Test(expected= InputMismatchException.class)
+    public void testInterfaceNotInterface() throws IllegalAccessException, InvocationTargetException, InvalidFormatException,
+            InstantiationException, NoSuchMethodException, ClassNotFoundException {
+        String classPath = "metrics.comparison.CommonElements";
+        String implementedInterface = "metrics.comparison.CommonElements";
+        reflector.loadClass(classPath, implementedInterface);
+    }
+
     /**
      * test for when reflection is invoked with a malformed pathname when loading a class with a constructor that takes args.
-     * an InvalidFormat Exception should be thrown
+     * an InvalidFormatException should be thrown
      */
     @Test
     public void testInvalidPathFormatArgs(){
-        ReflectionService reflector = new ReflectionService();
-
         String className = "java.awt/Rectangle";
         String implementedInterface = "java.io.Serializable";
         Class[] constructorTemplate = new Class[] {int.class, int.class};
@@ -220,7 +236,6 @@ public class ReflectionServiceTest {
      * test for the searchPackage() method, which searches a package for all objects that implement a specified interface
      */
     public void testSearchPackage() {
-        ReflectionService reflector = new ReflectionService();
         try {
             Object[] list = reflector.searchPackage("metrics.comparison", "metrics.comparison.PairwiseComparisonStrategy");
             assertEquals(3, list.length);
@@ -245,7 +260,6 @@ public class ReflectionServiceTest {
         }
 
         //do the test
-        ReflectionService reflector = new ReflectionService();
         try {
             Object[] list = reflector.searchPackage("metrics.comparison", "metrics.comparison.PairwiseComparisonStrategy");
             assertEquals(3, list.length);
@@ -264,7 +278,6 @@ public class ReflectionServiceTest {
      * this test is for the case where the package being searched for does not exist
      */
     public void testSearchPackageNoSuchDirectory() {
-        ReflectionService reflector = new ReflectionService();
         try {
             Object[] list = reflector.searchPackage("banana", "PairwiseComparisonStrategy");
             assertNull(list);
@@ -280,8 +293,6 @@ public class ReflectionServiceTest {
      * given field. This is for the positive case, where the setter can be found
      */
     public void testRetrieveConfigSetterExists(){
-        ReflectionService reflector = new ReflectionService();
-
         //read JSON
         JsonReader jsonReader = null;
         try {
@@ -327,8 +338,6 @@ public class ReflectionServiceTest {
      * given field.This is for the negative case, where the setter does not exist
      */
     public void testRetrieveConfigSetterNotExists(){
-        ReflectionService reflector = new ReflectionService();
-
         //read JSON
         JsonReader jsonReader = null;
         try {
@@ -342,9 +351,8 @@ public class ReflectionServiceTest {
 
         //attempt to find setter for a field
         String fieldName = "banana";
-        Method setter = null;
         try {
-            setter = reflector.retrieveConfigSetter(config, String.class, fieldName);
+            reflector.retrieveConfigSetter(config, String.class, fieldName);
             fail();
         } catch (Exception e) {
             assertTrue(e instanceof  NoSuchMethodException);
