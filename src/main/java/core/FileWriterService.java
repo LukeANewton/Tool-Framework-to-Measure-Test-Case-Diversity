@@ -1,5 +1,8 @@
 package core;
 
+import com.google.gson.Gson;
+import model.Config;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -20,6 +23,11 @@ public class FileWriterService {
 	 * @param path used to decide where to write or find the file
 	 */
 	public FileWriterService(String path) { this.path = path; }
+
+	/**
+	 * FileWriterService will write to the path ""
+	 */
+	public FileWriterService() { path = ""; }
 
 	/**
 	 * This method will write the given string to the file with the given name at the path location.
@@ -46,4 +54,17 @@ public class FileWriterService {
 		writer.close();
 	}
 
+	/**
+	 * writes a Config object to a file
+	 *
+	 * @param filename the name of the file to write to
+	 * @param config the Config object to write to file
+	 * @throws IOException when there is an error with the FileWriter
+	 */
+	public void writeConfig(String filename, Config config) throws IOException {
+		FileWriter writer = new FileWriter(filename);
+		Gson gson = new Gson();
+		gson.toJson(config, writer); // Write to json file
+		Objects.requireNonNull(writer).close();
+	}
 }

@@ -1,20 +1,18 @@
 package core;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
 import data_representation.DataRepresentation;
 import metrics.aggregation.AggregationStrategy;
 import metrics.comparison.PairwiseComparisonStrategy;
 import model.*;
 import user_interface.Console;
+import user_interface.InputParser;
+import user_interface.InvalidCommandException;
 import user_interface.OverwriteOption;
 import utilities.Tuple;
 
-import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * The Controller is the main logic for the program. It pieces together the different services to
@@ -39,60 +37,82 @@ public class Controller {
     private PairingService pairingService;
     //service to perform comparisons
     private ComparisonService comparisonService;
+    //the service which parses commands
+    private InputParser inputParser;
 
     /**Constructor*/
-    public Controller() {
-        //read config file
-        try {
-            config = readConfig(CONFIG_FILE);
-        } catch (FileNotFoundException e) {
-            System.err.println("Config file: " + CONFIG_FILE + " not found.");
-            e.printStackTrace();
-            System.exit(-1);
-        }
-
-        console = new Console();
-        reflectionService = new ReflectionService();
+    private Controller() throws IOException {
         fileReaderService = new FileReaderService();
-        fileWriterService = new FileWriterService("");
+        console = new Console();
+        inputParser = new InputParser();
+        reflectionService = new ReflectionService();
+        fileWriterService = new FileWriterService();
         pairingService = new PairingService();
+
+        //read config file
+        config = fileReaderService.readConfig(CONFIG_FILE);
+
         comparisonService = new ComparisonService(config.getNumThreads());
     }
 
-    /**
-     * reads a configuration file from the passed filename
-     * @param filename the name of the configuration file
-     * @throws FileNotFoundException thrown when passed filename can not be found
-     * @return a Config object containing all the information from the configuration file
-     */
-    private Config readConfig(String filename) throws FileNotFoundException {
-        JsonReader jsonReader = new JsonReader(new FileReader(filename));
-        Gson gson = new Gson();
-        return config = gson.fromJson(jsonReader, Config.class);
+    public static Controller getController(){
+        File file = new File(CONFIG_FILE);
+        String errorMsg = "Failed to read from configuration file: " + CONFIG_FILE + ". Ensure the file exists in the same directory as this program.";
+        if(file.exists()) {
+            try {
+                return new Controller();
+            } catch (Exception e) {
+                System.out.println(errorMsg);
+                return null;
+            }
+        }else {//the config file does not exist
+            //this determines if we are executing within the jar file or not
+            if(Controller.class.getResource("Controller.class").toString().startsWith("jar")) {
+                try{//try to create a jar in the proper spot from the default inside the jar
+                    //read in the config file from the jar
+                    InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(CONFIG_FILE);
+                    byte[] buffer = new byte[in.available()];
+                    in.read(buffer);
+
+                    //write the file to outside the jar
+                    OutputStream outStream = new FileOutputStream(file);
+                    outStream.write(buffer);
+                    outStream.close();
+
+                    return new Controller();
+                } catch(Exception ex){//this means we failed to create a new config file, so the Controller cannot be created
+                    System.out.println(errorMsg);
+                    return null;
+                }
+            } else{
+                System.out.println(errorMsg);
+                return null;
+            }
+        }
     }
 
     /**
-     * writes a Config object to a file
+     * the command to invoke in the Controller to process a system instruction
      *
-     * @param filename the name of the file to write to
-     * @param config the Config object to write to file
-     * @throws IOException when there is an error with the FileWriter
+     * @param command the command for the system to execute
      */
-    private void writeConfig(String filename, Config config) throws IOException {
-        FileWriter writer = new FileWriter(filename);
-        Gson gson = new Gson();
-        gson.toJson(config, writer); // Write to json file
-        Objects.requireNonNull(writer).close();
-    }
-
     public void processCommand(String command){
-        DataTransferObject dto = console.processInstruction(command);
+        //parse the command into a DTO
+        DataTransferObject dto;
+        try {
+            dto = inputParser.parse(command);
+        } catch (InvalidCommandException e) {
+			/*if we have an invalid command, display an error message and list the
+			valid commands through issuing a HelpDTO*/
+            console.displayResults(e.getErrorMessage() + "Valid commands are:");
+            HelpDTO help = new HelpDTO();
+            help.setHelpType(HelpType.Command);
+            dto = help;
+        }
+
+        //determine which command is being parsed
         CommandType commandType = dto.getCommandType();
         switch(commandType){
-            case Exit:
-            case Update:
-                console.displayResults("This command remains unimplemented while there is no REPL");
-                break;
             case Help:
                 processHelpCommand((HelpDTO)dto);
                 break;
@@ -259,7 +279,7 @@ public class Controller {
         try {
            result = comparisonService.compareTestCase(pairs, comparisonStrategy, aggregationStrategy, console);
         } catch (Exception e) {
-            console.displayResults("Error in pairwise comparison calculation: " + e.toString());
+            console.displayResults("Error in pairwise comparison calculation: " + e.getMessage());
             return;
         }
 
@@ -292,11 +312,20 @@ public class Controller {
         return;
     }
 
+    /**
+     * loads a test suite from a given file into the system. The test cases in the system are expected to
+     * be seperated by the provided delimiter, and be formated according to the supplied data representation
+     *
+     * @param filename the name of the test suite file
+     * @param delimiter the character/string/regex that separates each file in the test suite
+     * @param format the data representation of the test cases
+     * @return an array of data representations where each data representation contains a test case
+     */
     private DataRepresentation[] getTestSuite(String filename, String delimiter, DataRepresentation format){
         try {
              return fileReaderService.readIntoDataRepresentation(filename, delimiter, format);
         } catch (InvalidFormatException e) {
-            console.displayResults("one or more test cases do not match the specified data representation: " + format);
+            console.displayResults("one or more test cases do not match the specified data representation: " + format.getClass().getName());
         } catch (FileNotFoundException e) {
             console.displayResults("file: " + filename + " could not be found");
         } catch (Exception e) {
@@ -340,10 +369,12 @@ public class Controller {
                 }
 
                 //as long as there is no REPL, any config command must save the value to a file, whether -s is specified or not
-                writeConfig(CONFIG_FILE, config);
+                fileWriterService.writeConfig(CONFIG_FILE, config);
                 console.displayResults("Successfully set " + dto.getParameterName() + " to the value " + dto.getParameterValue());
+            }  catch (NumberFormatException e) {
+                console.displayResults("Failed to set " + dto.getParameterName() + " to " + dto.getParameterValue() + ". The value for " + dto.getParameterName() + " should be a number");
             } catch (Exception e) {
-                console.displayResults("Failed to set " + dto.getParameterName() + " to the value " + dto.getParameterValue() +": " + e.toString());
+                console.displayResults("Failed to set " + dto.getParameterName() + " to " + dto.getParameterValue() + ": " + e.toString());
             }
         }
     }
@@ -363,7 +394,7 @@ public class Controller {
         switch(helpType){
             case Command:
                 result.append("\tcompare <filename> [<filename>] <data-representation>\n");
-                result.append("\t\tperforms a diversity calculation within a test suite, or between test suites at the specified filenames(s)\n");
+                result.append("\t\tperforms a diversity calculation within a test suite, or between test suites at the specified filename(s)\n");
                 result.append("\t\t\t-m <metric>: set the diversity metric to use in the calculation. Available metrics can be found with 'help -m'\n");
                 result.append("\t\t\t-a <method>: set the method to use for aggregating results. Available methods can be found with 'help -a'\n");
                 result.append("\t\t\t-d <delimiter>: set the delimiter that separates test cases within the passed test suite file(s). This can be a character, string, or regular expression\n");
@@ -376,22 +407,18 @@ public class Controller {
                 result.append("\t\t\t-m: lists the available comparison metrics in the system\n");
                 result.append("\t\t\t-a: lists the available aggregation methods in the system\n");
                 result.append("\t\t\t-f: lists the available data representations in the system\n");
-                result.append("\tupdate\n");
-                result.append("\t\tnot implemented\n");
-                result.append("\texit\n");
-                result.append("\t\tnot implemented");
                 console.displayResults(result.toString());
                 return;
             case PairwiseMetric:
-                packageName = "metrics.comparison";
+                packageName = config.getComparisonMethodLocation();
                 interfaceName = "PairwiseComparisonStrategy";
                 break;
             case AggregationMethod:
-                packageName = "metrics.aggregation";
+                packageName = config.getAggregationMethodLocation();
                 interfaceName = "AggregationStrategy";
                 break;
             case DataRepresentation:
-                packageName = "data_representation";
+                packageName = config.getGetDataRepresentationLocation();
                 interfaceName = "DataRepresentation";
                 break;
         }
@@ -400,27 +427,31 @@ public class Controller {
             class of the method and get the description from each*/
         try {
             Object[] objects = reflectionService.searchPackage(packageName, interfaceName);
-            result.append("Available " + helpType + "s are:\n");
-            for(int i = 0; i <objects.length; i++){//for each object, we want to print the name and description
-                HelpTarget h = (HelpTarget) objects[i];
+            result.append("Available ").append(helpType).append("s are:\n");
+            if(objects == null)
+                result.append("\tNone available at specified directory: " + packageName);
+            else{
+                for (Object object : objects) {//for each object, we want to print the name and description
+                    HelpTarget h = (HelpTarget) object;
 
-                //get the class name
-                String name = h.getClass().getName();
-                //need to remove the preceding pathname from each class name
-                String[] parts = name.split("\\.");
-                name = parts[parts.length-1];
-                result.append("\t" + name + ":\n");
+                    //get the class name
+                    String name = h.getClass().getName();
+                    //need to remove the preceding pathname from each class name
+                    String[] parts = name.split("\\.");
+                    name = parts[parts.length - 1];
+                    result.append("\t").append(name).append(":\n");
 
-                //get the class description
-                String description = h.getDescription();
-                //display an error message instead of null for missing descriptions
-                if (description == null)
-                    description = "no description available";
-                result.append("\t\t" + description + "\n");
+                    //get the class description
+                    String description = h.getDescription();
+                    //display an error message instead of null for missing descriptions
+                    if (description == null)
+                        description = "no description available";
+                    result.append("\t\t").append(description).append("\n");
+                }
             }
             console.displayResults(result.toString());
         } catch (Exception e){
-            console.displayResults("failed to retrieve object descriptions: " + e.getMessage());
+            console.displayResults("failed to retrieve object descriptions: " + e.toString());
         }
     }
 
@@ -430,17 +461,16 @@ public class Controller {
      * @param args command line arguments
      */
     public static void main(String[] args){
-        Controller controller = new Controller();
+        Controller controller = getController();
+        if (controller != null){
+            /*in order to reuse the code from the Console, for now args must be
+            concatenated, even though it is then tokenized again in the near future
+            */
+            StringBuilder stringBuilder = new StringBuilder();
+            for (String arg : args) stringBuilder.append(arg).append(" ");
 
-        /*in order to reuse the code from the Console, for now args must be
-          concatenated, even though it is then tokenized again in the near future
-         */
-        StringBuilder stringBuilder = new StringBuilder();
-        for(int i = 0; i < args.length; i++)
-            stringBuilder.append(args[i]);
-
-        controller.processCommand(stringBuilder.toString());
+            controller.processCommand(stringBuilder.toString());
+        }
         System.exit(0);
     }
-
 }

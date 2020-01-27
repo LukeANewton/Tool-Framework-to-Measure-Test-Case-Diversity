@@ -2,16 +2,16 @@ package core;
 import model.Config;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Objects;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Creates instances of classes using their constructor and arguments provided by the caller.
@@ -53,7 +53,7 @@ public class ReflectionService {
      * @param constructorArgs an array of object parameters that a loaded class may need passed into it's constructor.
      * @return an instance of the loaded class to be type casted by the caller.
      */
-    public Object loadClass(String className, Class[] initArgsClasses, Object[] constructorArgs)
+    public Object loadClass(String className, Class<?>[] initArgsClasses, Object[] constructorArgs)
             throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException, InvalidFormatException {
 
         Class<?> definition;
@@ -70,29 +70,44 @@ public class ReflectionService {
      * @param interfaceName the name of the interface which classes must implement to be instantiated
      * @return a list of objects from the specified package that implement the specified interface
      */
-    public Object[] searchPackage(String packageName, String interfaceName) throws IllegalAccessException, InvocationTargetException, InstantiationException, ClassNotFoundException, NoSuchMethodException {
+    public Object[] searchPackage(String packageName, String interfaceName) throws IllegalAccessException, InvocationTargetException, InstantiationException, ClassNotFoundException, NoSuchMethodException, IOException, URISyntaxException {
+        if(!packageName.endsWith("."))
+            packageName = packageName + ".";
+
+        if(Controller.class.getResource("Controller.class").toString().startsWith("jar")) {
+            ArrayList<Object> objects = new ArrayList<>();
+            ZipInputStream zip = new ZipInputStream(new FileInputStream(new File(ReflectionService.class.getProtectionDomain().getCodeSource().getLocation().toURI())));
+            for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
+                if (!entry.isDirectory() && entry.getName().endsWith(".class") && entry.getName().startsWith(packageName.replace('.', '/'))) {
+                    // This ZipEntry represents a class. Now, what class does it represent?
+                    String className = entry.getName().replace('/', '.');
+                    Class<?> c = Class.forName(className.substring(0, className.length() - ".class".length()));
+                    if(Class.forName(packageName + interfaceName).isAssignableFrom(c) &&
+                            !c.isInterface()) //if this is true, the class in an implementation of the required interface
+                        objects.add(c.getConstructor().newInstance());
+                }
+            }
+
+            return objects.toArray();
+        }
+
         String directoryName = "target/classes/" + packageName.replace('.', '/');
 
         File directory = new File(directoryName);
-        ArrayList<Class> classes = new ArrayList<Class>();
         if (!directory.exists())
             return null;
 
-        //get classes from each class file
+        //look at each file in the directory, and attempt to instantiate each class that implements the given interface
         File[] files = directory.listFiles();
-        for (int i = 0; i < files.length; i++) {
-                if (files[i].getName().endsWith(".class")) {
-                    classes.add(Class.forName(packageName + '.' +
-                            files[i].getName().substring(0, files[i].getName().length() - 6)));
-                }
-        }
-
-        //instantiate each found class that implements the interface
-        ArrayList<Object> objects = new ArrayList<Object>();
-        for(int i = 0; i < classes.size(); i++) {
-            if(Class.forName(packageName + '.' + interfaceName).isAssignableFrom(classes.get(i)) &&
-                    !classes.get(i).isInterface())
-                objects.add(classes.get(i).getConstructor().newInstance());
+        ArrayList<Object> objects = new ArrayList<>();
+        for (File file : Objects.requireNonNull(files)) {
+            if (file.getName().endsWith(".class")) {
+                Class<?> c = Class.forName(packageName +
+                        file.getName().substring(0, file.getName().length() - 6));
+                if (Class.forName(packageName + interfaceName).isAssignableFrom(c) &&
+                        !c.isInterface())
+                    objects.add(c.getConstructor().newInstance());
+            }
         }
         return objects.toArray();
     }
@@ -104,7 +119,7 @@ public class ReflectionService {
      * @param fieldName the name of the field that we want to find a setter for
      * @return a method for setting the passed fieldName to a new value
      */
-    public Method retrieveConfigSetter(Config c, Class type, String fieldName) throws NoSuchMethodException {
+    public Method retrieveConfigSetter(Config c, Class<?> type, String fieldName) throws NoSuchMethodException {
         //change the first character of the fieldName to uppercase and prepend 'set' to get setter name
         String methodName = "set" + String.valueOf(fieldName.charAt(0)).toUpperCase() + fieldName.substring(1);
 

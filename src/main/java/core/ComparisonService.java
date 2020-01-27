@@ -3,7 +3,10 @@ package core;
 import data_representation.DataRepresentation;
 import metrics.aggregation.AggregationStrategy;
 import metrics.comparison.PairwiseComparisonStrategy;
+import metrics.listwise.ListwiseComparisonStrategy;
 import model.Command;
+import model.ListwiseCommand;
+import model.PairwiseCommand;
 import utilities.Tuple;
 
 import java.beans.PropertyChangeEvent;
@@ -31,15 +34,9 @@ public class ComparisonService {
 		support = new PropertyChangeSupport(this);
 	}
 
-	public String compareTestCase(List<Tuple<DataRepresentation, DataRepresentation>> testCasePairs,
-								  PairwiseComparisonStrategy strategy,
-								  AggregationStrategy aggregation) throws ExecutionException, InterruptedException {
-		return compareTestCase(testCasePairs, strategy, aggregation, null);
-	}
-
 	/**
 	 * Compares all the tests provided by testSuite1 with testSuite2 using the
-	 * provided strategy, then returns a final value using the provided aggregation
+	 * provided pairwise metric, then returns a final value using the provided aggregation
 	 * strategy
 	 *
 	 * @param testCasePairs the list of test case pairs
@@ -51,22 +48,56 @@ public class ComparisonService {
 	public String compareTestCase(List<Tuple<DataRepresentation, DataRepresentation>> testCasePairs,
 								  PairwiseComparisonStrategy strategy, AggregationStrategy aggregation,
 								  PropertyChangeListener pcl) throws ExecutionException, InterruptedException {
+		List<Command> tasks = new ArrayList<>();
+		for (Tuple testCasePair : testCasePairs) {
+			tasks.add(new PairwiseCommand(strategy, (DataRepresentation)testCasePair.getLeft(),
+											(DataRepresentation)testCasePair.getRight(), pcl));
+		}
+
+		return compareWithThreadPool(tasks, aggregation, pcl);
+		}
+
+	/**
+	 * private helper method to perform comparison with thread pool
+	 *
+	 * @param tasks the comparisons to make in the thread pool
+	 * @param aggregation the aggregation metric to use to assimilate all the
+	 * 	 *                    	comparisons
+	 * @return a double representing the diversity of the testsuite comparisons
+	 */
+	private String compareWithThreadPool(List<Command> tasks, AggregationStrategy aggregation,
+										 PropertyChangeListener pcl) throws ExecutionException, InterruptedException {
 		if (pcl != null)
 			support.addPropertyChangeListener(pcl);
 
-		List<Command> tasks = new ArrayList<>();
-		for (Tuple testCasePair : testCasePairs) {
-			tasks.add(new Command(strategy, (DataRepresentation)testCasePair.getLeft(),
-					(DataRepresentation)testCasePair.getRight(), pcl));
-		}
 		support.firePropertyChange(new PropertyChangeEvent(this, "numberTasks", 0, tasks.size()));
 		List<Future<Object>> futureList = threadPool.invokeAll(tasks);
 
 		ArrayList<Double> results = new ArrayList<>();
-		for (Future<Object> future : futureList) {
+		for (Future<Object> future : futureList)
 			results.add((Double) future.get());
-		}
+
 		return aggregation.aggregate(results);
+	}
+
+
+	/**
+	 * Compares all the testsuites provided with the provided listwise metric,
+	 * then returns a final value using the provided aggregation strategy
+	 *
+	 * @param testsuites 	the list of test suites
+	 * @param strategy    	the strategy to use to calculate testsuite diversity
+	 * @param aggregation 	the aggregation metric to use to assimilate all the
+	 *                    	comparisons
+	 * @return a double representing the diversity of the testsuite comparisons
+	 */
+	public String compareTestCase(List<List<DataRepresentation>> testsuites,
+								  ListwiseComparisonStrategy strategy, AggregationStrategy aggregation,
+								  PropertyChangeListener pcl) throws ExecutionException, InterruptedException {
+		List<Command> tasks = new ArrayList<>();
+		for(List<DataRepresentation> testsuite: testsuites)
+			tasks.add(new ListwiseCommand(strategy, testsuite, pcl));
+		return compareWithThreadPool(tasks, aggregation, pcl);
 	}
 
 	/**

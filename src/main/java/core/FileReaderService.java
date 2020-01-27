@@ -2,11 +2,16 @@ package core;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import data_representation.DataRepresentation;
+import model.Config;
 
 /**
  * Handles the system functionality for reading test cases from files.
@@ -118,6 +123,20 @@ public class FileReaderService {
 			list.add(d);
 		}
 		return list.toArray(new DataRepresentation[0]);
+	}
+
+	/**
+	 * reads a configuration file from the passed filename
+	 * @param filename the name of the configuration file
+	 * @throws FileNotFoundException thrown when passed filename can not be found
+	 * @return a Config object containing all the information from the configuration file
+	 */
+	public Config readConfig(String filename) throws IOException {
+		JsonReader jsonReader = new JsonReader(new FileReader(filename));
+		Gson gson = new Gson();
+		Config result = gson.fromJson(jsonReader, Config.class);
+		jsonReader.close();
+		return result;
 	}
 
 }
