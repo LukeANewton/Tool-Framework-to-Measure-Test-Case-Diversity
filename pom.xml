@@ -85,7 +85,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        core.Controller
+                                        ComparisonApp
                                     </mainClass>
                                 </manifest>
                             </archive>

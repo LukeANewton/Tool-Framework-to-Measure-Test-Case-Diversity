@@ -23,6 +23,10 @@ import java.util.List;
 public class Controller {
     //the name of the configuration file containing system defaults
     private static final String CONFIG_FILE = "config.json";
+    private static final String DATA_REP_INTERFACE_PATH = "data_representation.DataRepresentation";
+    private static final String PAIRWISE_COMPARISON_INTERFACE_PATH = "metrics.comparison.PairwiseComparisonStrategy";
+    private static final String AGGREGATION_INTERFACE_PATH = "metrics.aggregation.AggregationStrategy";
+
     //configuration object containing config file values
     private Config config;
     //console to obtain user input and display output
@@ -132,20 +136,19 @@ public class Controller {
      * @return an instance of the DataRepresentation specified in the dto
      */
     private DataRepresentation loadDataRepresentation(CompareDTO dto){
-        String name = dto.getDataRepresentation();
+        String dataRepresentationName = dto.getDataRepresentation();
 
-        if (name == null)//nothing specified in dto, so load default from config file
-            name = config.getDataRepresentation();
+        if (dataRepresentationName == null)//nothing specified in dto, so load default from config file
+            dataRepresentationName = config.getDataRepresentation();
 
         //set the package to look in
         String packageName = config.getGetDataRepresentationLocation();
         if (!packageName.endsWith("."))
             packageName = packageName + ".";
-        reflectionService.setClassSource(packageName);
 
         //try to load the class
         try {
-            return (DataRepresentation) reflectionService.loadClass(name);
+            return (DataRepresentation) reflectionService.loadClass(packageName + dataRepresentationName, DATA_REP_INTERFACE_PATH);
         } catch (ClassNotFoundException | InvalidFormatException e) {
             console.displayResults("no data representation named " + dto.getDataRepresentation() + " found");
         }catch (ClassCastException e){
@@ -172,11 +175,10 @@ public class Controller {
         String packageName = config.getComparisonMethodLocation();
         if (!packageName.endsWith("."))
             packageName = packageName + ".";
-        reflectionService.setClassSource(packageName);
 
         //try to load the class
         try {
-            return (PairwiseComparisonStrategy) reflectionService.loadClass(name);
+            return (PairwiseComparisonStrategy) reflectionService.loadClass(packageName + name, PAIRWISE_COMPARISON_INTERFACE_PATH);
         } catch (ClassNotFoundException | InvalidFormatException e) {
             console.displayResults("no pairwise metric named " + dto.getPairwiseMethod() + " found");
         }catch (ClassCastException e){
@@ -203,11 +205,10 @@ public class Controller {
         String packageName = config.getAggregationMethodLocation();
         if (!packageName.endsWith("."))
             packageName = packageName + ".";
-        reflectionService.setClassSource(packageName);
 
         //try to load the class
         try {
-            return (AggregationStrategy) reflectionService.loadClass(name);
+            return (AggregationStrategy) reflectionService.loadClass(packageName + name, AGGREGATION_INTERFACE_PATH);
         } catch (ClassNotFoundException | InvalidFormatException e) {
             console.displayResults("no aggregation method named " + dto.getAggregationMethod() + " found");
         }catch (ClassCastException e){
@@ -309,7 +310,6 @@ public class Controller {
 
         //output results to console
         console.displayResults("result:\n\n" + result);
-        return;
     }
 
     /**
@@ -350,8 +350,7 @@ public class Controller {
                 setter = reflectionService.retrieveConfigSetter(config, classes[i], dto.getParameterName());
                 validIndex = i;
                 break;
-            } catch (NoSuchMethodException e) {
-                continue;
+            } catch (NoSuchMethodException ignored) {
             }
         }
 
@@ -389,7 +388,7 @@ public class Controller {
         StringBuilder result = new StringBuilder();
 
         String packageName = null;
-        String interfaceName = null;
+        String interfacePath = null;
         //determine which type of help is needed, each works the same way except for Command help
         switch(helpType){
             case Command:
@@ -411,22 +410,22 @@ public class Controller {
                 return;
             case PairwiseMetric:
                 packageName = config.getComparisonMethodLocation();
-                interfaceName = "PairwiseComparisonStrategy";
+                interfacePath = PAIRWISE_COMPARISON_INTERFACE_PATH;
                 break;
             case AggregationMethod:
                 packageName = config.getAggregationMethodLocation();
-                interfaceName = "AggregationStrategy";
+                interfacePath = AGGREGATION_INTERFACE_PATH;
                 break;
             case DataRepresentation:
                 packageName = config.getGetDataRepresentationLocation();
-                interfaceName = "DataRepresentation";
+                interfacePath = DATA_REP_INTERFACE_PATH;
                 break;
         }
 
         /* for comparison metrics, aggregation methods, and data representations, we search for every
             class of the method and get the description from each*/
         try {
-            Object[] objects = reflectionService.searchPackage(packageName, interfaceName);
+            Object[] objects = reflectionService.searchPackage(packageName, interfacePath);
             result.append("Available ").append(helpType).append("s are:\n");
             if(objects == null)
                 result.append("\tNone available at specified directory: " + packageName);
@@ -453,24 +452,5 @@ public class Controller {
         } catch (Exception e){
             console.displayResults("failed to retrieve object descriptions: " + e.toString());
         }
-    }
-
-    /**
-     * main function for the system
-     *
-     * @param args command line arguments
-     */
-    public static void main(String[] args){
-        Controller controller = getController();
-        if (controller != null){
-            /*in order to reuse the code from the Console, for now args must be
-            concatenated, even though it is then tokenized again in the near future
-            */
-            StringBuilder stringBuilder = new StringBuilder();
-            for (String arg : args) stringBuilder.append(arg).append(" ");
-
-            controller.processCommand(stringBuilder.toString());
-        }
-        System.exit(0);
     }
 }

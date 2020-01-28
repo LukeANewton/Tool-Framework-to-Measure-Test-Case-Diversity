@@ -3,122 +3,228 @@ package core;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import model.Config;
+import org.junit.Before;
 import org.junit.Test;
+
 import java.awt.*;
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.InputMismatchException;
 
 import static org.junit.Assert.*;
 
 /**
- * A test suite for the Reflection service
+ * A test suite for the Reflection service.
  */
 public class ReflectionServiceTest {
 
-    @Test
-    public void testReflectNoArgsConstructor() {
-        ReflectionService reflector = new ReflectionService();
-        reflector.setClassSource("metrics.comparison.");
-        Object instance = null;
-        String className = "CommonElements";
+    private ReflectionService reflector;
 
-        try {
-            instance = reflector.loadClass(className);
-        } catch (ClassNotFoundException e) {
-            System.err.println("Failed to find class " + reflector.getClassSource() + className);
-        } catch (IllegalAccessException e) {
-            System.err.println("Restricted access to file; cannot load " + className);
-        } catch (InstantiationException e) {
-            System.err.println("Failed to create instance of " + className);
-        } catch (NoSuchMethodException e) {
-            System.err.println("Failed to find no args constructor for class " + className);
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (InvalidFormatException e) {
-            System.err.println("Class path not correct format. Required: <classSource>.<class> Found: " + reflector.getClassSource() + className);
-            e.printStackTrace();
-        }
-        assertNotNull("Failed to instantiate class '" + className + "'.", instance);
+    @Before
+    public void setup() {
+        reflector = new ReflectionService();
     }
 
+    /**
+     * Tests that a class with a no args constructor can be instantiated.
+     *
+     * @throws NoSuchMethodException when the constructor can't be found.
+     * @throws ClassNotFoundException when the class or interface doesn't exist.
+     * @throws IllegalAccessException when the class or interface are in a read protected space.
+     * @throws InvocationTargetException when the class or interface cannot be invoked.
+     * @throws InstantiationException when an object of the class cannot be instantiated.
+     * @throws InvalidFormatException when the classPath or interfacePath is malformed.
+     */
     @Test
-    public void testReflectArgsConstructor() {
-        ReflectionService reflector = new ReflectionService("java.awt.");
-
+    public void testReflectNoArgsConstructor() throws InvalidFormatException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         Object instance = null;
-        String className = "Rectangle";
+        String classPath = "metrics.comparison.CommonElements";
+        String implementedInterface = "metrics.comparison.PairwiseComparisonStrategy";
+        instance = reflector.loadClass(classPath, implementedInterface);
+        assertNotNull("Failed to instantiate class '" + classPath + "'.", instance);
+    }
+
+    /**
+     * Tests that a class with a no args constructor given a null or empty interface can be instantiated.
+     *
+     * @throws NoSuchMethodException when the constructor can't be found.
+     * @throws ClassNotFoundException when the class or interface doesn't exist.
+     * @throws IllegalAccessException when the class or interface are in a read protected space.
+     * @throws InvocationTargetException when the class or interface cannot be invoked.
+     * @throws InstantiationException when an object of the class cannot be instantiated.
+     * @throws InvalidFormatException when the classPath or interfacePath is malformed.
+     */
+    @Test
+    public void testReflectNoArgsConstructorNullIF() throws InvalidFormatException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        Object instance = null;
+        String classPath = "metrics.comparison.CommonElements";
+        instance = reflector.loadClass(classPath, null);
+        assertNotNull("Failed to instantiate class '" + classPath + "' with a null interface.", instance);
+
+        instance = reflector.loadClass(classPath, "");
+        assertNotNull("Failed to instantiate class '" + classPath + "' with an empty interface.", instance);
+    }
+
+    /**
+     * Tests that an InstantiationException is thrown when asked for a class that doesn't implement the provided interface.
+     *
+     * @throws NoSuchMethodException when the constructor can't be found.
+     * @throws ClassNotFoundException when the class or interface doesn't exist.
+     * @throws IllegalAccessException when the class or interface are in a read protected space.
+     * @throws InvocationTargetException when the class or interface cannot be invoked.
+     * @throws InstantiationException when an object of the class cannot be instantiated.
+     * @throws InvalidFormatException when the classPath or interfacePath is malformed.
+     */
+    @Test(expected = InstantiationException.class)
+    public void testReflectNoArgsConstructorInvalidIF() throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException, ClassNotFoundException, InvalidFormatException {
+        Object instance;
+        String className = "java.awt.Rectangle";
+
+        // Prove that the class is normally instantiated fine with the right interface.
+        String correctlyImplementedInterface = "java.io.Serializable";
+        instance = reflector.loadClass(className, correctlyImplementedInterface);
+        assertNotNull(instance);
+
+        // Attempt to pass an incorrect interface, throwing an InstantiationException.
+        String implementedInterface = "java.awt.ActiveEvent";
+        reflector.loadClass(className, implementedInterface);
+    }
+
+    /**
+     * Test that a class with a constructor that takes arguments can be instantiated.
+     *
+     * @throws NoSuchMethodException when the constructor can't be found.
+     * @throws ClassNotFoundException when the class or interface doesn't exist.
+     * @throws IllegalAccessException when the class or interface are in a read protected space.
+     * @throws InvocationTargetException when the class or interface cannot be invoked.
+     * @throws InstantiationException when an object of the class cannot be instantiated.
+     * @throws InvalidFormatException when the classPath or interfacePath is malformed.
+     */
+    @Test
+    public void testReflectArgsConstructor() throws NoSuchMethodException, InvalidFormatException, IllegalAccessException, InstantiationException, InvocationTargetException, ClassNotFoundException {
+        Object instance = null;
+        String classPath = "java.awt.Rectangle";
+        String implementedInterface = "java.io.Serializable";
         Class[] constructorTemplate = new Class[] {int.class, int.class};
         Object[] constructorValues = new Object[] {5, 10};
 
-        try {
-            instance = reflector.loadClass(className, constructorTemplate, constructorValues);
-        } catch (ClassNotFoundException e) {
-            System.err.println("Failed to find class " + reflector.getClassSource() + className);
-        } catch (IllegalAccessException e) {
-            System.err.println("Restricted access to file; cannot load " + className);
-        } catch (InstantiationException e) {
-            System.err.println("Failed to create instance of " + className);
-        } catch (NoSuchMethodException e) {
-            System.err.println("Failed to find args constructor for class '" + className + "' with arg template '" +
-                    Arrays.toString(constructorTemplate) + "' and args '" + Arrays.toString(constructorValues) + "'.");
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (InvalidFormatException e) {
-            System.err.println("Class path not correct format. Required: <classSource>.<class> Found: " + reflector.getClassSource() + className);
-            e.printStackTrace();
-        }
-        assertNotNull("Failed to instantiate class '" + className + "'.", instance);
+        instance = reflector.loadClass(classPath, implementedInterface, constructorTemplate, constructorValues);
+        assertNotNull("Failed to instantiate class '" + classPath + "'.", instance);
 
         Rectangle rec = (Rectangle) instance;
-
         assertEquals("Failed to set constructor argument.", 10, rec.height);
     }
 
+    /**
+     * Test that a class with a constructor that takes arguments can be instantiated.
+     *
+     * @throws NoSuchMethodException when the constructor can't be found.
+     * @throws ClassNotFoundException when the class or interface doesn't exist.
+     * @throws IllegalAccessException when the class or interface are in a read protected space.
+     * @throws InvocationTargetException when the class or interface cannot be invoked.
+     * @throws InstantiationException when an object of the class cannot be instantiated.
+     * @throws InvalidFormatException when the classPath or interfacePath is malformed.
+     */
     @Test
-    public void testGetClassSource() {
-        ReflectionService reflector = new ReflectionService("metrics.comparison.");
-        assertEquals("Class source obtained from reflector is incorrect.", "metrics.comparison.", reflector.getClassSource());
+    public void testReflectArgsConstructorInvalidIF() throws NoSuchMethodException, InvalidFormatException, IllegalAccessException, InstantiationException, InvocationTargetException, ClassNotFoundException {
+        Object instance = null;
+        String classPath = "java.awt.Rectangle";
+        String implementedInterface = null;
+        Class[] constructorTemplate = new Class[] {int.class, int.class};
+        Object[] constructorValues = new Object[] {5, 10};
+
+        instance = reflector.loadClass(classPath, implementedInterface, constructorTemplate, constructorValues);
+        assertNotNull("Failed to instantiate class '" + classPath + "' with null interface.", instance);
+
+        Rectangle rec = (Rectangle) instance;
+        assertEquals("Failed to set constructor argument.", 10, rec.height);
+
+        implementedInterface = "";
+        instance = reflector.loadClass(classPath, implementedInterface, constructorTemplate, constructorValues);
+        assertNotNull("Failed to instantiate class '" + classPath + "' with empty interface.", instance);
+
+        rec = (Rectangle) instance;
+        assertEquals("Failed to set constructor argument.", 10, rec.height);
+
     }
 
-    @Test
     /**
-     * test for when reflection is invoked with a malformed pathname.
+     * test for when reflection is invoked with a malformed path when loading a class with a no args constructor.
      * an InvalidFormat Exception should be thrown
      */
-    public void testInvalidPathFormatNoArgs(){
-        ReflectionService reflector = new ReflectionService();
-        reflector.setClassSource("metrics,comparison,");
-        Object instance = null;
-        String className = "CommonElements";
+    @Test
+    public void testInvalidPathFormatNoArgs() {
+        String classPath = ".CommonElements";
+        String implementedInterface = "PairwiseComparisonStrategy";
 
         try {
-            instance = reflector.loadClass(className);
+            reflector.loadClass(classPath, implementedInterface);
+            fail();
+        } catch (Exception e) {
+            assertTrue(e instanceof InvalidFormatException);
+        }
+
+        classPath = "metrics/comparison.CommonElements";
+        implementedInterface = "metrics.comparison.PairwiseComparisonStrategy";
+
+        try {
+            reflector.loadClass(classPath, implementedInterface);
+            fail();
+        } catch (Exception e) {
+            assertTrue(e instanceof InvalidFormatException);
+        }
+
+        classPath = "metrics.comparison.CommonElements";
+        implementedInterface = "metrics.comparison/PairwiseComparisonStrategy";
+        try {
+            reflector.loadClass(classPath, implementedInterface);
             fail();
         } catch (Exception e) {
             assertTrue(e instanceof InvalidFormatException);
         }
     }
 
-    @Test
-    /**
-     * test for when reflection is invoked with a malformed pathname.
-     * an InvalidFormat Exception should be thrown
-     */
-    public void testInvalidPathFormatArgs(){
-        ReflectionService reflector = new ReflectionService("java/awt/");
+    @Test(expected= InputMismatchException.class)
+    public void testClassNotClass() throws IllegalAccessException, InvocationTargetException, InvalidFormatException,
+            InstantiationException, NoSuchMethodException, ClassNotFoundException {
+        String classPath = "metrics.comparison.PairwiseComparisonStrategy";
+        String implementedInterface = "metrics.comparison.PairwiseComparisonStrategy";
+        reflector.loadClass(classPath, implementedInterface);
+    }
 
-        Object instance = null;
-        String className = "Rectangle";
+    @Test(expected= InputMismatchException.class)
+    public void testInterfaceNotInterface() throws IllegalAccessException, InvocationTargetException, InvalidFormatException,
+            InstantiationException, NoSuchMethodException, ClassNotFoundException {
+        String classPath = "metrics.comparison.CommonElements";
+        String implementedInterface = "metrics.comparison.CommonElements";
+        reflector.loadClass(classPath, implementedInterface);
+    }
+
+    /**
+     * test for when reflection is invoked with a malformed pathname when loading a class with a constructor that takes args.
+     * an InvalidFormatException should be thrown
+     */
+    @Test
+    public void testInvalidPathFormatArgs(){
+        String className = "java.awt/Rectangle";
+        String implementedInterface = "java.io.Serializable";
         Class[] constructorTemplate = new Class[] {int.class, int.class};
         Object[] constructorValues = new Object[] {5, 10};
 
         try {
-            instance = reflector.loadClass(className, constructorTemplate, constructorValues);
+            reflector.loadClass(className, implementedInterface, constructorTemplate, constructorValues);
+            fail();
+        } catch (Exception e) {
+            assertTrue(e instanceof InvalidFormatException);
+        }
+
+        className = "java.awt.Rectangle";
+        implementedInterface = "java/io.Serializable";
+        try {
+            reflector.loadClass(className, implementedInterface, constructorTemplate, constructorValues);
             fail();
         } catch (Exception e) {
             assertTrue(e instanceof InvalidFormatException);
@@ -129,10 +235,9 @@ public class ReflectionServiceTest {
     /**
      * test for the searchPackage() method, which searches a package for all objects that implement a specified interface
      */
-    public void testSearchPackage(){
-        ReflectionService reflector = new ReflectionService();
+    public void testSearchPackage() {
         try {
-            Object[] list = reflector.searchPackage("metrics.comparison", "PairwiseComparisonStrategy");
+            Object[] list = reflector.searchPackage("metrics.comparison", "metrics.comparison.PairwiseComparisonStrategy");
             assertEquals(3, list.length);
         } catch (Exception e) {
             e.printStackTrace();
@@ -143,9 +248,9 @@ public class ReflectionServiceTest {
     @Test
     /**
      * test for the searchPackage() method, which searches a package for all objects that implement a specified interface.
-     * This method introduces a non-class file, to ensure that it is skipped over and does not cause any errors
+     * This method introduces a non-class file in the package to ensure that it is skipped over and does not cause any errors
      */
-    public void testSearchPackageWithNonClassFile(){
+    public void testSearchPackageWithNonClassFile() {
         //create file
         File file = new File("target/classes/metrics/comparison/banana");
         try {
@@ -155,9 +260,8 @@ public class ReflectionServiceTest {
         }
 
         //do the test
-        ReflectionService reflector = new ReflectionService();
         try {
-            Object[] list = reflector.searchPackage("metrics.comparison", "PairwiseComparisonStrategy");
+            Object[] list = reflector.searchPackage("metrics.comparison", "metrics.comparison.PairwiseComparisonStrategy");
             assertEquals(3, list.length);
         } catch (Exception e) {
             e.printStackTrace();
@@ -173,8 +277,7 @@ public class ReflectionServiceTest {
      * test for the searchPackage() method, which searches a package for all objects that implement a specified interface.
      * this test is for the case where the package being searched for does not exist
      */
-    public void testSearchPackageNoSuchDirectory(){
-        ReflectionService reflector = new ReflectionService();
+    public void testSearchPackageNoSuchDirectory() {
         try {
             Object[] list = reflector.searchPackage("banana", "PairwiseComparisonStrategy");
             assertNull(list);
@@ -190,8 +293,6 @@ public class ReflectionServiceTest {
      * given field. This is for the positive case, where the setter can be found
      */
     public void testRetrieveConfigSetterExists(){
-        ReflectionService reflector = new ReflectionService();
-
         //read JSON
         JsonReader jsonReader = null;
         try {
@@ -237,8 +338,6 @@ public class ReflectionServiceTest {
      * given field.This is for the negative case, where the setter does not exist
      */
     public void testRetrieveConfigSetterNotExists(){
-        ReflectionService reflector = new ReflectionService();
-
         //read JSON
         JsonReader jsonReader = null;
         try {
@@ -252,9 +351,8 @@ public class ReflectionServiceTest {
 
         //attempt to find setter for a field
         String fieldName = "banana";
-        Method setter = null;
         try {
-            setter = reflector.retrieveConfigSetter(config, String.class, fieldName);
+            reflector.retrieveConfigSetter(config, String.class, fieldName);
             fail();
         } catch (Exception e) {
             assertTrue(e instanceof  NoSuchMethodException);
