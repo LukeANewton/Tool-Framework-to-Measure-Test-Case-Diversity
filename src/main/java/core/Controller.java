@@ -4,7 +4,7 @@ import data_representation.DataRepresentation;
 import metrics.aggregation.AggregationStrategy;
 import metrics.comparison.PairwiseComparisonStrategy;
 import model.*;
-import user_interface.Console;
+import user_interface.ConsoleOutputService;
 import user_interface.InputParser;
 import user_interface.InvalidCommandException;
 import user_interface.OverwriteOption;
@@ -30,7 +30,7 @@ public class Controller {
     //configuration object containing config file values
     private Config config;
     //console to obtain user input and display output
-    private Console console;
+    private ConsoleOutputService console;
     //service to load class instances
     private ReflectionService reflectionService;
     //service to read files into system
@@ -47,7 +47,7 @@ public class Controller {
     /**Constructor*/
     private Controller() throws IOException {
         fileReaderService = new FileReaderService();
-        console = new Console();
+        console = new ConsoleOutputService();
         inputParser = new InputParser();
         reflectionService = new ReflectionService();
         fileWriterService = new FileWriterService();

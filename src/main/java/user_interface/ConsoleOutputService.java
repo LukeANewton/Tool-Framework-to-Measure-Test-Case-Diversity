@@ -11,7 +11,7 @@ import java.util.Scanner;
  * @author luke
  *
  */
-public class Console implements PropertyChangeListener {
+public class ConsoleOutputService implements PropertyChangeListener {
 	//the scanner used to obtain user input
 	private Scanner input;
 	//used in displaying progress to denote the number of completed tasks
@@ -25,7 +25,7 @@ public class Console implements PropertyChangeListener {
 	private double lastProgressMilestone;
 	
 	/**Constructor*/
-	public Console() {
+	public ConsoleOutputService() {
 		input = new Scanner(System.in);
 	}
 	

@@ -13,15 +13,15 @@ import java.io.PrintStream;
 
 import static org.junit.Assert.*;
 
-public class ConsoleTest {
-    private Console console;
+public class ConsoleOutputServiceTest {
+    private ConsoleOutputService consoleOutputService;
     private  ByteArrayOutputStream outContent;
     private  PrintStream originalOut;
     private InputStream originalIn;
 
     @Before
     public void setUp(){
-        console = new Console();
+        consoleOutputService = new ConsoleOutputService();
         outContent = new ByteArrayOutputStream();
         originalOut = System.out;
         System.setOut(new PrintStream(outContent));
@@ -40,29 +40,29 @@ public class ConsoleTest {
      * this should throw an IllegalStateException
      */
     public void closeScanner() {
-        console.closeScanner();
-        console.getOverwriteChoice("filename");
+        consoleOutputService.closeScanner();
+        consoleOutputService.getOverwriteChoice("filename");
     }
 
     @Test
     /**Test for display results to check that if properly prints to the standard output*/
     public void displayResults() {
         String s = "results";
-        console.displayResults(s);
+        consoleOutputService.displayResults(s);
         assertEquals(s + "\r\n", outContent.toString());
     }
 
     private void setInputForTest(String input){
         ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
         System.setIn(in);
-        console = new Console(); //the constructor opens a scanner on System.in, so we need to redo that
+        consoleOutputService = new ConsoleOutputService(); //the constructor opens a scanner on System.in, so we need to redo that
     }
 
     @Test
     /**test for getOverwriteChoice with a yes option*/
     public void getOverwriteChoiceYes() {
         setInputForTest("y");
-        OverwriteOption opt = console.getOverwriteChoice("filename");
+        OverwriteOption opt = consoleOutputService.getOverwriteChoice("filename");
         assertEquals(OverwriteOption.Yes, opt);
     }
 
@@ -70,7 +70,7 @@ public class ConsoleTest {
     /**test for getOverwriteChoice with a no option*/
     public void getOverwriteChoiceNo() {
         setInputForTest("N");
-        OverwriteOption opt = console.getOverwriteChoice("filename");
+        OverwriteOption opt = consoleOutputService.getOverwriteChoice("filename");
         assertEquals(OverwriteOption.No, opt);
     }
 
@@ -78,7 +78,7 @@ public class ConsoleTest {
     /**test for getOverwriteChoice with an append option*/
     public void getOverwriteChoiceAppend() {
         setInputForTest("A");
-        OverwriteOption opt = console.getOverwriteChoice("filename");
+        OverwriteOption opt = consoleOutputService.getOverwriteChoice("filename");
         assertEquals(OverwriteOption.Append, opt);
     }
 
@@ -87,7 +87,7 @@ public class ConsoleTest {
     public void getOverwriteChoiceInvalid() {
         //the system should try to get input twice, first failing, then getting a Yes choice
         setInputForTest("banana\ny");
-        OverwriteOption opt = console.getOverwriteChoice("filename");
+        OverwriteOption opt = consoleOutputService.getOverwriteChoice("filename");
         assertEquals(OverwriteOption.Yes, opt);
 
         /*the expected output is a prompt for a choice twice, but there is no new line
@@ -102,7 +102,7 @@ public class ConsoleTest {
     public void testPropertyChange(){
         //setup the observer for the console
         PropertyChangeSupport support = new PropertyChangeSupport(this);
-        support.addPropertyChangeListener(console);
+        support.addPropertyChangeListener(consoleOutputService);
 
         //set the number of tasks to expect
         int numTasks = 10;
