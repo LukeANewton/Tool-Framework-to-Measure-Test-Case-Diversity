@@ -277,7 +277,7 @@ public class Controller {
             comparisonService = new ComparisonService(dto.getNumberOfThreads());
         String result = null;
         try {
-           result = comparisonService.compareTestCase(pairs, comparisonStrategy, aggregationStrategy);
+            result = comparisonService.compareTestCase(pairs, comparisonStrategy, aggregationStrategy, console);
         } catch (Exception e) {
             console.displayResults("Error in pairwise comparison calculation: " + e.getMessage());
             return;
@@ -323,7 +323,7 @@ public class Controller {
      */
     private DataRepresentation[] getTestSuite(String filename, String delimiter, DataRepresentation format){
         try {
-             return fileReaderService.readIntoDataRepresentation(filename, delimiter, format);
+            return fileReaderService.readIntoDataRepresentation(filename, delimiter, format);
         } catch (InvalidFormatException e) {
             console.displayResults("one or more test cases do not match the specified data representation: " + format.getClass().getName());
         } catch (FileNotFoundException e) {
@@ -429,7 +429,7 @@ public class Controller {
             Object[] objects = reflectionService.searchPackage(packageName, interfaceName);
             result.append("Available ").append(helpType).append("s are:\n");
             if(objects == null)
-                result.append("\tNone available at specified directory: " + packageName);
+                result.append("\tNone available at specified directory: ").append(packageName);
             else{
                 for (Object object : objects) {//for each object, we want to print the name and description
                     HelpTarget h = (HelpTarget) object;

@@ -35,7 +35,7 @@ public class ComparisonServiceTest {
         sameTestCasePairs = new ArrayList<>();
         halfSimilarPairs = new ArrayList<>();
         int dissimilarValue;
-        int value = 0;
+        int value;
         try {
             for (int i = 0; i < 10; i++) {
                 value = i;
@@ -62,53 +62,41 @@ public class ComparisonServiceTest {
         }
     }
 
-    /**
+    /*
      * Test that the comparison service is comparing pairs correctly when given completely similar pairs.
      */
     @Test
-    public void testCompareSimilarPairs() {
-        try {
-            assertEquals(1.0, Double.valueOf(comparisonService.compareTestCase(sameTestCasePairs, strategy, aggregationStrategy)), TOLERANCE);
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public void testCompareSimilarPairs() throws ExecutionException, InterruptedException {
+        assertEquals(1.0,
+                Double.parseDouble(comparisonService.compareTestCase(sameTestCasePairs, strategy, aggregationStrategy, null)),
+                TOLERANCE);
     }
 
-    /**
+    /*
      * Test that the comparison service is comparing pairs correctly when given completely dissimilar pairs.
      */
     @Test
-    public void testCompareDissimilarPairs() {
-        try {
-            assertEquals(0.0, Double.valueOf(comparisonService.compareTestCase(differentTestCasePairs, strategy, aggregationStrategy)), TOLERANCE);
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public void testCompareDissimilarPairs() throws ExecutionException, InterruptedException {
+        assertEquals(0.0,
+                Double.parseDouble(comparisonService.compareTestCase(differentTestCasePairs, strategy, aggregationStrategy, null)),
+                TOLERANCE);
     }
 
-    /**
+    /*
      * Test that the comparison service is comparing pairs correctly when given half similar pairs.
      * This is a 0.0 value because the current aggregation strategy finds the minimum
      */
     @Test
-    public void testCompareHalfSimilarPairs() {
-        try {
-            assertEquals(0.5, Double.valueOf(comparisonService.compareTestCase(halfSimilarPairs, strategy, aggregationStrategy)), TOLERANCE);
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public void testCompareHalfSimilarPairs() throws ExecutionException, InterruptedException {
+        assertEquals(0.5,
+                Double.parseDouble(comparisonService.compareTestCase(halfSimilarPairs, strategy, aggregationStrategy, null)),
+                TOLERANCE);
     }
 
     @Test
-    /**Test for the Comparison service with a listwise comparison that uses the thread pool*/
+    /*Test for the Comparison service with a listwise comparison that uses the thread pool*/
     public void testListwiseComparison() throws InvalidFormatException, ExecutionException, InterruptedException {
-       List<List<DataRepresentation>> testsuites = new ArrayList<>();
+        List<List<DataRepresentation>> testsuites = new ArrayList<>();
         List<DataRepresentation> testsuite = new ArrayList<>();
         testsuite.add(new CSV("1,2,3,4,5,6"));
         testsuite.add(new CSV("5,4,8,5,2,4,7"));
@@ -116,7 +104,7 @@ public class ComparisonServiceTest {
         testsuites.add(testsuite);
 
         assertEquals(2.512,
-                Double.valueOf(comparisonService.compareTestCase(testsuites, new ShannonIndex(), aggregationStrategy)),
+                Double.parseDouble(comparisonService.compareTestCase(testsuites, new ShannonIndex(), aggregationStrategy, null)),
                 TOLERANCE);
     }
 }

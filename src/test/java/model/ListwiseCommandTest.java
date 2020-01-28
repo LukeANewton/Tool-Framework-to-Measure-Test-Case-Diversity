@@ -25,7 +25,7 @@ public class ListwiseCommandTest {
         testsuite.add(new CSV("1,2,3,4,5,6"));
         testsuite.add(new CSV("5,4,8,5,2,4,7"));
         testsuite.add(new CSV("1,1,1,4,5,8"));
-        command = new ListwiseCommand(strategy, testsuite);
+        command = new ListwiseCommand(strategy, testsuite, null);
     }
 
     @Test

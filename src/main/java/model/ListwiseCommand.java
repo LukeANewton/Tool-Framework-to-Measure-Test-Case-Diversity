@@ -1,9 +1,12 @@
 package model;
 
-import java.util.List;
-import java.util.concurrent.Callable;
 import data_representation.DataRepresentation;
 import metrics.listwise.ListwiseComparisonStrategy;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.util.List;
 
 /**
  * ListwiseCommands will contain the information needed to compare a test suite with a listwise metric
@@ -11,13 +14,18 @@ import metrics.listwise.ListwiseComparisonStrategy;
  * @author luke
  *
  */
-public class ListwiseCommand implements Callable<Object>{
+public class ListwiseCommand implements Command{
     private ListwiseComparisonStrategy comparison;
     private List<DataRepresentation> testsuite;
+    private PropertyChangeSupport support;
 
-    public ListwiseCommand(ListwiseComparisonStrategy comparison, List<DataRepresentation> testsuite) {
+    public ListwiseCommand(ListwiseComparisonStrategy comparison, List<DataRepresentation> testsuite,
+                           PropertyChangeListener pcl) {
         this.comparison = comparison;
         this.testsuite = testsuite;
+        support = new PropertyChangeSupport(this);
+        if (pcl != null)
+            support.addPropertyChangeListener(pcl);
     }
 
     public ListwiseComparisonStrategy getComparison() {
@@ -34,7 +42,9 @@ public class ListwiseCommand implements Callable<Object>{
      * @return a double representing the result of the diversity calculation
      */
     public Object call() throws Exception {
-        return comparison.compare(testsuite);
+        double result = comparison.compare(testsuite);
+        support.firePropertyChange(new PropertyChangeEvent(this, "complete",
+                null, null));
+        return result;
     }
-
 }
