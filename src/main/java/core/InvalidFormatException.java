@@ -6,6 +6,12 @@ package core;
  * @author luke
  */
 public class InvalidFormatException extends Exception {
-	private static final long serialVersionUID = 4901443855099127604L;
 
+    public InvalidFormatException() {
+        super();
+    }
+
+    public InvalidFormatException(String s) {
+        super(s);
+    }
 }

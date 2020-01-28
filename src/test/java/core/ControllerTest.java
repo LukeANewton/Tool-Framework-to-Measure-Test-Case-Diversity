@@ -5,10 +5,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 public class ControllerTest {
     private Controller c;

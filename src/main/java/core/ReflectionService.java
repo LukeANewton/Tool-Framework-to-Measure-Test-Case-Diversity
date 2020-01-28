@@ -1,4 +1,5 @@
 package core;
+
 import model.Config;
 
 import java.io.File;
@@ -9,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -20,46 +22,48 @@ import java.util.zip.ZipInputStream;
  */
 public class ReflectionService {
 
-    private String classSource;
-
     public ReflectionService() {
-        classSource = "";
-    }
-
-    public ReflectionService(String source) {
-        classSource = source;
     }
 
     /**
-     * Loads a class with a no-args constructor.
+     * Instantiate a class with a no-args constructor.
      *
-     * @param className the path of the class to load relative to the root of the project.
+     * @param classPath the path and name of the class to lead relative to the root of the project.
+     * @param interfacePath the path and name of the interface that the class is to implement.
      * @return an instance of the loaded class.
+     * @throws NoSuchMethodException when the constructor can't be found.
+     * @throws ClassNotFoundException when the class or interface doesn't exist.
+     * @throws IllegalAccessException when the class or interface are in a read protected space.
+     * @throws InvocationTargetException when the class or interface cannot be invoked.
+     * @throws InstantiationException when an object of the class cannot be instantiated.
+     * @throws InvalidFormatException when the classPath or interfacePath is malformed.
      */
-    public Object loadClass(String className)
+    public Object loadClass(String classPath, String interfacePath)
             throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException, InvalidFormatException {
-
-        Class<?> myClass = Class.forName(checkFormat(className));
-        return myClass.getDeclaredConstructor().newInstance();
+        return loadClassHelper(classPath, interfacePath).getConstructor().newInstance();
     }
 
     /**
-     * Loads a class with a constructor that takes arguments.
-     * Example inputs: when classSource is "java.awt.":
-     * ("Rectangle", new Class[] {int.class, int.class}, new Object[] {5, 10})
+     * Instantiate a class with a constructor that takes arguments.
+     * Example inputs:
+     * ("java.awt.Rectangle", "java.io.Serializable", new Class[] {int.class, int.class}, new Object[] {5, 10})
      *
-     * @param className the path of the class to load relative to the root of the project.
+     * @param classPath the path and name of the class to lead relative to the root of the project.
+     * @param interfacePath the path and name of the interface that the class is to implement.
      * @param initArgsClasses the classes array that the constructor takes.
      * @param constructorArgs an array of object parameters that a loaded class may need passed into it's constructor.
      * @return an instance of the loaded class to be type casted by the caller.
+     * @throws NoSuchMethodException when the constructor can't be found.
+     * @throws ClassNotFoundException when the class or interface doesn't exist.
+     * @throws IllegalAccessException when the class or interface are in a read protected space.
+     * @throws InvocationTargetException when the class or interface cannot be invoked.
+     * @throws InstantiationException when an object of the class cannot be instantiated.
+     * @throws InvalidFormatException when the classPath or interfacePath is malformed.
      */
-    public Object loadClass(String className, Class<?>[] initArgsClasses, Object[] constructorArgs)
+    public Object loadClass(String classPath, String interfacePath, Class<?>[] initArgsClasses, Object[] constructorArgs)
             throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException, InvalidFormatException {
-
-        Class<?> definition;
-        Constructor<?> initArgsConstructor;
-        definition = Class.forName(checkFormat(className));
-        initArgsConstructor = definition.getConstructor(initArgsClasses);
+        Class<?> myClass = loadClassHelper(classPath, interfacePath);
+        Constructor<?> initArgsConstructor = myClass.getConstructor(initArgsClasses);
         return initArgsConstructor.newInstance(constructorArgs);
     }
 
@@ -67,46 +71,46 @@ public class ReflectionService {
      * instantiates an object from each file in a package that matches a specified interface
      *
      * @param packageName the name of the package to instantiate objects from
-     * @param interfaceName the name of the interface which classes must implement to be instantiated
+     * @param interfacePath the path and name of the interface which classes must implement to be instantiated
      * @return a list of objects from the specified package that implement the specified interface
      */
-    public Object[] searchPackage(String packageName, String interfaceName) throws IllegalAccessException, InvocationTargetException, InstantiationException, ClassNotFoundException, NoSuchMethodException, IOException, URISyntaxException {
-        if(!packageName.endsWith("."))
+    public Object[] searchPackage(String packageName, String interfacePath)
+            throws IllegalAccessException, InvocationTargetException, ClassNotFoundException,
+            NoSuchMethodException, IOException, URISyntaxException, InvalidFormatException {
+        if (!packageName.endsWith("."))
             packageName = packageName + ".";
-
-        if(Controller.class.getResource("Controller.class").toString().startsWith("jar")) {
-            ArrayList<Object> objects = new ArrayList<>();
+        ArrayList<Object> objects = new ArrayList<>();
+        if (Controller.class.getResource("Controller.class").toString().startsWith("jar")) {
             ZipInputStream zip = new ZipInputStream(new FileInputStream(new File(ReflectionService.class.getProtectionDomain().getCodeSource().getLocation().toURI())));
             for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
                 if (!entry.isDirectory() && entry.getName().endsWith(".class") && entry.getName().startsWith(packageName.replace('.', '/'))) {
                     // This ZipEntry represents a class. Now, what class does it represent?
                     String className = entry.getName().replace('/', '.');
-                    Class<?> c = Class.forName(className.substring(0, className.length() - ".class".length()));
-                    if(Class.forName(packageName + interfaceName).isAssignableFrom(c) &&
-                            !c.isInterface()) //if this is true, the class in an implementation of the required interface
-                        objects.add(c.getConstructor().newInstance());
+                    className = className.substring(0, className.length() - ".class".length());
+                    try {
+                        objects.add(loadClass(className, interfacePath));
+                    } catch (InputMismatchException | InstantiationException ignore){}
                 }
             }
-
             return objects.toArray();
         }
 
+        // This code is for testing
         String directoryName = "target/classes/" + packageName.replace('.', '/');
-
         File directory = new File(directoryName);
         if (!directory.exists())
             return null;
 
         //look at each file in the directory, and attempt to instantiate each class that implements the given interface
         File[] files = directory.listFiles();
-        ArrayList<Object> objects = new ArrayList<>();
         for (File file : Objects.requireNonNull(files)) {
             if (file.getName().endsWith(".class")) {
-                Class<?> c = Class.forName(packageName +
-                        file.getName().substring(0, file.getName().length() - 6));
-                if (Class.forName(packageName + interfaceName).isAssignableFrom(c) &&
-                        !c.isInterface())
-                    objects.add(c.getConstructor().newInstance());
+                String classPath = packageName + file.getName().substring(0, file.getName().length() - ".class".length());
+                // We ignore these exceptions because when we scan the package, it's okay if we accidentally send in incorrect classes.
+                // We shouldn't check it here because it's already checked later as long as loadClass() works.
+                try {
+                    objects.add(loadClass(classPath, interfacePath));
+                } catch (InputMismatchException | InstantiationException ignore){}
             }
         }
         return objects.toArray();
@@ -127,28 +131,62 @@ public class ReflectionService {
     }
 
     /**
+     * Gets and checks the desired class and interface exists and that the class implements the interface.
+     * @param classPath The full path and name of the class in the project.
+     * @param interfacePath The full path and name of the interface in the project (Can be null or empty to bypass the interface check).
+     * @return The desired class.
+     * @throws InvalidFormatException when the classPath or interfacePath is malformed.
+     * @throws InstantiationException when an object of the class cannot be instantiated.
+     * @throws ClassNotFoundException when the class or interface doesn't exist.
+     * @throws InputMismatchException when class is not a class and interface is not an interface
+     */
+    private Class<?> loadClassHelper(String classPath, String interfacePath) throws InvalidFormatException, InstantiationException, ClassNotFoundException, InputMismatchException {
+        if (!checkFormat(classPath)) {
+            throw new InvalidFormatException("Invalid class path. Expected: <package>.<subPackage>.<className> with any number of subpackages. Actual: " + classPath);
+        }
+        Class<?> myClass = Class.forName(classPath);
+
+        if (interfacePath == null || interfacePath.isEmpty()) {
+            return myClass;
+        }
+        if (!checkFormat(interfacePath)) {
+            throw new InvalidFormatException("Invalid interface path. Expected: <package>.<subPackage>.<interfaceName> with any number of subpackages. Actual: " + interfacePath);
+        }
+        Class<?> myInterface = Class.forName(interfacePath);
+        return checkClassTypes(myClass, myInterface);
+    }
+
+    /**
+     * Checks that a class directly implements an interface and that the class is a class and interface is an interface.
+     *
+     * @param myClass a class that implements the given interface
+     * @param myInterface the interface that myClass implements
+     * @return myClass when it's confirmed that myClass implements myInterface
+     * @throws InstantiationException when the check class implements interface fails
+     * @throws InputMismatchException when class is not a class and interface is not an interface
+     */
+    private Class<?> checkClassTypes(Class<?> myClass, Class<?> myInterface) throws InstantiationException, InputMismatchException {
+        if (myClass.isInterface()) {
+            throw new InputMismatchException(myClass.getSimpleName() + " is a " + myClass.getTypeName() + ". Expected a class.");
+        }
+        if (!myInterface.isInterface()) {
+            throw new InputMismatchException(myInterface.getSimpleName() + " is a " + myInterface.getTypeName() + ". Expected an interface.");
+        }
+
+        if (myInterface.isAssignableFrom(myClass)) {
+            return myClass;
+        }
+        throw new InstantiationException("Class '" + myClass.getSimpleName() + "' doesn't implement interface '" + myInterface.getSimpleName() + "'.");
+    }
+
+    /**
      * Ensures that the path is the correct format.
      * For example, src/main/java/ 'my_package.my_other_package.class_name' is the path with the quoted part the full path used.
      *
-     * @param className the package source string delimited with periods
-     * @return the new source string
-     * @throws InvalidFormatException when the path to the class isn't specified like above
+     * @param fullClassPath the package source string delimited with periods plus the class name
+     * @return true if the format is correct, otherwise false.
      */
-    private String checkFormat(String className) throws InvalidFormatException {
-        String pathToClass = classSource + className;
-        String regex = "([[A-Za-z0-9_-]]+\\.?)+";
-        if (pathToClass.matches(regex)) {
-            return pathToClass;
-        } else {
-            throw new InvalidFormatException();
-        }
-    }
-
-    public String getClassSource() {
-        return classSource;
-    }
-
-    public void setClassSource(String classSource) {
-        this.classSource = classSource;
+    private boolean checkFormat(String fullClassPath) {
+        return fullClassPath.matches("([A-Za-z0-9_-]+\\.?)+");
     }
 }

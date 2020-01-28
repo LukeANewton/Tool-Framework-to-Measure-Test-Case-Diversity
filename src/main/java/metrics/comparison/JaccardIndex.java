@@ -1,8 +1,8 @@
 package metrics.comparison;
 
-import java.util.HashSet;
-
 import data_representation.DataRepresentation;
+
+import java.util.HashSet;
 
 /**
  * A pairwise comparison metric which provides a ratio of the size of the intersection of sets of 
@@ -26,7 +26,6 @@ public class JaccardIndex implements PairwiseComparisonStrategy {
 			throw new TestCaseFormatMismatchException();
 
 		HashSet<String> set1 = new HashSet<>();
-		HashSet<String> set2 = new HashSet<>();
 		HashSet<String> union = new HashSet<>();
 		HashSet<String> intersection = new HashSet<>();
 		
@@ -38,7 +37,6 @@ public class JaccardIndex implements PairwiseComparisonStrategy {
 			
 		while(testCase2.hasNext()) {
 			String s = testCase2.next();
-			set2.add(s);
 			union.add(s);
 			if(set1.contains(s))
 				intersection.add(s);
