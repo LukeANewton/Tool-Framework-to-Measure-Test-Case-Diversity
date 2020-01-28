@@ -7,6 +7,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * ListwiseCommands will contain the information needed to compare a test suite with a listwise metric
@@ -14,7 +15,7 @@ import java.util.List;
  * @author luke
  *
  */
-public class ListwiseCommand implements Command{
+public class ListwiseCommand implements Callable<Object> {
     private ListwiseComparisonStrategy comparison;
     private List<DataRepresentation> testsuite;
     private PropertyChangeSupport support;

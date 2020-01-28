@@ -6,6 +6,7 @@ import metrics.comparison.PairwiseComparisonStrategy;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.concurrent.Callable;
 
 /**
  * PairwiseCommands will contain the information needed to compare two tests
@@ -13,7 +14,7 @@ import java.beans.PropertyChangeSupport;
  * @author Eric
  *
  */
-public class PairwiseCommand implements Command{
+public class PairwiseCommand implements Callable<Object> {
 	private PairwiseComparisonStrategy comparison;
 	private DataRepresentation Data1, Data2;
 	private PropertyChangeSupport support;

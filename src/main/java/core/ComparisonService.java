@@ -4,7 +4,6 @@ import data_representation.DataRepresentation;
 import metrics.aggregation.AggregationStrategy;
 import metrics.comparison.PairwiseComparisonStrategy;
 import metrics.listwise.ListwiseComparisonStrategy;
-import model.Command;
 import model.ListwiseCommand;
 import model.PairwiseCommand;
 import utilities.Tuple;
@@ -48,7 +47,7 @@ public class ComparisonService {
 	public String compareTestCase(List<Tuple<DataRepresentation, DataRepresentation>> testCasePairs,
 								  PairwiseComparisonStrategy strategy, AggregationStrategy aggregation,
 								  PropertyChangeListener pcl) throws ExecutionException, InterruptedException {
-		List<Command> tasks = new ArrayList<>();
+		List<Callable<Object>> tasks = new ArrayList<>();
 		for (Tuple testCasePair : testCasePairs) {
 			tasks.add(new PairwiseCommand(strategy, (DataRepresentation)testCasePair.getLeft(),
 					(DataRepresentation)testCasePair.getRight(), pcl));
@@ -65,7 +64,7 @@ public class ComparisonService {
 	 * 	 *                    	comparisons
 	 * @return a double representing the diversity of the testsuite comparisons
 	 */
-	private String compareWithThreadPool(List<Command> tasks, AggregationStrategy aggregation,
+	private String compareWithThreadPool(List<Callable<Object>> tasks, AggregationStrategy aggregation,
 										 PropertyChangeListener pcl) throws ExecutionException, InterruptedException {
 		if (pcl != null)
 			support.addPropertyChangeListener(pcl);
@@ -94,7 +93,7 @@ public class ComparisonService {
 	public String compareTestCase(List<List<DataRepresentation>> testsuites,
 								  ListwiseComparisonStrategy strategy, AggregationStrategy aggregation,
 								  PropertyChangeListener pcl) throws ExecutionException, InterruptedException {
-		List<Command> tasks = new ArrayList<>();
+		List<Callable<Object>> tasks = new ArrayList<>();
 		for(List<DataRepresentation> testsuite: testsuites)
 			tasks.add(new ListwiseCommand(strategy, testsuite, pcl));
 		return compareWithThreadPool(tasks, aggregation, pcl);
