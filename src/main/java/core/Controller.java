@@ -51,7 +51,6 @@ public class Controller {
         inputParser = new InputParser();
         reflectionService = new ReflectionService();
         fileWriterService = new FileWriterService();
-        pairingService = new PairingService();
 
         //read config file
         config = fileReaderService.readConfig(CONFIG_FILE);
@@ -60,16 +59,10 @@ public class Controller {
     }
 
     public static Controller getController(){
-        File file = new File(CONFIG_FILE);
         String errorMsg = "Failed to read from configuration file: " + CONFIG_FILE + ". Ensure the file exists in the same directory as this program.";
-        if(file.exists()) {
-            try {
-                return new Controller();
-            } catch (Exception e) {
-                System.out.println(errorMsg);
-                return null;
-            }
-        }else {//the config file does not exist
+        try {
+            return new Controller();
+        } catch (Exception e) {// the configuration file does not exist
             //this determines if we are executing within the jar file or not
             if(Controller.class.getResource("Controller.class").toString().startsWith("jar")) {
                 try{//try to create a jar in the proper spot from the default inside the jar
@@ -79,7 +72,7 @@ public class Controller {
                     in.read(buffer);
 
                     //write the file to outside the jar
-                    OutputStream outStream = new FileOutputStream(file);
+                    OutputStream outStream = new FileOutputStream(new File(CONFIG_FILE));
                     outStream.write(buffer);
                     outStream.close();
 
@@ -136,27 +129,17 @@ public class Controller {
      * @return an instance of the DataRepresentation specified in the dto
      */
     private DataRepresentation loadDataRepresentation(CompareDTO dto){
-        String dataRepresentationName = dto.getDataRepresentation();
+        String name = dto.getDataRepresentation();
 
-        if (dataRepresentationName == null)//nothing specified in dto, so load default from config file
-            dataRepresentationName = config.getDataRepresentation();
+        if (name == null)//nothing specified in dto, so load default from config file
+            name = config.getDataRepresentation();
 
         //set the package to look in
-        String packageName = config.getGetDataRepresentationLocation();
-        if (!packageName.endsWith("."))
-            packageName = packageName + ".";
+        String packageName = config.getDataRepresentationLocation();
 
         //try to load the class
-        try {
-            return (DataRepresentation) reflectionService.loadClass(packageName + dataRepresentationName, DATA_REP_INTERFACE_PATH);
-        } catch (ClassNotFoundException | InvalidFormatException e) {
-            console.displayResults("no data representation named " + dto.getDataRepresentation() + " found");
-        }catch (ClassCastException e){
-            console.displayResults(dto.getDataRepresentation() + " does not implement the data representation interface");
-        } catch (Exception e) {
-            console.displayResults("failed to instantiate data representation: " + dto.getDataRepresentation() + ": " + e.getMessage());
-        }
-        return null;
+        return (DataRepresentation) loadRequiredImplementation(name, packageName,
+                DATA_REP_INTERFACE_PATH, "data representation");
     }
 
     /**
@@ -173,20 +156,10 @@ public class Controller {
 
         //set the package to look in
         String packageName = config.getComparisonMethodLocation();
-        if (!packageName.endsWith("."))
-            packageName = packageName + ".";
 
         //try to load the class
-        try {
-            return (PairwiseComparisonStrategy) reflectionService.loadClass(packageName + name, PAIRWISE_COMPARISON_INTERFACE_PATH);
-        } catch (ClassNotFoundException | InvalidFormatException e) {
-            console.displayResults("no pairwise metric named " + dto.getPairwiseMethod() + " found");
-        }catch (ClassCastException e){
-            console.displayResults(dto.getPairwiseMethod() + " does not implement the pairwise metric interface");
-        } catch (Exception e) {
-            console.displayResults("failed to instantiate pairwise metric: " + dto.getPairwiseMethod() + ": " + e.getMessage());
-        }
-        return null;
+        return (PairwiseComparisonStrategy) loadRequiredImplementation(name, packageName,
+                PAIRWISE_COMPARISON_INTERFACE_PATH, "pairwise metric");
     }
 
     /**
@@ -203,18 +176,24 @@ public class Controller {
 
         //set the package to look in
         String packageName = config.getAggregationMethodLocation();
+
+        //try to load the class
+        return (AggregationStrategy) loadRequiredImplementation(name, packageName,
+                AGGREGATION_INTERFACE_PATH, "aggregation method");
+    }
+
+    private Object loadRequiredImplementation(String name, String packageName, String interfacePath, String interfaceType){
         if (!packageName.endsWith("."))
             packageName = packageName + ".";
 
-        //try to load the class
         try {
-            return (AggregationStrategy) reflectionService.loadClass(packageName + name, AGGREGATION_INTERFACE_PATH);
+            return reflectionService.loadClass(packageName + name, interfacePath);
         } catch (ClassNotFoundException | InvalidFormatException e) {
-            console.displayResults("no aggregation method named " + dto.getAggregationMethod() + " found");
+            console.displayResults("no " + interfaceType + " named " + name + " in " +  packageName + " found");
         }catch (ClassCastException e){
-            console.displayResults(dto.getAggregationMethod() + " does not implement the aggregation method interface");
+            console.displayResults(name + " does not implement the " + interfaceType + " interface");
         } catch (Exception e) {
-            console.displayResults("failed to instantiate aggregation method: " + dto.getAggregationMethod() + ": " + e.getMessage());
+            console.displayResults("failed to instantiate " + interfaceType + ": " + name + ": " + e.getMessage());
         }
         return null;
     }
@@ -267,20 +246,27 @@ public class Controller {
         }
 
         //generate the pairs for comparison
-        List<Tuple<DataRepresentation, DataRepresentation>> pairs = null;
+        pairingService = new PairingService();
+        List<Tuple<DataRepresentation, DataRepresentation>> pairs;
         if(testSuite2 == null)
             pairs = pairingService.makePairs(testSuite1);
         else
             pairs = pairingService.makePairs(testSuite1, testSuite2);
+        if(pairs.size() == 0){//no pairs could be made from the passed test suites
+            console.displayResults("Test suite contains insufficient test cases to generate pairs");
+            return;
+        }
 
         //now perform the actual comparison
         if(dto.getNumberOfThreads() != null)//only update thread count if command specifies it
             comparisonService = new ComparisonService(dto.getNumberOfThreads());
-        String result = null;
+        else
+            comparisonService = new ComparisonService(config.getNumThreads());
+        String result;
         try {
             result = comparisonService.compareTestCase(pairs, comparisonStrategy, aggregationStrategy, console);
         } catch (Exception e) {
-            console.displayResults("Error in pairwise comparison calculation: " + e.getMessage());
+            console.displayResults("Error in pairwise comparison calculation: " + e.toString());
             return;
         }
 
@@ -309,7 +295,7 @@ public class Controller {
         }
 
         //output results to console
-        console.displayResults("result:\n\n" + result);
+        console.displayResults("Result:\n\n" + result);
     }
 
     /**
@@ -325,7 +311,7 @@ public class Controller {
         try {
             return fileReaderService.readIntoDataRepresentation(filename, delimiter, format);
         } catch (InvalidFormatException e) {
-            console.displayResults("one or more test cases do not match the specified data representation: " + format.getClass().getName());
+            console.displayResults("one or more test cases in " + filename + " do not match the specified data representation: " + format.getClass().getName());
         } catch (FileNotFoundException e) {
             console.displayResults("file: " + filename + " could not be found");
         } catch (Exception e) {
@@ -417,7 +403,7 @@ public class Controller {
                 interfacePath = AGGREGATION_INTERFACE_PATH;
                 break;
             case DataRepresentation:
-                packageName = config.getGetDataRepresentationLocation();
+                packageName = config.getDataRepresentationLocation();
                 interfacePath = DATA_REP_INTERFACE_PATH;
                 break;
         }
@@ -453,5 +439,4 @@ public class Controller {
             console.displayResults("failed to retrieve object descriptions: " + e.toString());
         }
     }
-
 }

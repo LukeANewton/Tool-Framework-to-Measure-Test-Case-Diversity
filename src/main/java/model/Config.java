@@ -46,11 +46,11 @@ public class Config {
         this.dataRepresentation = dataRepresentation;
     }
 
-    public String getGetDataRepresentationLocation() {
+    public String getDataRepresentationLocation() {
         return dataRepresentationLocation;
     }
 
-    public void setGetDataRepresentationLocation(String getDataRepresentationLocation) {
+    public void setDataRepresentationLocation(String getDataRepresentationLocation) {
         this.dataRepresentationLocation = getDataRepresentationLocation;
     }
 
