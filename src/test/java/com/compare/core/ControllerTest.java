@@ -1,10 +1,14 @@
 package com.compare.core;
 
 import com.compare.model.Config;
+import com.compare.user_interface.Console;
+import com.compare.user_interface.InputParser;
+import com.compare.user_interface.InvalidCommandException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -14,21 +18,30 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
 public class ControllerTest {
     // Dont mock the controller because this is what we want to use.
     private Controller c;
     private ByteArrayOutputStream outContent;
     private PrintStream originalOut;
     private Config originalConfigFile;
-    @MockBean //TODO: Mock these with mockito instead because we dont wanna spin up spring's app context (takes too long)
+    @Mock
     private FileReaderService reader;
-    @MockBean
+    @Mock
     private FileWriterService writer;
-    @MockBean
+    @Mock
     private Config config;
-    @MockBean
+    @Mock
+    private Console console;
+    @Mock
+    private InputParser parser;
+    @Mock
+    private PairingService pairingService;
+    @Mock
+    private ComparisonService comparisonService;
+
+
     private final String configName = "config.json";
     private final String commandHelpString = "\tcompare <filename> [<filename>] <data-representation>\n" +
                 "\t\tperforms a diversity calculation within a test suite, or between test suites at the specified filename(s)\n"+
@@ -49,8 +62,8 @@ public class ControllerTest {
     }
 
     @Before
-    public void setUp() throws IOException {
-        c = new Controller();
+    public void setUp() {
+        c = new Controller(console, parser, writer, reader, pairingService, comparisonService, config);
         outContent = new ByteArrayOutputStream();
         originalOut = System.out;
         System.setOut(new PrintStream(outContent));
@@ -63,30 +76,16 @@ public class ControllerTest {
     @After
     public void tearDown() throws IOException {
         System.setOut(originalOut);
-        writer.writeConfig(configName, originalConfigFile);
-    }
-
-    @Test
-    /*Test for the creation of a controller when no config file is present*/
-    public void testControllerCreationWithoutConfigFile() throws IOException {
-        //remove config file
-        File file = new File(configName);
-        assertTrue(file.delete());
-
-        //test the creation of a controller without a config file
-        assertNull(c);
-        String expected = "Failed to read from configuration file: config.json. Ensure the file exists in the same directory as this program.\r\n";
-        assertEquals(expected, outContent.toString());
-
-        //restore config file
-        writer.writeConfig(configName, config);
+//        writer.writeConfig(configName, originalConfigFile);
     }
 
     @Test
     /*Test for the error handling of invalid command types*/
-    public void testProcessInvalidCommand() {
+    public void testProcessInvalidCommand() throws InvalidCommandException {
+        String command = "banana apple orange";
         String expected = "The keyword 'banana' is not recognized. Valid commands are:\r\n" + commandHelpString;
-        compareAgainstString("banana apple orange", expected);
+        when(parser.parse(command)).thenThrow(InvalidCommandException.class);
+        compareAgainstString(command, expected);
     }
 
     @Test

@@ -54,7 +54,7 @@ public class Controller {
 
     /**Constructor*/
     @Autowired
-    private Controller(Console console, InputParser parser, FileWriterService writer, FileReaderService reader,
+    public Controller(Console console, InputParser parser, FileWriterService writer, FileReaderService reader,
                        PairingService pairingService, ComparisonService comparisonService, Config configuration) {
         this.fileReaderService = reader;
         this.console = console;
