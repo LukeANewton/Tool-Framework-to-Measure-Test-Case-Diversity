@@ -20,20 +20,20 @@ public class ControllerHelpTest {
     private FileWriterService writer;
     private Config config;
     private final String configName = "config.json";
-    private final String commandHelpString = "\tcompare <filename> [<filename>] <data-representation>\n" +
-            "\t\tperforms a diversity calculation within a test suite, or between test suites at the specified filename(s)\n"+
-            "\t\t\t-m <metric>: set the diversity metric to use in the calculation. Available metrics can be found with 'help -m'\n"+
-            "\t\t\t-a <method>: set the method to use for aggregating results. Available methods can be found with 'help -a'\n"+
-            "\t\t\t-d <delimiter>: set the delimiter that separates test cases within the passed test suite file(s). This can be a character, string, or regular expression\n"+
-            "\t\t\t-s <filename>: denote that the results of the operation should be saved to a file named <filename>\n"+
-            "\t\t\t-t [<integer>]: denote that the operation should use a thread pool for concurrency, and optionally specify the number of threads\n"+
-            "\tconfig <parameter> <value>\n"+
-            "\t\tsets the value of a parameter read from the configuration file\n"+
-            "\thelp\n"+
-            "\t\tlists information on the requested topic\n"+
-            "\t\t\t-m: lists the available comparison metrics in the system\n"+
-            "\t\t\t-a: lists the available aggregation methods in the system\n"+
-            "\t\t\t-f: lists the available data representations in the system\n\r\n";
+    private final String commandHelpString = "\tcompare <filename> [<filename>] <data-representation>" + System.lineSeparator() +
+            "\t\tperforms a diversity calculation within a test suite, or between test suites at the specified filename(s)" + System.lineSeparator() +
+            "\t\t\t-m <metric>: set the diversity metric to use in the calculation. Available metrics can be found with 'help -m'" + System.lineSeparator() +
+            "\t\t\t-a <method>: set the method to use for aggregating results. Available methods can be found with 'help -a'" + System.lineSeparator() +
+            "\t\t\t-d <delimiter>: set the delimiter that separates test cases within the passed test suite file(s). This can be a character, string, or regular expression" + System.lineSeparator() +
+            "\t\t\t-s <filename>: denote that the results of the operation should be saved to a file named <filename>" + System.lineSeparator() +
+            "\t\t\t-t [<integer>]: denote that the operation should use a thread pool for concurrency, and optionally specify the number of threads" + System.lineSeparator() +
+            "\tconfig <parameter> <value>" + System.lineSeparator() +
+            "\t\tsets the value of a parameter read from the configuration file" + System.lineSeparator() +
+            "\thelp" + System.lineSeparator() +
+            "\t\tlists information on the requested topic" + System.lineSeparator() +
+            "\t\t\t-m: lists the available comparison metrics in the system" + System.lineSeparator() +
+            "\t\t\t-a: lists the available aggregation methods in the system" + System.lineSeparator() +
+            "\t\t\t-f: lists the available data representations in the system" + System.lineSeparator() + System.lineSeparator();
 
     @Before
     public void setUp() throws IOException {
@@ -56,6 +56,14 @@ public class ControllerHelpTest {
     }
 
     @Test
+    /*Test for the error handling of invalid command types*/
+    public void testProcessInvalidCommand() {
+        String expected = "The keyword 'banana' is not recognized. Valid commands are:\r\n" + commandHelpString;
+        c.processCommand("banana apple orange");
+        assertEquals(expected, outContent.toString());
+    }
+
+    @Test
     /*Test for processing command help*/
     public void testProcessCommandHelp() {
         compareAgainstString("help", commandHelpString);
@@ -64,36 +72,36 @@ public class ControllerHelpTest {
     @Test
     /*test for parsing aggregation method help*/
     public void testAggregationHelp() {
-        String expected = "Available AggregationMethods are:\n" +
-                "\tAverageValue:\n" +
-                "\t\tChooses the average similarity value to represent the overall similarity of the test cases compared.\n" +
-                "\tMinimumValue:\n" +
-                "\t\tChooses the lowest similarity value to represent the overall similarity of the test cases compared.\n" +
-                "\r\n";
+        String expected = "Available AggregationMethods are:" + System.lineSeparator() +
+                "\tAverageValue:" + System.lineSeparator() +
+                "\t\tChooses the average similarity value to represent the overall similarity of the test cases compared." + System.lineSeparator() +
+                "\tMinimumValue:" + System.lineSeparator() +
+                "\t\tChooses the lowest similarity value to represent the overall similarity of the test cases compared." + System.lineSeparator() +
+                System.lineSeparator();
         compareAgainstString("help -a", expected);
     }
 
     @Test
     /*test for parsing comparison metric help*/
     public void testPairwiseHelp() {
-        String expected = "Available PairwiseMetrics are:\n" +
-                "\tCommonElements:\n" +
-                "\t\tno description available\n" +
-                "\tJaccardIndex:\n" +
-                "\t\tno description available\n" +
-                "\tLevenshtein:\n" +
-                "\t\tCalculates the minimum number of insertion/deletion/modification operations to transform one test case into another\n" +
-                "\r\n";
+        String expected = "Available PairwiseMetrics are:" + System.lineSeparator() +
+                "\tCommonElements:" + System.lineSeparator() +
+                "\t\tno description available" + System.lineSeparator() +
+                "\tJaccardIndex:" + System.lineSeparator() +
+                "\t\tno description available" + System.lineSeparator() +
+                "\tLevenshtein:" + System.lineSeparator() +
+                "\t\tCalculates the minimum number of insertion/deletion/modification operations to transform one test case into another" + System.lineSeparator() +
+                System.lineSeparator();
         compareAgainstString("help -m", expected);
     }
 
     @Test
     /*test for parsing data representation help*/
     public void testDataRepresentationHelp() {
-        String expected = "Available DataRepresentations are:\n" +
-                "\tCSV:\n" +
-                "\t\tcomma separated value\n" +
-                "\r\n";
+        String expected = "Available DataRepresentations are:" + System.lineSeparator() +
+                "\tCSV:" + System.lineSeparator() +
+                "\t\tcomma separated value" + System.lineSeparator() +
+                System.lineSeparator();
         compareAgainstString("help -f", expected);
     }
 
@@ -119,8 +127,8 @@ public class ControllerHelpTest {
         config.setComparisonMethodLocation(fakeDirectory);
         writer.writeConfig(configName, config);
 
-        String expected = "Available PairwiseMetrics are:\n" +
-                "\tNone available at specified directory: " + fakeDirectory + "\r\n";
+        String expected = "Available PairwiseMetrics are:" + System.lineSeparator() +
+                "\tNone available at specified directory: " + fakeDirectory + System.lineSeparator();
         c = Controller.getController(); // need to get a new controller so it updates its internal config file
         compareAgainstString("help -m", expected);
     }

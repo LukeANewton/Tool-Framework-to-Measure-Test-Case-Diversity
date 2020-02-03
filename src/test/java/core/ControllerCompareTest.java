@@ -12,6 +12,7 @@ import static org.junit.Assert.*;
 public class ControllerCompareTest {
     private Controller c;
     private ByteArrayOutputStream outContent;
+    private InputStream originalIn;
     private PrintStream originalOut;
     private Config originalConfigFile;
     private FileReaderService reader;
@@ -19,20 +20,6 @@ public class ControllerCompareTest {
     private Config config;
     private final double TOLERANCE = 0.001;
     private final String CONFIG_NAME = "config.json";
-    private final String COMMAND_HELP_STRING = "\tcompare <filename> [<filename>] <data-representation>\n" +
-                "\t\tperforms a diversity calculation within a test suite, or between test suites at the specified filename(s)\n"+
-                "\t\t\t-m <metric>: set the diversity metric to use in the calculation. Available metrics can be found with 'help -m'\n"+
-                "\t\t\t-a <method>: set the method to use for aggregating results. Available methods can be found with 'help -a'\n"+
-                "\t\t\t-d <delimiter>: set the delimiter that separates test cases within the passed test suite file(s). This can be a character, string, or regular expression\n"+
-                "\t\t\t-s <filename>: denote that the results of the operation should be saved to a file named <filename>\n"+
-                "\t\t\t-t [<integer>]: denote that the operation should use a thread pool for concurrency, and optionally specify the number of threads\n"+
-                "\tconfig <parameter> <value>\n"+
-                "\t\tsets the value of a parameter read from the configuration file\n"+
-                "\thelp\n"+
-                "\t\tlists information on the requested topic\n"+
-                "\t\t\t-m: lists the available comparison metrics in the system\n"+
-                "\t\t\t-a: lists the available aggregation methods in the system\n"+
-                "\t\t\t-f: lists the available data representations in the system\n\r\n";
     private final String singlePairTestSuiteName = "single-pair-suite";
     private final String singleCaseTestSuiteName = "single-test-case";
     private final String sampleTestSuiteA = "sample-suite-A";
@@ -44,6 +31,8 @@ public class ControllerCompareTest {
         outContent = new ByteArrayOutputStream();
         originalOut = System.out;
         System.setOut(new PrintStream(outContent));
+        originalIn = System.in;
+
 
         //store the config file for to later restore
         reader = new FileReaderService();
@@ -72,16 +61,9 @@ public class ControllerCompareTest {
     @After
     public void tearDown() throws IOException {
         System.setOut(originalOut);
+        System.setIn(originalIn);
         writer.writeConfig(CONFIG_NAME, originalConfigFile);
         deleteFiles(singlePairTestSuiteName, singleCaseTestSuiteName, sampleTestSuiteA, sampleTestSuiteB);
-    }
-
-    @Test
-    /*Test for the error handling of invalid command types*/
-    public void testProcessInvalidCommand() {
-        String expected = "The keyword 'banana' is not recognized. Valid commands are:\r\n" + COMMAND_HELP_STRING;
-        c.processCommand("banana apple orange");
-        assertEquals(expected, outContent.toString());
     }
 
     @Test
@@ -99,10 +81,10 @@ public class ControllerCompareTest {
      */
     private String readFile(String filename) throws IOException {
         BufferedReader r = new BufferedReader(new FileReader(filename));
-        String line;
+        int character;
         StringBuilder fileContent = new StringBuilder();
-        while((line = r.readLine()) != null)
-            fileContent.append(line);
+        while((character = r.read()) != -1)
+            fileContent.append((char) character);
         r.close();
         return fileContent.toString();
     }
@@ -161,7 +143,17 @@ public class ControllerCompareTest {
      * @return the result formated to match console display
      */
     private String buildSinglePairConsoleOutput(String result){
-        return "[==========]\r\nResult:\n\n" + result + "\r\n";
+        return "[==========]"+System.lineSeparator()+"Result:" + System.lineSeparator() +
+                System.lineSeparator() + result + System.lineSeparator();
+    }
+
+    /**
+     * helper method to simulate input from the user for a test
+     *
+     * @param input the inpt to simulate doming from the user
+     */
+    private void provideInput(String input) {
+        System.setIn(new ByteArrayInputStream(input.getBytes()));
     }
 
     @Test
@@ -221,7 +213,7 @@ public class ControllerCompareTest {
         doComparison(inputName1, null, "CommonElements", "AverageValue",
                 delimiter, outputName1, null);
 
-        delimiter = "\r\n";
+        delimiter = System.lineSeparator();
         contents = "1,2,3,4,5,6" + delimiter + "1,2,3,5,4,6";
         writeFile(inputName2, contents);
         doComparison(inputName2, null, "CommonElements", "MinimumValue",
@@ -243,7 +235,7 @@ public class ControllerCompareTest {
         config.setComparisonMethodLocation("metrics.comparison");
         config.setAggregationMethod("AverageValue");
         config.setAggregationMethodLocation("metrics.aggregation");
-        config.setDelimiter("\r\n");
+        config.setDelimiter(System.lineSeparator());
         writer.writeConfig(CONFIG_NAME, config);
 
         c = Controller.getController(); //getting a new controller is required because the config file is read in during creation
@@ -259,7 +251,8 @@ public class ControllerCompareTest {
     public void testCompareInvalidMetric() {
         doComparison(singlePairTestSuiteName, null, "banana", null,
                 null, null, null);
-        assertEquals("no pairwise metric named banana in metrics.comparison. found\r\n", outContent.toString());
+        assertEquals("no pairwise metric named banana in metrics.comparison. found" +
+                System.lineSeparator(), outContent.toString());
     }
 
     @Test
@@ -267,14 +260,16 @@ public class ControllerCompareTest {
     public void testCompareInvalidAggregation() {
         doComparison(singlePairTestSuiteName, null, null, "apple",
                 null, null, null);
-        assertEquals("no aggregation method named apple in metrics.aggregation. found\r\n", outContent.toString());
+        assertEquals("no aggregation method named apple in metrics.aggregation. found" +
+                System.lineSeparator(), outContent.toString());
     }
 
     @Test
     /*test for the compare command with an invalid data representation name*/
     public void testCompareInvalidDataRepresentation() {
         c.processCommand("compare " + singlePairTestSuiteName + " banana");
-        assertEquals("no data representation named banana in data_representation. found\r\n", outContent.toString());
+        assertEquals("no data representation named banana in data_representation. found"
+                + System.lineSeparator(), outContent.toString());
     }
 
     @Test
@@ -282,7 +277,8 @@ public class ControllerCompareTest {
     public void testCompareNonExistentTestSuite() {
         String filename = "not-a-file";
         c.processCommand("compare " + filename + " CSV");
-        assertEquals("file: " + filename + " could not be found\r\n", outContent.toString());
+        assertEquals("file: " + filename + " could not be found" +
+                System.lineSeparator(), outContent.toString());
     }
 
     @Test
@@ -294,7 +290,9 @@ public class ControllerCompareTest {
         exception if the the CSV contains newlines*/
         doComparison(singlePairTestSuiteName, null, null, null,
                 "-1", null, null);
-        assertEquals("one or more test cases in " + singlePairTestSuiteName + " do not match the specified data representation: data_representation.CSV\r\n", outContent.toString());
+        assertEquals("one or more test cases in " + singlePairTestSuiteName +
+                " do not match the specified data representation: data_representation.CSV" +
+                System.lineSeparator(), outContent.toString());
     }
 
     @Test
@@ -303,7 +301,8 @@ public class ControllerCompareTest {
         doComparison(singlePairTestSuiteName, null, "PairwiseComparisonStrategy", null,
                 null, null, null);
         assertEquals("failed to instantiate pairwise metric: PairwiseComparisonStrategy: PairwiseComparisonStrategy " +
-                "is a metrics.comparison.PairwiseComparisonStrategy. Expected a class.\r\n", outContent.toString());
+                "is a metrics.comparison.PairwiseComparisonStrategy. Expected a class." +
+                System.lineSeparator(), outContent.toString());
     }
 
     @Test
@@ -313,7 +312,8 @@ public class ControllerCompareTest {
         new File(emptyTestSuiteName).createNewFile();
         doComparison(emptyTestSuiteName, null, null, null,
                 null, null, null);
-        assertEquals("operation failed because " + emptyTestSuiteName + " does not contain any test cases\r\n", outContent.toString());
+        assertEquals("operation failed because " + emptyTestSuiteName +
+                " does not contain any test cases"+System.lineSeparator(), outContent.toString());
         deleteFiles(emptyTestSuiteName);
     }
 
@@ -327,7 +327,9 @@ public class ControllerCompareTest {
 
         doComparison(testSuiteName, singlePairTestSuiteName, null, null,
                 "-1", null, null);
-        assertEquals("one or more test cases in " + singlePairTestSuiteName + " do not match the specified data representation: data_representation.CSV\r\n", outContent.toString());
+        assertEquals("one or more test cases in " + singlePairTestSuiteName +
+                " do not match the specified data representation: data_representation.CSV"+System.lineSeparator(),
+                outContent.toString());
     deleteFiles(testSuiteName);
     }
 
@@ -338,7 +340,8 @@ public class ControllerCompareTest {
         new File(emptyTestSuiteName).createNewFile();
         doComparison(singlePairTestSuiteName, emptyTestSuiteName, null, null,
                 null, null, null);
-        assertEquals("operation failed because " + emptyTestSuiteName + " does not contain any test cases\r\n", outContent.toString());
+        assertEquals("operation failed because " + emptyTestSuiteName + " does not contain any test cases"
+                        +System.lineSeparator(), outContent.toString());
         deleteFiles(emptyTestSuiteName);
     }
 
@@ -381,5 +384,48 @@ public class ControllerCompareTest {
         assertEquals(6.1, Double.parseDouble(readFile(output1)), TOLERANCE);
 
         deleteFiles(output1, output2, output3);
+    }
+
+    @Test
+    /*test for the compare command that checks results can be correctly appended to a file*/
+    public void testCompareFileExistsAppend() throws IOException {
+        String filename = "out";
+        prepareFileExistsIssue(filename, "a");
+        assertEquals("6.1"+System.lineSeparator()+"6.1" ,readFile(filename));
+        deleteFiles(filename);
+    }
+
+    @Test
+    /*test for the compare command that checks results can correctly overwrite a file*/
+    public void testCompareFileExistsOverwrite() throws IOException {
+        String filename = "out";
+        prepareFileExistsIssue(filename, "y");
+        assertEquals("6.1" ,readFile(filename));
+        deleteFiles(filename);
+    }
+
+    @Test
+    /*test for the compare command that checks results can cancel a write if needed*/
+    public void testCompareFileExistsCancelOverwrite() throws IOException {
+        String filename = "out";
+        prepareFileExistsIssue(filename, "n");
+        assertEquals("6.1" ,readFile(filename));
+        assertTrue(outContent.toString().contains("file writing cancelled since file already exists"));
+        deleteFiles(filename);
+    }
+
+    /**
+     * helper method for tests that check an overwrite option
+     *
+     * @param filename the name of the file to cause an overwrite issue on requiring user input
+     * @param choice the user input choice for dealing with the issue
+     */
+    private void prepareFileExistsIssue(String filename, String choice) {
+        doComparison(sampleTestSuiteA, null, "CommonElements", null, null,
+                filename, null);
+        provideInput(choice);
+        c = Controller.getController();
+        doComparison(sampleTestSuiteA, null, "CommonElements", null, null,
+                filename, null);
     }
 }

@@ -112,22 +112,12 @@ public class FileWriterServiceTest {
 
     @Test
     /**test the write function for appending to a file that does not exist*/
-    public void testWriteAppendNotExist(){
-        try {// write the file
-            fileWriterService.write(FILENAME, FILE_CONTENTS, false, true);
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail();
-        }
+    public void testWriteAppendNotExist() throws IOException {
+        fileWriterService.write(FILENAME, FILE_CONTENTS, false, true);
 
         //read back in to test
         assertTrue(file.exists());
-        try {
-            assertEquals(FILE_CONTENTS, readFile(FILENAME));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            fail();
-        }
+        assertEquals(System.lineSeparator() + FILE_CONTENTS, readFile(FILENAME));
     }
 
     @Test
@@ -197,6 +187,7 @@ public class FileWriterServiceTest {
      * This operates the same as overwrite, since if we overwrite, there is nothing to append to*/
     public void testWriteOverwriteAppend(){
         try {// write the file
+            fileWriterService.write(FILENAME, FILE_CONTENTS, false, false);
             fileWriterService.write(FILENAME, FILE_CONTENTS, true, true);
         } catch (IOException e) {
             e.printStackTrace();
@@ -206,7 +197,8 @@ public class FileWriterServiceTest {
         //read back in to test
         assertTrue(file.exists());
         try {
-            assertEquals(FILE_CONTENTS, readFile(FILENAME));
+            assertEquals(FILE_CONTENTS + System.lineSeparator() + FILE_CONTENTS,
+                    readFile(FILENAME));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             fail();

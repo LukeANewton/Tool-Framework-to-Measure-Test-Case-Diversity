@@ -284,7 +284,7 @@ public class Controller {
                         case No:
                             console.displayResults("file writing cancelled since file already exists");
                             break;
-                        case Append:
+                        case Append: //write the results out on a new line
                             fileWriterService.write(filename, result, false, true);
                     }
                 } else
@@ -295,7 +295,7 @@ public class Controller {
         }
 
         //output results to console
-        console.displayResults("Result:\n\n" + result);
+        console.displayResults("Result:" + System.lineSeparator() + System.lineSeparator() + result);
     }
 
     /**
@@ -378,20 +378,20 @@ public class Controller {
         //determine which type of help is needed, each works the same way except for Command help
         switch(helpType){
             case Command:
-                result.append("\tcompare <filename> [<filename>] <data-representation>\n");
-                result.append("\t\tperforms a diversity calculation within a test suite, or between test suites at the specified filename(s)\n");
-                result.append("\t\t\t-m <metric>: set the diversity metric to use in the calculation. Available metrics can be found with 'help -m'\n");
-                result.append("\t\t\t-a <method>: set the method to use for aggregating results. Available methods can be found with 'help -a'\n");
-                result.append("\t\t\t-d <delimiter>: set the delimiter that separates test cases within the passed test suite file(s). This can be a character, string, or regular expression\n");
-                result.append("\t\t\t-s <filename>: denote that the results of the operation should be saved to a file named <filename>\n");
-                result.append("\t\t\t-t [<integer>]: denote that the operation should use a thread pool for concurrency, and optionally specify the number of threads\n");
-                result.append("\tconfig <parameter> <value>\n");
-                result.append("\t\tsets the value of a parameter read from the configuration file\n");
-                result.append("\thelp\n");
-                result.append("\t\tlists information on the requested topic\n");
-                result.append("\t\t\t-m: lists the available comparison metrics in the system\n");
-                result.append("\t\t\t-a: lists the available aggregation methods in the system\n");
-                result.append("\t\t\t-f: lists the available data representations in the system\n");
+                result.append("\tcompare <filename> [<filename>] <data-representation>").append(System.lineSeparator());
+                result.append("\t\tperforms a diversity calculation within a test suite, or between test suites at the specified filename(s)").append(System.lineSeparator());
+                result.append("\t\t\t-m <metric>: set the diversity metric to use in the calculation. Available metrics can be found with 'help -m'").append(System.lineSeparator());
+                result.append("\t\t\t-a <method>: set the method to use for aggregating results. Available methods can be found with 'help -a'").append(System.lineSeparator());
+                result.append("\t\t\t-d <delimiter>: set the delimiter that separates test cases within the passed test suite file(s). This can be a character, string, or regular expression").append(System.lineSeparator());
+                result.append("\t\t\t-s <filename>: denote that the results of the operation should be saved to a file named <filename>").append(System.lineSeparator());
+                result.append("\t\t\t-t [<integer>]: denote that the operation should use a thread pool for concurrency, and optionally specify the number of threads").append(System.lineSeparator());
+                result.append("\tconfig <parameter> <value>").append(System.lineSeparator());
+                result.append("\t\tsets the value of a parameter read from the configuration file").append(System.lineSeparator());
+                result.append("\thelp").append(System.lineSeparator());
+                result.append("\t\tlists information on the requested topic").append(System.lineSeparator());
+                result.append("\t\t\t-m: lists the available comparison metrics in the system").append(System.lineSeparator());
+                result.append("\t\t\t-a: lists the available aggregation methods in the system").append(System.lineSeparator());
+                result.append("\t\t\t-f: lists the available data representations in the system").append(System.lineSeparator());
                 console.displayResults(result.toString());
                 return;
             case PairwiseMetric:
@@ -412,7 +412,7 @@ public class Controller {
             class of the method and get the description from each*/
         try {
             Object[] objects = reflectionService.searchPackage(packageName, interfacePath);
-            result.append("Available ").append(helpType).append("s are:\n");
+            result.append("Available ").append(helpType).append("s are:").append(System.lineSeparator());
             if(objects == null)
                 result.append("\tNone available at specified directory: ").append(packageName);
             else{
@@ -424,14 +424,14 @@ public class Controller {
                     //need to remove the preceding pathname from each class name
                     String[] parts = name.split("\\.");
                     name = parts[parts.length - 1];
-                    result.append("\t").append(name).append(":\n");
+                    result.append("\t").append(name).append(":").append(System.lineSeparator());
 
                     //get the class description
                     String description = h.getDescription();
                     //display an error message instead of null for missing descriptions
                     if (description == null)
                         description = "no description available";
-                    result.append("\t\t").append(description).append("\n");
+                    result.append("\t\t").append(description).append(System.lineSeparator());
                 }
             }
             console.displayResults(result.toString());
