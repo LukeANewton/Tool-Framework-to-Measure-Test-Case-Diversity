@@ -181,15 +181,15 @@ public class ConfigTest {
         @Test
         /**test the getter for location of data representations*/
         public void getGetDataRepresentationLocation() {
-                assertEquals(config.getGetDataRepresentationLocation(), "data_representation");
+                assertEquals(config.getDataRepresentationLocation(), "data_representation");
         }
 
         @Test
         /**test the setter for location of data representations*/
         public void setGetDataRepresentationLocation() {
                 String newLocation = "java.util";
-                config.setGetDataRepresentationLocation(newLocation);
-                assertEquals(config.getGetDataRepresentationLocation(), newLocation);
+                config.setDataRepresentationLocation(newLocation);
+                assertEquals(config.getDataRepresentationLocation(), newLocation);
         }
 
         @Test

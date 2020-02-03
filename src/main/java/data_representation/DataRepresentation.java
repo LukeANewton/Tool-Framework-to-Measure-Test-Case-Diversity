@@ -1,5 +1,6 @@
 package data_representation;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import core.HelpTarget;
@@ -11,7 +12,7 @@ import core.InvalidFormatException;
  * 
  * @author luke
  */
-public interface DataRepresentation extends Iterator<String>, HelpTarget {
+public interface DataRepresentation extends Iterator<String>, HelpTarget, Serializable {
 	/**
 	 * determines if there is another element in the test case being iterated over that has not yet been seen
 	 * 

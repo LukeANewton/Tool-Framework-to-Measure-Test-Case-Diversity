@@ -48,7 +48,7 @@ public class ConsoleOutputService implements PropertyChangeListener {
     public OverwriteOption getOverwriteChoice(String filename){
     	String choicesMessage = "([y]es/[n]o/[a]ppend)";
 
-    	System.out.print("The file: " + filename + " already exists.\n" +
+    	System.out.print("The file: " + filename + " already exists." + System.lineSeparator() +
 				"Do you wish to overwrite it?" + choicesMessage +  ":");
 		System.out.print("");
 
@@ -69,9 +69,10 @@ public class ConsoleOutputService implements PropertyChangeListener {
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		if(evt.getPropertyName().equals("numberTasks"))
+		if(evt.getPropertyName().equals("numberTasks")) {
 			numberTasks = (Integer) evt.getNewValue();
-		else {
+			completedComparisons = 0;
+		}else {
 			synchronized (this) {
 				completedComparisons++;
 				double percent = ((double) completedComparisons) / numberTasks;

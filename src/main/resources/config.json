@@ -4,7 +4,7 @@
   "dataRepresentation": "CSV",
   "dataRepresentationLocation": "data_representation",
   "delimiter": "\r\n",
-  "aggregationMethod": "",
+  "aggregationMethod": "AverageValue",
   "aggregationMethodLocation": "metrics.aggregation.",
   "numThreads":  3,
   "resultRoundingScale": 2,

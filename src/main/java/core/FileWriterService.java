@@ -3,6 +3,7 @@ package core;
 import com.google.gson.Gson;
 import model.Config;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -49,9 +50,12 @@ public class FileWriterService {
 		if(!append) {
 			file.createNewFile();
 		}
-		FileWriter writer = new FileWriter(file, append);
-		writer.write(text + System.lineSeparator());
-		writer.close();
+		BufferedWriter bw = new BufferedWriter(new FileWriter(file, append));
+		if(append)
+			bw.newLine();
+		bw.write(text);
+		bw.flush();
+		bw.close();
 	}
 
 	/**

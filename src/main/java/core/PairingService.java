@@ -1,6 +1,7 @@
 package core;
 
 import data_representation.DataRepresentation;
+import org.apache.commons.lang3.SerializationUtils;
 import utilities.Tuple;
 
 import java.util.ArrayList;
@@ -20,7 +21,6 @@ public class PairingService {
         pairs = new ArrayList<>();
     }
 
-
     /**
      * Makes pairs to be compared from a single test suite. Each test case is compared to another test case once.
      *
@@ -30,7 +30,8 @@ public class PairingService {
     public List<Tuple<DataRepresentation, DataRepresentation>> makePairs(DataRepresentation[] testSuite) {
         for (int i = 0; i < testSuite.length; i++) {
             for (int j = i + 1; j < testSuite.length; j++) {
-                pairs.add(new Tuple<>(testSuite[i], testSuite[j]));
+                pairs.add(new Tuple<>(SerializationUtils.clone(testSuite[i]),
+                        SerializationUtils.clone(testSuite[j])));
             }
         }
         return pairs;
@@ -52,7 +53,8 @@ public class PairingService {
                     // Loop through each element in that other column
                     for (int m = 0; m < testSuites[k].length; m++) {
                         // Pair the observed element(Test Case) in the observed column(Test Suite) with the other element(TC) in the other column(TS)
-                        pairs.add(new Tuple<>(testSuites[i][j], testSuites[k][m]));
+                        pairs.add(new Tuple<>( SerializationUtils.clone(testSuites[i][j]),
+                                SerializationUtils.clone(testSuites[k][m])));
                     }
                 }
             }

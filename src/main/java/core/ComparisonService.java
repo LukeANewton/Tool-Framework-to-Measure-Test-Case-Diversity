@@ -76,6 +76,8 @@ public class ComparisonService {
 		for (Future<Object> future : futureList)
 			results.add((Double) future.get());
 
+		threadPool.shutdown();
+
 		return aggregation.aggregate(results);
 	}
 

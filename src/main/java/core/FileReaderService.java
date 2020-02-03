@@ -63,37 +63,6 @@ public class FileReaderService {
 	}
 
 	/**
-	 * reads a file into the system which contains a multiple test cases in one file at the specified path
-	 *
-	 * @param filename a string representing the location of the file to read
-	 * @param delimiter the sequence of characters used to separate test cases in a single file
-	 * @param format the data representation of the test case
-	 * @return the test case formatted as a DataRepresentation object
-	 * @throws FileNotFoundException thrown when no file is found at the specified path
-	 * @throws InvalidFormatException thrown when the format of the test case found does not match the expected format
-	 */
-	public String[] read(String filename, String delimiter, DataRepresentation format) throws FileNotFoundException, InvalidFormatException {
-		if (format == null)
-			throw new InvalidFormatException();
-
-		String s = readFile(filename);
-
-		//at this point, we have all the file read in, so we can split up the test cases
-		String[] testCases;
-		if (delimiter == null){
-			testCases = new String[] {s};
-		} else{
-			testCases = s.split(delimiter);
-		}
-
-		for(int i = 0; i < testCases.length; i++){
-			testCases[i] = format.parse(testCases[i]);
-		}
-
-		return testCases;
-	}
-
-	/**
 	 * reads a test suite file located at filename into the passed DataRepresentation for later iteration over
 	 *
 	 * @param filename the test suite file containing test cases
@@ -106,6 +75,9 @@ public class FileReaderService {
 			throw new InvalidFormatException();
 
 		String s = readFile(filename);
+
+		if(s.equals("")) //the file is empty
+			return new DataRepresentation[]{};
 
 		//at this point, we have all the file read in, so we can split up the test cases
 		String[] testCases;

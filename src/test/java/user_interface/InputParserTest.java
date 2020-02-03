@@ -16,7 +16,7 @@ public class InputParserTest {
     }
 
     @Test(expected = InvalidCommandException.class)
-    /**test for parsing unrecognized command*/
+    /*test for parsing unrecognized command*/
     public void testInvalidCommand() throws InvalidCommandException {
         input.parse("banana");
         fail();
@@ -51,66 +51,66 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing command help*/
+    /*test for parsing command help*/
     public void testCommandHelp() throws InvalidCommandException {
         helpHelper(HelpType.Command);
     }
 
     @Test
-    /**test for parsing aggregation method help*/
+    /*test for parsing aggregation method help*/
     public void testAggregationHelp() throws InvalidCommandException {
         helpHelper(HelpType.AggregationMethod);
     }
 
     @Test
-    /**test for parsing comparison metric help*/
+    /*test for parsing comparison metric help*/
     public void testPairwiseHelp() throws InvalidCommandException {
         helpHelper(HelpType.PairwiseMetric);
     }
 
     @Test
-    /**test for parsing data representation help*/
+    /*test for parsing data representation help*/
     public void testDataRepresentationHelp() throws InvalidCommandException {
         helpHelper(HelpType.DataRepresentation);
     }
 
     @Test(expected = InvalidCommandException.class)
-    /**test for parsing an invalid help with extra tokens*/
+    /*test for parsing an invalid help with extra tokens*/
     public void testHelpExtraTokens() throws InvalidCommandException {
         input.parse("help -f -m");
         fail();
     }
 
     @Test(expected = InvalidCommandException.class)
-    /**test for parsing an invalid help with invalid type*/
+    /*test for parsing an invalid help with invalid type*/
     public void testHelpInvalidType() throws InvalidCommandException {
         input.parse("help -x");
         fail();
     }
 
     @Test(expected = InvalidCommandException.class)
-    /**test for parsing config command with no parameter name or value specified*/
+    /*test for parsing config command with no parameter name or value specified*/
     public void testConfigNoSpecification() throws InvalidCommandException {
         input.parse("config");
         fail();
     }
 
     @Test(expected = InvalidCommandException.class)
-    /**test for parsing config command with no parameter value specified*/
+    /*test for parsing config command with no parameter value specified*/
     public void testConfigNoValueSet() throws InvalidCommandException {
         input.parse("config banana");
         fail();
     }
 
     @Test(expected = InvalidCommandException.class)
-    /**test for parsing config command with extra tokens*/
+    /*test for parsing config command with extra tokens*/
     public void testConfigExtraTokensShort() throws InvalidCommandException {
         input.parse("config numThreads 4 banana");
         fail();
     }
 
     @Test(expected = InvalidCommandException.class)
-    /**test for parsing config command with extra tokens*/
+    /*test for parsing config command with extra tokens*/
     public void testConfigExtraTokensLong() throws InvalidCommandException {
         input.parse("config numThreads 4 banana orange apple");
         fail();
@@ -139,7 +139,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a valid config command without save option*/
+    /*test for parsing a valid config command without save option*/
     public void testConfigValidSyntax() throws InvalidCommandException {
         String name = "numThreads";
         String value = "4";
@@ -147,7 +147,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a syntactically valid config command that is semantically invalid.
+    /*test for parsing a syntactically valid config command that is semantically invalid.
      * the parser should not know anything about what a valid name/value is, so this should
      * not throw an InvalidCommandException*/
     public void testConfigValidSyntaxInvalidSemantics() throws InvalidCommandException {
@@ -157,7 +157,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a valid config command with save option*/
+    /*test for parsing a valid config command with save option*/
     public void testConfigValidSyntaxWithSave() throws InvalidCommandException {
         String name = "numThreads";
         String value = "4";
@@ -201,7 +201,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a valid compare command with no flags*/
+    /*test for parsing a valid compare command with no flags*/
     public void testCompareNoFlags() throws InvalidCommandException {
         String file1 = "file1";
         String file2 = "file2";
@@ -211,7 +211,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a valid compare command with save flag*/
+    /*test for parsing a valid compare command with save flag*/
     public void testCompareSaveFlag() throws InvalidCommandException {
         String file1 = "file1";
         String file2 = "file2";
@@ -222,7 +222,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a compare command with save flag but no filename*/
+    /*test for parsing a compare command with save flag but no filename*/
     public void testCompareSaveFlagNoValueEndOfCommand(){
         String file1 = "file1";
         String dataRepresentation = "CSV";
@@ -236,7 +236,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a compare command with save flag but no filename*/
+    /*test for parsing a compare command with save flag but no filename*/
     public void testCompareSaveFlagNoValue(){
         String file1 = "file1";
         String dataRepresentation = "CSV";
@@ -250,7 +250,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a valid compare command with comparison metric flag*/
+    /*test for parsing a valid compare command with comparison metric flag*/
     public void testCompareMetricFlag() throws InvalidCommandException {
         String file1 = "file1";
         String file2 = "file2";
@@ -261,7 +261,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a compare command with metric flag but no provided metric*/
+    /*test for parsing a compare command with metric flag but no provided metric*/
     public void testCompareMetricFlagNoValueEndOfCommand(){
         String file1 = "file1";
         String dataRepresentation = "CSV";
@@ -275,7 +275,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a compare command with metric flag but no provided metric*/
+    /*test for parsing a compare command with metric flag but no provided metric*/
     public void testCompareMetricFlagNoValue(){
         String file1 = "file1";
         String dataRepresentation = "CSV";
@@ -289,7 +289,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a valid compare command with aggregation metric flag*/
+    /*test for parsing a valid compare command with aggregation metric flag*/
     public void testCompareAggregationFlag() throws InvalidCommandException {
         String file1 = "file1";
         String file2 = "file2";
@@ -300,7 +300,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a compare command with aggregation flag but no provided method*/
+    /*test for parsing a compare command with aggregation flag but no provided method*/
     public void testCompareAggregationFlagNoValueEndOfCommand(){
         String file1 = "file1";
         String dataRepresentation = "CSV";
@@ -314,7 +314,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a compare command with aggregation flag but no provided method*/
+    /*test for parsing a compare command with aggregation flag but no provided method*/
     public void testCompareAggregationFlagNoValue(){
         String file1 = "file1";
         String dataRepresentation = "CSV";
@@ -328,7 +328,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a valid compare command with delimiter flag*/
+    /*test for parsing a valid compare command with delimiter flag*/
     public void testCompareDelimiterFlag() throws InvalidCommandException {
         String file1 = "file1";
         String file2 = "file2";
@@ -339,7 +339,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a compare command with delimiter flag but no provided delimiter*/
+    /*test for parsing a compare command with delimiter flag but no provided delimiter*/
     public void testCompareDelimiterFlagNoValueEndOfCommand(){
         String file1 = "file1";
         String dataRepresentation = "CSV";
@@ -353,7 +353,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a compare command with delimiter flag but no provided delimiter*/
+    /*test for parsing a compare command with delimiter flag but no provided delimiter*/
     public void testCompareDelimiterFlagNoValue(){
         String file1 = "file1";
         String dataRepresentation = "CSV";
@@ -367,7 +367,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a valid compare command with numThreads flag*/
+    /*test for parsing a valid compare command with numThreads flag*/
     public void testCompareNumThreadFlag() throws InvalidCommandException {
         String file1 = "file1";
         String file2 = "file2";
@@ -378,7 +378,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a compare command with numThread flag but no provided value*/
+    /*test for parsing a compare command with numThread flag but no provided value*/
     public void testCompareNumThreadFlagNoValueEndOfCommand(){
         String file1 = "file1";
         String dataRepresentation = "CSV";
@@ -392,7 +392,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a compare command with numThread flag but no provided value*/
+    /*test for parsing a compare command with numThread flag but no provided value*/
     public void testCompareNumThreadFlagNoValue(){
         String file1 = "file1";
         String dataRepresentation = "CSV";
@@ -406,7 +406,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a compare command with numThread flag but the provided value is not a number*/
+    /*test for parsing a compare command with numThread flag but the provided value is not a number*/
     public void testCompareNumThreadFlagNotNumber(){
         String file1 = "file1";
         String dataRepresentation = "CSV";
@@ -420,7 +420,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a valid compare command with many flags*/
+    /*test for parsing a valid compare command with many flags*/
     public void testCompareSeveralFlags() throws InvalidCommandException {
         String file1 = "file1";
         String file2 = "file2";
@@ -433,7 +433,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a valid compare command with every flag specified*/
+    /*test for parsing a valid compare command with every flag specified*/
     public void testCompareEveryFlag() throws InvalidCommandException {
         String file1 = "file1";
         String file2 = "file2";
@@ -447,7 +447,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a valid compare command with every flag specified and some extra bits*/
+    /*test for parsing a valid compare command with every flag specified and some extra bits*/
     public void testCompareTooLong() {
         try {
             input.parse("compare file1 file2 CSV -m metricname -a aggregation -d *** -t 67 -s out.txt banana republic");
@@ -458,7 +458,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a valid compare command with many flags, reordered to ensure that only the helper flag ordering works*/
+    /*test for parsing a valid compare command with many flags, reordered to ensure that only the helper flag ordering works*/
     public void testCompareSeveralFlagsReordered() throws InvalidCommandException {
         String file1 = "file1";
         String dataRepresentation = "CSV";
@@ -472,17 +472,17 @@ public class InputParserTest {
         DataTransferObject dto = input.parse(command);
         assertEquals(dto.getCommandType(), CommandType.Compare);
         assertEquals(file1, ((CompareDTO)dto).getTestCaseLocationOne());
-        assertEquals(null, ((CompareDTO)dto).getTestCaseLocationTwo());
+        assertNull(((CompareDTO) dto).getTestCaseLocationTwo());
         assertEquals(dataRepresentation, ((CompareDTO)dto).getDataRepresentation());
         assertEquals(metric, ((CompareDTO)dto).getPairwiseMethod());
-        assertEquals(null, ((CompareDTO)dto).getAggregationMethod());
+        assertNull(((CompareDTO) dto).getAggregationMethod());
         assertEquals(delimiter, ((CompareDTO)dto).getDelimiter());
-        assertEquals(null, ((CompareDTO)dto).getOutputFilename());
+        assertNull(((CompareDTO) dto).getOutputFilename());
         assertEquals(numThreads, ((CompareDTO)dto).getNumberOfThreads());
     }
 
     @Test
-    /**test for parsing a compare command that is missing a data representation*/
+    /*test for parsing a compare command that is missing a data representation*/
     public void testCompareTooShort() {
         try {
             input.parse("compare file1");
@@ -493,7 +493,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a compare command that is missing filenames and data representation*/
+    /*test for parsing a compare command that is missing filenames and data representation*/
     public void testCompareWayTooShort() {
         try {
             input.parse("compare");
@@ -504,7 +504,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a compare command with an invalid flag*/
+    /*test for parsing a compare command with an invalid flag*/
     public void testCompareInvalidFlag(){
         try {
             input.parse("compare file1 file2 CSV -t 12 -x banana -m metricname");
@@ -515,7 +515,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a compare command with an invalid token in the middle of flags*/
+    /*test for parsing a compare command with an invalid token in the middle of flags*/
     public void testCompareInvalidTokenAfterFlags(){
         try {
             input.parse("compare file1 file2 CSV -t 12 -m metric name -d ***");
@@ -526,7 +526,7 @@ public class InputParserTest {
     }
 
     @Test
-    /**test for parsing a compare command with too many filenames listed*/
+    /*test for parsing a compare command with too many filenames listed*/
     public void testCompareTooManyTokensBeforeFlags(){
         try {
             input.parse("compare file1 file2 file3 CSV -t 12 -m metric -d ***");
