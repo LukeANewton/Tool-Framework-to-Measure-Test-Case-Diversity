@@ -49,7 +49,7 @@ public class ConsoleOutputServiceTest {
     public void displayResults() {
         String s = "results";
         consoleOutputService.displayResults(s);
-        assertEquals(s + "\r\n", outContent.toString());
+        assertEquals(s + System.lineSeparator(), outContent.toString());
     }
 
     private void setInputForTest(String input){
@@ -86,13 +86,13 @@ public class ConsoleOutputServiceTest {
     /**test for getOverwriteChoice with an invalid option*/
     public void getOverwriteChoiceInvalid() {
         //the system should try to get input twice, first failing, then getting a Yes choice
-        setInputForTest("banana\ny");
+        setInputForTest("banana" + System.lineSeparator() +"y");
         OverwriteOption opt = consoleOutputService.getOverwriteChoice("filename");
         assertEquals(OverwriteOption.Yes, opt);
 
         /*the expected output is a prompt for a choice twice, but there is no new line
         because that would normally be entered by the user*/
-        String expected = "The file: filename already exists.\n" +
+        String expected = "The file: filename already exists." + System.lineSeparator() +
                 "Do you wish to overwrite it?([y]es/[n]o/[a]ppend):Invalid choice, options are ([y]es/[n]o/[a]ppend): ";
         assertEquals(expected, outContent.toString());
     }
