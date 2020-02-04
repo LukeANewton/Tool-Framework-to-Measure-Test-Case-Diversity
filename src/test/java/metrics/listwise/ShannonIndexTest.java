@@ -3,7 +3,6 @@ package metrics.listwise;
 import core.InvalidFormatException;
 import data_representation.CSV;
 import data_representation.DataRepresentation;
-import model.TestCaseFormatMismatchException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,8 +20,8 @@ public class ShannonIndexTest {
     }
 
     @Test
-    /**test for the compare method on a small test suite*/
-    public void testCompare() throws InvalidFormatException, TestCaseFormatMismatchException {
+    /*test for the compare method on a small test suite*/
+    public void testCompare() throws InvalidFormatException {
         //create a test suite
         List<DataRepresentation> testsuite = new ArrayList<>();
         testsuite.add(new CSV("1,2,3,4,5,6"));
@@ -35,15 +34,15 @@ public class ShannonIndexTest {
     }
 
     @Test
-    /**test for the compare method on an empty test suite should yield 0*/
-    public void testCompareEmpty() throws TestCaseFormatMismatchException {
+    /*test for the compare method on an empty test suite should yield 0*/
+    public void testCompareEmpty() {
         List<DataRepresentation> testsuite = new ArrayList<>();
         double result = strategy.compare(testsuite);
         assertEquals(0, result, 0.05);
     }
 
     @Test
-    /**test for the getDescription method*/
+    /*test for the getDescription method*/
     public void testGetDescription() {
         assertEquals("A measure of the entropy for sets of sequences. " +
                 "Commonly used to measure diversity within a population in life sciences",
