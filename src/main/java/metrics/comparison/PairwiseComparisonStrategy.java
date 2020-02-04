@@ -2,7 +2,6 @@ package metrics.comparison;
 
 import core.HelpTarget;
 import data_representation.DataRepresentation;
-import model.TestCaseFormatMismatchException;
 
 /**
  * The interface for all pairwise comparison metrics to implement. This interface ensures that each metric has a function 
@@ -18,7 +17,6 @@ public interface PairwiseComparisonStrategy extends HelpTarget {
 	 * @param testCase1 the first test case to compare
 	 * @param testCase2 the second test case to compare
 	 * @return a number value representing the similarity between the two passed test cases
-	 * @throws TestCaseFormatMismatchException thrown when the two passed test cases are of different formats
-	 */
-	public double compare(DataRepresentation testCase1, DataRepresentation testCase2) throws TestCaseFormatMismatchException;
+	  */
+	 double compare(DataRepresentation testCase1, DataRepresentation testCase2);
 }
