@@ -55,7 +55,7 @@ public class Controller {
         //read config file
         config = fileReaderService.readConfig(CONFIG_FILE);
 
-        comparisonService = new ComparisonService(config.getNumThreads());
+        comparisonService = new ComparisonService();
     }
 
     public static Controller getController(){
@@ -258,13 +258,17 @@ public class Controller {
         }
 
         //now perform the actual comparison
-        if(dto.getNumberOfThreads() != null)//only update thread count if command specifies it
-            comparisonService = new ComparisonService(dto.getNumberOfThreads());
-        else
-            comparisonService = new ComparisonService(config.getNumThreads());
+        comparisonService = new ComparisonService();
         String result;
+        if(dto.isUseThreadPool()){
+            if(dto.getNumberOfThreads() != null)//only update thread count if command specifies it
+                comparisonService.setUpThreadPool(dto.getNumberOfThreads());
+            else
+                comparisonService.setUpThreadPool(config.getNumThreads());
+        }
+
         try {
-            result = comparisonService.compareTestCase(pairs, comparisonStrategy, aggregationStrategy, console);
+            result = comparisonService.pairwiseCompare(pairs, comparisonStrategy, aggregationStrategy, console, dto.isUseThreadPool());
         } catch (Exception e) {
             console.displayResults("Error in pairwise comparison calculation: " + e.toString());
             return;

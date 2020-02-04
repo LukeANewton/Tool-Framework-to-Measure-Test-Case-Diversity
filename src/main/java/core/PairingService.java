@@ -14,13 +14,6 @@ import java.util.List;
  * @author crushton
  */
 public class PairingService {
-
-    private List<Tuple<DataRepresentation, DataRepresentation>> pairs;
-
-    public PairingService() {
-        pairs = new ArrayList<>();
-    }
-
     /**
      * Makes pairs to be compared from a single test suite. Each test case is compared to another test case once.
      *
@@ -28,6 +21,7 @@ public class PairingService {
      * @return a list of pairs of test cases in the form of data representations
      */
     public List<Tuple<DataRepresentation, DataRepresentation>> makePairs(DataRepresentation[] testSuite) {
+        List<Tuple<DataRepresentation, DataRepresentation>> pairs = new ArrayList<>();
         for (int i = 0; i < testSuite.length; i++) {
             for (int j = i + 1; j < testSuite.length; j++) {
                 pairs.add(new Tuple<>(SerializationUtils.clone(testSuite[i]),
@@ -44,6 +38,7 @@ public class PairingService {
      * @return a list of pairs of test cases in the form of data representations
      */
     public List<Tuple<DataRepresentation, DataRepresentation>> makePairs(DataRepresentation[]... testSuites) {
+        List<Tuple<DataRepresentation, DataRepresentation>> pairs = new ArrayList<>();
         // Observed column(Test Suite) of DataRepresentations
         for (int i = 0; i < testSuites.length; i++) {
             // Element(Test Case) in the observed column
