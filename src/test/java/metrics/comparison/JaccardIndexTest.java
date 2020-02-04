@@ -16,14 +16,15 @@ public class JaccardIndexTest {
     }
 
     @Test
-    /**test for the getDescription method, currently null*/
-    public void testCommonElementsGetDescription() {
-        assertNull("Description should be null but is: " + metric.getDescription(), metric.getDescription());
+    /*test for the getDescription method, currently null*/
+    public void testJaccardIndexGetDescription() {
+        assertEquals("provides a ratio between the intersection of two sets and the union of the sets",
+                metric.getDescription());
     }
 
     @Test
-    /**Test the JaccardIndex metric when both test cases are equal*/
-    public void testCommonElementsEqual() {
+    /*Test the JaccardIndex metric when both test cases are equal*/
+    public void testJaccardIndexEqual() {
         String testCase = "1,2,3,4,5,6,7,8,9";
         try {
             double result = metric.compare(new CSV(testCase), new CSV(testCase));
@@ -34,8 +35,8 @@ public class JaccardIndexTest {
     }
 
     @Test
-    /**Test the JaccardIndex when test cases are completely different*/
-    public void testCommonElementsNotEqual() {
+    /*Test the JaccardIndex when test cases are completely different*/
+    public void testJaccardIndexNotEqual() {
         String testCase1 = "1,2,3,4,5";
         String testCase2 = "6,7,8,9,10";
         try {
@@ -47,8 +48,8 @@ public class JaccardIndexTest {
     }
 
     @Test
-    /**Test the common elements between two lists with the same values in different order*/
-    public void testCommonElements() {
+    /*Test the common elements between two lists with the same values in different order*/
+    public void testJaccardIndex() {
         String testCase1 = "1,2,3,4,5,6";
         String testCase2 = "6,5,4,3,2,1";
         try {
@@ -60,7 +61,7 @@ public class JaccardIndexTest {
     }
 
     @Test
-    /**Test the common elements between two lists with one list longer than the other*/
+    /*Test the common elements between two lists with one list longer than the other*/
     public void testComparisonSwitchOperands() {
         String testCase1 = "1,2,3";
         String testCase2 = "1,2,3,4,5,6";

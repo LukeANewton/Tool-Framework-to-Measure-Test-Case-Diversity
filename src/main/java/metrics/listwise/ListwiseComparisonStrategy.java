@@ -2,7 +2,7 @@ package metrics.listwise;
 
 import core.HelpTarget;
 import data_representation.DataRepresentation;
-import metrics.comparison.TestCaseFormatMismatchException;
+import model.TestCaseFormatMismatchException;
 
 import java.util.List;
 

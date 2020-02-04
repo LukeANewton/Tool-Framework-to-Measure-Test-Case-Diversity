@@ -1,4 +1,4 @@
-package metrics.comparison;
+package model;
 
 /**
  * An exception thrown when the two test cases in a comparison are of different formats

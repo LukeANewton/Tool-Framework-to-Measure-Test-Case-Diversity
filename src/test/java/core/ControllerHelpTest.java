@@ -86,9 +86,9 @@ public class ControllerHelpTest {
     public void testPairwiseHelp() {
         String expected = "Available PairwiseMetrics are:" + System.lineSeparator() +
                 "\tCommonElements:" + System.lineSeparator() +
-                "\t\tno description available" + System.lineSeparator() +
+                "\t\tcounts the number of elements that appear at the same index in both sequences" + System.lineSeparator() +
                 "\tJaccardIndex:" + System.lineSeparator() +
-                "\t\tno description available" + System.lineSeparator() +
+                "\t\tprovides a ratio between the intersection of two sets and the union of the sets" + System.lineSeparator() +
                 "\tLevenshtein:" + System.lineSeparator() +
                 "\t\tCalculates the minimum number of insertion/deletion/modification operations to transform one test case into another" + System.lineSeparator() +
                 System.lineSeparator();

@@ -24,11 +24,7 @@ public class Levenshtein implements PairwiseComparisonStrategy {
 	}
 
 	@Override
-	public double compare(DataRepresentation testCase1, DataRepresentation testCase2)
-			throws TestCaseFormatMismatchException {
-		if (!testCase1.checkFormat(testCase2.toString()) || !testCase2.checkFormat(testCase1.toString()))
-			throw new TestCaseFormatMismatchException();
-		
+	public double compare(DataRepresentation testCase1, DataRepresentation testCase2) {
 		//unpack DataRepresentation information
 		ArrayList<String> t1 = new ArrayList<>();
 		ArrayList<String> t2 = new ArrayList<>();

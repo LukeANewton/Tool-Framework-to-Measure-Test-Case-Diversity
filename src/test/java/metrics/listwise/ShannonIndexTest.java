@@ -1,10 +1,9 @@
 package metrics.listwise;
 
-import core.FileWriterService;
 import core.InvalidFormatException;
 import data_representation.CSV;
 import data_representation.DataRepresentation;
-import metrics.comparison.TestCaseFormatMismatchException;
+import model.TestCaseFormatMismatchException;
 import org.junit.Before;
 import org.junit.Test;
 

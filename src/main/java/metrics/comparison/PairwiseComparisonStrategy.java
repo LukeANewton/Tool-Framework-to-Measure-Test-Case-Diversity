@@ -2,6 +2,7 @@ package metrics.comparison;
 
 import core.HelpTarget;
 import data_representation.DataRepresentation;
+import model.TestCaseFormatMismatchException;
 
 /**
  * The interface for all pairwise comparison metrics to implement. This interface ensures that each metric has a function 
