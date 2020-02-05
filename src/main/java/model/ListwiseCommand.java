@@ -43,6 +43,10 @@ public class ListwiseCommand implements Callable<Object> {
      * @return a double representing the result of the diversity calculation
      */
     public Object call() throws Exception {
+        for(DataRepresentation testcase: testsuite) {
+            if (!testcase.getClass().equals(testsuite.get(0).getClass()))
+                throw new TestCaseFormatMismatchException();
+        }
         double result = comparison.compare(testsuite);
         support.firePropertyChange(new PropertyChangeEvent(this, "complete",
                 null, null));
