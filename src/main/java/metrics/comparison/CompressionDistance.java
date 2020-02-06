@@ -5,6 +5,18 @@ import data_representation.DataRepresentation;
 import java.io.*;
 import java.util.zip.DeflaterOutputStream;
 
+/**
+ * this implements a pairwise comparison metric called the
+ * normalized compression distance. It writes the test cases to files and writes
+ * another file that contains both test cases concatenated, then compresses all
+ * three files and compares the sizes.
+ *
+ * the idea is that files are compressed more when there are more redundancies,
+ * so if the concatenated file is a similar size to the individual test cases,
+ * the test cases must have many redundancies between them (ie. many similar elements!)
+ *
+ * @author luke
+ */
 public class CompressionDistance implements PairwiseComparisonStrategy {
     @Override
     public double compare(DataRepresentation testCase1, DataRepresentation testCase2) throws Exception{
@@ -30,9 +42,16 @@ public class CompressionDistance implements PairwiseComparisonStrategy {
         return (concatenatedLength - Math.min(length1,length2)) / Math.max(length1,length2);
     }
 
+    /**
+     *creates a compressed file out of the passed contents and returns the size of the file
+     *
+     * @param contents the information to place in the file
+     * @return the size of the compressed file
+     * @throws Exception when the file cannot be written or compressed
+     */
     private long getCompressedSize(String contents) throws Exception {
-        File file = new File( "normalized-compression-distance-file");
-        File compressedFile = new File( "compressed-normalized-compression-distance-file");
+        File file = File.createTempFile( "normalized-compression-distance-file", null);
+        File compressedFile = File.createTempFile( "compressed-normalized-compression-distance-file", null);
 
         //write to file
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
