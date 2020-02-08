@@ -103,7 +103,7 @@ public class ComparisonServiceTest {
         testsuite.add(new CSV("1,1,1,4,5,8"));
         testsuites.add(testsuite);
 
-        assertEquals(2.512,
+        assertEquals(1.92,
                 Double.parseDouble(comparisonService.listwiseCompare(testsuites, new ShannonIndex(), aggregationStrategy, null, false)),
                 TOLERANCE);
     }
@@ -137,8 +137,6 @@ public class ComparisonServiceTest {
 
         assertEquals(Double.parseDouble(comparisonService.listwiseCompare(testsuites1, new ShannonIndex(), aggregationStrategy, null, true)),
                 Double.parseDouble(comparisonService.listwiseCompare(testsuites2, new ShannonIndex(), aggregationStrategy, null, false)),
-        assertEquals(1.92,
-                Double.parseDouble(comparisonService.compareTestCase(testsuites, new ShannonIndex(), aggregationStrategy, null)),
                 TOLERANCE);
     }
 }
