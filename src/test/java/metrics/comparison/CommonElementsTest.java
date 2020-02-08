@@ -17,7 +17,7 @@ public class CommonElementsTest {
     @Test
     /**test for the getDescription method, currently null*/
     public void testCommonElementsGetDescription() {
-        assertNull("Description should be null but is: " + metric.getDescription(), metric.getDescription());
+        assertEquals("counts the number of elements that appear at the same index in both sequences", metric.getDescription());
     }
 
     @Test

@@ -29,24 +29,15 @@ public class PairwiseCommand implements Callable<Object> {
 			support.addPropertyChangeListener(pcl);
 	}
 
-	public PairwiseComparisonStrategy getComparison() {
-		return comparison;
-	}
-
-	public DataRepresentation getFirst() {
-		return Data1;
-	}
-
-	public DataRepresentation getSecond() {
-		return Data2;
-	}
-
 	/**
 	 * calculate the difference between two give tests
 	 *
 	 * @return a double representing the similarity between the two tests
 	 */
 	public Object call() throws Exception {
+		if(!Data1.getClass().equals(Data2.getClass()))
+			throw new TestCaseFormatMismatchException();
+
 		double result = comparison.compare(Data1, Data2);
 		support.firePropertyChange(new PropertyChangeEvent(this, "complete",
 				null, null));

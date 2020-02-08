@@ -137,6 +137,8 @@ public class ComparisonServiceTest {
 
         assertEquals(Double.parseDouble(comparisonService.listwiseCompare(testsuites1, new ShannonIndex(), aggregationStrategy, null, true)),
                 Double.parseDouble(comparisonService.listwiseCompare(testsuites2, new ShannonIndex(), aggregationStrategy, null, false)),
+        assertEquals(1.92,
+                Double.parseDouble(comparisonService.compareTestCase(testsuites, new ShannonIndex(), aggregationStrategy, null)),
                 TOLERANCE);
     }
 }

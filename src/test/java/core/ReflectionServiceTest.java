@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import model.Config;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.awt.*;
@@ -238,7 +239,7 @@ public class ReflectionServiceTest {
     public void testSearchPackage() {
         try {
             Object[] list = reflector.searchPackage("metrics.comparison", "metrics.comparison.PairwiseComparisonStrategy");
-            assertEquals(3, list.length);
+            assertEquals(7, list.length);
         } catch (Exception e) {
             e.printStackTrace();
             fail();
@@ -262,7 +263,7 @@ public class ReflectionServiceTest {
         //do the test
         try {
             Object[] list = reflector.searchPackage("metrics.comparison", "metrics.comparison.PairwiseComparisonStrategy");
-            assertEquals(3, list.length);
+            assertEquals(7, list.length);
         } catch (Exception e) {
             e.printStackTrace();
             fail();

@@ -3,6 +3,7 @@ package core;
 import model.Config;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -86,11 +87,19 @@ public class ControllerHelpTest {
     public void testPairwiseHelp() {
         String expected = "Available PairwiseMetrics are:" + System.lineSeparator() +
                 "\tCommonElements:" + System.lineSeparator() +
-                "\t\tno description available" + System.lineSeparator() +
+                "\t\tcounts the number of elements that appear at the same index in both sequences" + System.lineSeparator() +
+                "\tCompressionDistance:" + System.lineSeparator() +
+                "\t\tcalculates the similarity of two test cases by the ratio of size between the individual test cases compressed, and the compression of the test cases concatenated" + System.lineSeparator() +
+                "\tDice:" + System.lineSeparator() +
+                "\t\ta measure of overlap between two sets, with 0 being distinct and 1 being complete equality" + System.lineSeparator() +
+                "\tHamming:" + System.lineSeparator() +
+                "\t\tcompares two test cases by the number of positions in the test cases that are different" + System.lineSeparator() +
                 "\tJaccardIndex:" + System.lineSeparator() +
-                "\t\tno description available" + System.lineSeparator() +
+                "\t\tprovides a ratio between the intersection of two sets and the union of the sets" + System.lineSeparator() +
                 "\tLevenshtein:" + System.lineSeparator() +
                 "\t\tCalculates the minimum number of insertion/deletion/modification operations to transform one test case into another" + System.lineSeparator() +
+                "\tLongestCommonSubstring:" + System.lineSeparator() +
+                "\t\treturns a value indicating the longest common sequence of contiguous elements in a pair of test cases" + System.lineSeparator() +
                 System.lineSeparator();
         compareAgainstString("help -m", expected);
     }

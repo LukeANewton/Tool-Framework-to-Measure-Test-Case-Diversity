@@ -44,7 +44,7 @@ public class ListwiseCommandTest {
     @Test
     public void call() throws Exception {
         double result = (Double) command.call();
-        double expected = 2.512; //hand-calculated value
+        double expected = 1.92; //hand-calculated value
         assertEquals(expected, result, 0.05);
     }
 }

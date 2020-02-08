@@ -15,16 +15,11 @@ public class JaccardIndex implements PairwiseComparisonStrategy {
 
 	@Override
 	public String getDescription() {
-		// TODO Auto-generated method stub
-		return null;
+		return "provides a ratio between the intersection of two sets and the union of the sets";
 	}
 
 	@Override
-	public double compare(DataRepresentation testCase1, DataRepresentation testCase2)
-			throws TestCaseFormatMismatchException {
-		if (!testCase1.checkFormat(testCase2.toString()) || !testCase2.checkFormat(testCase1.toString()))
-			throw new TestCaseFormatMismatchException();
-
+	public double compare(DataRepresentation testCase1, DataRepresentation testCase2) {
 		HashSet<String> set1 = new HashSet<>();
 		HashSet<String> union = new HashSet<>();
 		HashSet<String> intersection = new HashSet<>();
