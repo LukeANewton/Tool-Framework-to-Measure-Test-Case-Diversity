@@ -188,6 +188,7 @@ public class InputParserTest {
         if(numThreads != null)
             command.append(" -t ").append(numThreads);
 
+
         DataTransferObject dto = input.parse(command.toString());
         assertEquals(dto.getCommandType(), CommandType.Compare);
         assertEquals(file1, ((CompareDTO)dto).getTestCaseLocationOne());
@@ -198,6 +199,7 @@ public class InputParserTest {
         assertEquals(delimiter, ((CompareDTO)dto).getDelimiter());
         assertEquals(outputFilename, ((CompareDTO)dto).getOutputFilename());
         assertEquals(numThreads, ((CompareDTO)dto).getNumberOfThreads());
+        assertEquals(numThreads!=null, ((CompareDTO)dto).isUseThreadPool());
     }
 
     @Test
@@ -379,30 +381,25 @@ public class InputParserTest {
 
     @Test
     /*test for parsing a compare command with numThread flag but no provided value*/
-    public void testCompareNumThreadFlagNoValueEndOfCommand(){
+    public void testCompareNumThreadFlagNoValueEndOfCommand() throws InvalidCommandException {
         String file1 = "file1";
         String dataRepresentation = "CSV";
 
-        try {
-            input.parse("compare " + file1 + " " + dataRepresentation + " -m metricname -t");
-            fail();
-        }catch(InvalidCommandException e){
-            assertEquals("No value specified after flag.", e.getErrorMessage());
-        }
+        DataTransferObject dto = input.parse("compare " + file1 + " " + dataRepresentation + " -m metricname -t");
+        assertTrue(((CompareDTO)dto).isUseThreadPool());
+        assertNull(((CompareDTO)dto).getNumberOfThreads());
     }
 
     @Test
-    /*test for parsing a compare command with numThread flag but no provided value*/
-    public void testCompareNumThreadFlagNoValue(){
+    /*test for parsing a compare command with numThread flag but no provided value */
+    public void testCompareNumThreadFlagNoValue() throws InvalidCommandException {
         String file1 = "file1";
         String dataRepresentation = "CSV";
 
-        try {
-            input.parse("compare " + file1 + " " + dataRepresentation + " -t -m metricname");
-            fail();
-        }catch(InvalidCommandException e){
-            assertEquals("No value specified after flag.", e.getErrorMessage());
-        }
+        DataTransferObject dto = input.parse("compare " + file1 + " " + dataRepresentation + " -t -m metricname");
+        assertTrue(((CompareDTO)dto).isUseThreadPool());
+        assertNull(((CompareDTO)dto).getNumberOfThreads());
+        assertEquals(((CompareDTO)dto).getPairwiseMethod(), "metricname");
     }
 
     @Test
@@ -415,7 +412,7 @@ public class InputParserTest {
             input.parse("compare " + file1 + " " + dataRepresentation + " -t twelve -m metricname");
             fail();
         }catch(InvalidCommandException e){
-            assertEquals("Value specified after number of threads flag is not a number.", e.getErrorMessage());
+            assertEquals("Value specified after number of threads flag is not a number or flag.", e.getErrorMessage());
         }
     }
 

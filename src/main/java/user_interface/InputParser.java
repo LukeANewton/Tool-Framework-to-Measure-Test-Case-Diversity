@@ -163,18 +163,21 @@ public class InputParser {
 				}
 			} else if(tokens.get(i).equals(NUMBER_THREADS_FLAG)) {//found a flag to set number of threads
 				if(isAtLastElement) {//reached the end of the tokens, so there is no value after the flag
-					throw new InvalidCommandException("No value specified after flag.");
+					compare.setUseThreadPool(true);
+					continue;
 				}
 				i++;
 				if(isTokenCompareFlag(tokens.get(i))) {// the next token is a flag, so there is no value after the flag
-					throw new InvalidCommandException("No value specified after flag.");
+					compare.setUseThreadPool(true);
+					i--;//go back so we dont skip over a flag
 				} else { //the next token should be the number of threads to use
 					//must also check if the value is a valid integer
 					try {
 						Integer numThreads = Integer.parseInt(tokens.get(i));
+						compare.setUseThreadPool(true);
 						compare.setNumberOfThreads(numThreads);
 					} catch (NumberFormatException e) {
-						throw new InvalidCommandException("Value specified after number of threads flag is not a number.");
+						throw new InvalidCommandException("Value specified after number of threads flag is not a number or flag.");
 					}
 				}
 			} else if(tokens.get(i).equals(SAVE_FLAG)) {//found a flag to specify if saving results to a file

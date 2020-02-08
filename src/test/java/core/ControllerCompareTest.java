@@ -363,11 +363,13 @@ public class ControllerCompareTest {
     }
 
     @Test
-    /*test for the compare command that checks the number of threads does not change the calculation result*/
+    /*test for the compare command that checks the number of threads, or choice or threads/sequential
+     does not change the calculation result*/
     public void testCompareNumThreadsDoesNotChangeResult() throws IOException {
         String output1 = "out-1";
         String output2 = "out-2";
         String output3 = "out-3";
+        String output4 = "out-4";
 
         doComparison(sampleTestSuiteA, null, "CommonElements", null, null,
                 output1, "7");
@@ -375,15 +377,17 @@ public class ControllerCompareTest {
                 output2, "3");
         doComparison(sampleTestSuiteA, null, "CommonElements", null, null,
                 output3, null);
+        c.processCommand("compare " + sampleTestSuiteA + " CSV -m CommonElements -t -s " + output4);
 
         assertEquals(readFile(output1), readFile(output2));
         assertEquals(readFile(output1), readFile(output3));
+        assertEquals(readFile(output1), readFile(output4));
         /*hand calculated value:
         sampleTestSuiteA generates 10 pairs
         with common elements: [4 4 4 4 5 9 9 5 5 12]*/
         assertEquals(6.1, Double.parseDouble(readFile(output1)), TOLERANCE);
 
-        deleteFiles(output1, output2, output3);
+        deleteFiles(output1, output2, output3, output4);
     }
 
     @Test

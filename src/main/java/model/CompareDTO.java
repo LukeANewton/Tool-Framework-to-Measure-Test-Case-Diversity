@@ -19,6 +19,9 @@ public class CompareDTO extends DataTransferObject {
 	private String testCaseLocationTwo;
 	//the number of threads to use in a thread pool for pairwise comparisons
 	private Integer numberOfThreads;
+
+	//true to use a thread pool, false to handle tasks sequentially
+	private boolean useThreadPool;
 	//in the case of multiple test cases in a single file, specify the delimiter between them
 	private String delimiter;
 	//the DataRepresentation test cases are formatted to
@@ -29,6 +32,7 @@ public class CompareDTO extends DataTransferObject {
 	/**Constructor*/
 	public CompareDTO() {
 		commandType = CommandType.Compare;
+		useThreadPool = false;
 	}
 
 	public String getPairwiseMethod() {
@@ -93,5 +97,13 @@ public class CompareDTO extends DataTransferObject {
 
 	public void setOutputFilename(String outputFilename) {
 		this.outputFilename = outputFilename;
+	}
+
+	public boolean isUseThreadPool() {
+		return useThreadPool;
+	}
+
+	public void setUseThreadPool(boolean useThreadPool) {
+		this.useThreadPool = useThreadPool;
 	}
 }

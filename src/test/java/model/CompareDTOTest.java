@@ -14,6 +14,7 @@ public class CompareDTOTest {
     private String pairwiseMethod = "PairwiseMethod";
     private String testCaseLocationOne = "Location/test1";
     private String testCaseLocationTwo = "Location/test2";
+    private boolean useThreadPool = true;
 
     @Test
     /**
@@ -28,6 +29,7 @@ public class CompareDTOTest {
         compare.setOutputFilename(outputFileName);
         compare.setPairwiseMethod(pairwiseMethod);
         compare.setTestCaseLocationOne(testCaseLocationOne);compare.setTestCaseLocationTwo(testCaseLocationTwo);
+        compare.setUseThreadPool(useThreadPool);
 
         assertTrue("CommandType should be "+ compareCommand +", but is: " + compare.getCommandType(),Objects.equals(compare.getCommandType(), compareCommand));
         assertTrue("AggregationMethod should be " + aggregationMethod + ", but is: " + compare.getAggregationMethod(), Objects.equals(compare.getAggregationMethod(), aggregationMethod));
@@ -38,6 +40,7 @@ public class CompareDTOTest {
         assertTrue("PairwiseMethod should be " + pairwiseMethod + ", but is: " + compare.getPairwiseMethod(), Objects.equals(compare.getPairwiseMethod(), pairwiseMethod));
         assertTrue("TestCaseLocationOne should be " + testCaseLocationOne + ", but is: " + compare.getTestCaseLocationOne(), Objects.equals(compare.getTestCaseLocationOne(), testCaseLocationOne));
         assertTrue("TestCaseLocationTwo should be " + testCaseLocationTwo + ", but is: " + compare.getTestCaseLocationTwo(), Objects.equals(compare.getTestCaseLocationTwo(), testCaseLocationTwo));
+        assertTrue(compare.isUseThreadPool());
     }
 
     @Test
@@ -56,5 +59,6 @@ public class CompareDTOTest {
         assertNull("PairwiseMethod should be null, but is: " + compareEmpty.getPairwiseMethod(), compareEmpty.getPairwiseMethod());
         assertNull("TestCaseLocationOne should be null, but is: " + compareEmpty.getTestCaseLocationOne(), compareEmpty.getTestCaseLocationOne());
         assertNull("TestCaseLocationTwo should be null, but is: " + compareEmpty.getTestCaseLocationTwo(), compareEmpty.getTestCaseLocationTwo());
+        assertFalse(compareEmpty.isUseThreadPool());
     }
 }
