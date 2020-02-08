@@ -11,12 +11,12 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class ShannonIndexTest {
+public class NeiTest {
     ListwiseComparisonStrategy strategy;
 
     @Before
     public void setUp(){
-        strategy = new ShannonIndex();
+        strategy = new Nei();
     }
 
     @Test
@@ -25,28 +25,41 @@ public class ShannonIndexTest {
         //create a test suite
         List<DataRepresentation> testsuite = new ArrayList<>();
         testsuite.add(new CSV("1,2,3,4,5,6"));
-        testsuite.add(new CSV("5,4,8,5,2,4,7"));
+        testsuite.add(new CSV("5,4,5,2,4"));
         testsuite.add(new CSV("1,1,1,4,5,8"));
 
         double result = strategy.compare(testsuite);
-        double expected = 1.92; //hand calculated value
-        assertEquals(expected, result, 0.05);
+        double expected = 0.527; //hand-calculated value
+        assertEquals(expected, result, 0.01);
+    }
+
+    @Test
+    /*test for the compare method on a test suite that should yield the
+    lowest possible diversity: 0*/
+    public void testNonDiverse() throws InvalidFormatException {
+        //create a test suite
+        List<DataRepresentation> testsuite = new ArrayList<>();
+        testsuite.add(new CSV("1"));
+        testsuite.add(new CSV("1,1,1"));
+
+        double result = strategy.compare(testsuite);
+        assertEquals(0, result, 0.01);
     }
 
     @Test
     /*test for the compare method that ensures the expected relationship holds:
-    * less diverse suites should have lower values for this metric*/
+     * less diverse suites should have lower values for this metric*/
     public void testCompareRelationship() throws InvalidFormatException {
         //create a test suite
         List<DataRepresentation> testsuite = new ArrayList<>();
         testsuite.add(new CSV("1,2,3,4,5,6"));
         testsuite.add(new CSV("5,4,8,5,2,4,7"));
-        testsuite.add(new CSV("1,1,1,4,5,8"));
+        testsuite.add(new CSV("1,2,3,4,5,6"));
 
         double result1 = strategy.compare(testsuite);
 
         testsuite = new ArrayList<>();
-        testsuite.add(new CSV("6,2,3,4,5,6"));
+        testsuite.add(new CSV("6,2,6,4,5,6"));
         testsuite.add(new CSV("6,2,6,4,5,6"));
         testsuite.add(new CSV("6,2,3,4,6,6"));
         double result2 = strategy.compare(testsuite);
@@ -59,14 +72,14 @@ public class ShannonIndexTest {
     public void testCompareEmpty() {
         List<DataRepresentation> testsuite = new ArrayList<>();
         double result = strategy.compare(testsuite);
-        assertEquals(0, result, 0.05);
+        assertEquals(0, result, 0);
+        assertEquals(0, strategy.compare(null), 0);
     }
 
     @Test
     /*test for the getDescription method*/
     public void testGetDescription() {
-        assertEquals("A measure of the entropy for sets. " +
-                "Commonly used to measure diversity within a population in life sciences",
+        assertEquals("yields the average of the simpson diversity calculated across each position in the test case sequences.",
                 strategy.getDescription());
 
     }

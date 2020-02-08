@@ -18,5 +18,5 @@ public interface PairwiseComparisonStrategy extends HelpTarget {
 	 * @param testCase2 the second test case to compare
 	 * @return a number value representing the similarity between the two passed test cases
 	  */
-	 double compare(DataRepresentation testCase1, DataRepresentation testCase2);
+	 double compare(DataRepresentation testCase1, DataRepresentation testCase2) throws Exception;
 }

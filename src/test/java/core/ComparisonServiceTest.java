@@ -103,7 +103,7 @@ public class ComparisonServiceTest {
         testsuite.add(new CSV("1,1,1,4,5,8"));
         testsuites.add(testsuite);
 
-        assertEquals(2.512,
+        assertEquals(1.92,
                 Double.parseDouble(comparisonService.compareTestCase(testsuites, new ShannonIndex(), aggregationStrategy, null)),
                 TOLERANCE);
     }

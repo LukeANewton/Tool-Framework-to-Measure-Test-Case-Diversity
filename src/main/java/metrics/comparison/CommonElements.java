@@ -15,9 +15,7 @@ public class CommonElements implements PairwiseComparisonStrategy {
 		int commonElements = 0;
 
 		while(testCase1.hasNext() && testCase2.hasNext()) {
-			String s1 = testCase1.next();
-			String s2 = testCase2.next();
-			if(s1.equals(s2)) 
+			if(testCase1.next().equals(testCase2.next()))
 				commonElements++;
 		}
 
