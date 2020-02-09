@@ -25,7 +25,7 @@ public class ShannonIndex implements ListwiseComparisonStrategy{
         //get the frequencies
         for(DataRepresentation testcase: testsuite){
             while(testcase.hasNext()) {
-                String s = testcase.next();
+                String s = testcase.next().toString();
                 numElements++;
                 if(frequencies.containsKey(s))
                     frequencies.put(s, frequencies.get(s) + 1);

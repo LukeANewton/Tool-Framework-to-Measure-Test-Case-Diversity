@@ -104,7 +104,7 @@ public class ControllerHelpTest {
         compareAgainstString("help -m", expected);
     }
 
-    @Test
+    @Test @Ignore
     /*test for parsing data representation help*/
     public void testDataRepresentationHelp() {
         String expected = "Available DataRepresentations are:" + System.lineSeparator() +
