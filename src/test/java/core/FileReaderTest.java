@@ -63,125 +63,21 @@ public class FileReaderTest {
 
     @Test
     /*
-     * Test for: String read(String filename, DataRepresentation format)
+     * Test for: String[] read(String filename, String delimiter, DataRepresentation format)
      *
      * tests the 'normal' case for reading a file. That is, the file exists and the format passed
      * matches the format of the file contents. The contents read in should match the contents of
      * the file.
      */
-    public void testSingleTestCasePositiveCase() throws FileNotFoundException, InvalidFormatException {
+    public void testSingleTestCasePositiveCase() throws FileNotFoundException, InvalidFormatException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         String filename = "test.txt";
         DataRepresentation d = new CSV();
         String contents = "1,2,3,4,5,6";
         createFile(filename, contents);
 
-        String testcase = fileReader.read(filename, d);
+        String testcase = fileReader.readIntoDataRepresentation(filename, null, d)[0].toString();
         assertEquals(testcase, contents);
 
-        removeFile(filename);
-    }
-
-    @Test
-    /*
-     * Test for: String read(String filename, DataRepresentation format)
-     *
-     * Test for the case of an empty file. The contents of an empty file will not match the
-     * given data representation, so it should throw a InvalidFormatException
-     */
-    public void testSingleTestCaseEmptyFile() {
-        String filename = "test.txt";
-        DataRepresentation d = new CSV();
-        String contents = "";
-        createFile(filename, contents);
-
-        try {
-            fileReader.read(filename, d);
-            fail(); // if exception not thrown, fail
-        } catch (Exception e) {
-            assertTrue(e instanceof InvalidFormatException);
-        }
-        removeFile(filename);
-    }
-
-    @Test
-    /*
-     * Test for: String read(String filename, DataRepresentation format)
-     *
-     * Test for the case of an empty filename. a FileNotFoundException should be thrown
-     * since files cannot be nameless
-     */
-    public void testSingleTestCaseEmptyFilename() {
-        String filename = "";
-        DataRepresentation d = new CSV();
-
-        try {
-            String testcase = fileReader.read(filename, d);
-            fail(); // if exception not thrown, fail
-        } catch (Exception e) {
-            assertTrue(e instanceof FileNotFoundException);
-        }
-    }
-
-    @Test
-    /*
-     * Test for: String read(String filename, DataRepresentation format)
-     *
-     * Test for when the filename does not match any existing files. A
-     * FileNotFoundExcpetion should be thrown
-     */
-    public void testSingleTestCaseNoMatchingFile() {
-        String filename = "test.txt";
-        DataRepresentation d = new CSV();
-        createFile(filename,"1,2,3,4,5,6");
-
-        try {
-            fileReader.read("filename", d);
-            fail(); // if exception not thrown, fail
-        } catch (Exception e) {
-            assertTrue(e instanceof FileNotFoundException);
-        }
-        removeFile(filename);
-    }
-
-    @Test
-    /*
-     * Test for: String read(String filename, DataRepresentation format)
-     *
-     * Test for when the data representation passed is null. An InvalidFormatException
-     * should be thrown
-     */
-    public void testSingleTestCaseNullFormat() {
-        String filename = "test.txt";
-        DataRepresentation d = null;
-        createFile(filename,"1,2,3,4,5,6");
-
-        try {
-            fileReader.read(filename, d);
-            fail(); // if exception not thrown, fail
-        } catch (Exception e) {
-            assertTrue(e instanceof InvalidFormatException);
-        }
-        removeFile(filename);
-    }
-
-    @Test
-    /*
-     * Test for: String read(String filename, DataRepresentation format)
-     *
-     * Test for when the contents of the file does not match the passed data representation.
-     * An InvalidFormatException should be thrown
-     */
-    public void testSingleTestCaseFormatMismatch() {
-        String filename = "test.txt";
-        DataRepresentation d = new CSV();
-        createFile(filename,"\n\n\n\n\n");
-
-        try {
-            fileReader.read(filename, d);
-            fail(); // if exception not thrown, fail
-        } catch (Exception e) {
-            assertTrue(e instanceof InvalidFormatException);
-        }
         removeFile(filename);
     }
 
@@ -216,7 +112,7 @@ public class FileReaderTest {
      * tests the case of the specified delimiter is null. In this case, everything should be
      * stored as a single test case
      */
-    public void testManyTestCasesNullDelimiter() throws NoSuchMethodException, InvalidFormatException, IllegalAccessException, InstantiationException, FileNotFoundException, InvocationTargetException {
+    public void testNullDelimiter() throws NoSuchMethodException, InvalidFormatException, IllegalAccessException, InstantiationException, FileNotFoundException, InvocationTargetException {
         String filename = "test";
         String delimiter = null;
         DataRepresentation d = new CSV();
@@ -235,7 +131,7 @@ public class FileReaderTest {
      * Test for the case of an empty filename. a FileNotFoundException should be thrown
      * since files cannot be nameless
      */
-    public void testManyTestCasesEmptyFilename() {
+    public void testEmptyFilename() {
         String filename = "";
         String delimiter = "\r\n";
         DataRepresentation d = new CSV();
@@ -277,7 +173,7 @@ public class FileReaderTest {
      * Test for when the data representation passed is null. An InvalidFormatException
      * should be thrown
      */
-    public void testManyTestCasesNullFormat() {
+    public void testNullFormat() {
         String filename = "test";
         String delimiter = "\r\n";
         DataRepresentation d = null;
@@ -300,7 +196,7 @@ public class FileReaderTest {
      * Test for when the filename does not match any existing files. A
      * FileNotFoundExcpetion should be thrown
      */
-    public void testManyTestCasesNoMatchingFile() {
+    public void testNoMatchingFile() {
         String filename = "test";
         String delimiter = "\r\n";
         DataRepresentation d = new CSV();
@@ -323,7 +219,7 @@ public class FileReaderTest {
      *  Test for when the contents of the file does not match the passed data representation.
      *  An InvalidFormatException should be thrown
      */
-    public void testManyTestCasesFormatMismatch() {
+    public void testFormatMismatch() {
         String filename = "test";
         String delimiter = "s";
         DataRepresentation d = new CSV();

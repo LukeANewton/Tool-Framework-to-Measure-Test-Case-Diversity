@@ -31,7 +31,7 @@ public interface DataRepresentation extends Iterator<Object>, HelpTarget, Serial
 	 * @param s the string test case to iterate over
 	 * @throws InvalidFormatException thrown when the passed string does not conform to the test case format
 	 */
-	String parse(String s) throws InvalidFormatException;
+	void parse(String s) throws InvalidFormatException;
 	/**
 	 * determines if the passed string conforms to the test case format
 	 * 

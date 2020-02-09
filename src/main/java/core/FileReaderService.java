@@ -21,23 +21,6 @@ import model.Config;
  */
 public class FileReaderService {
 	/**
-	 * reads a file into the system which contains a single test case at the specified path 
-	 * 
-	 * @param filename a string representing the location of the file to read
-	 * @param format the data representation of the test case
-	 * @return the test case formatted as a DataRepresentation object
-	 * @throws FileNotFoundException thrown when no file is found at the specified path
-	 * @throws InvalidFormatException thrown when the format of the test case found does not match the expected format
-	 */
-	public String read(String filename, DataRepresentation format) throws FileNotFoundException, InvalidFormatException {
-		if (format == null)
-			throw new InvalidFormatException();
-
-		String s = readFile(filename);
-		return format.parse(s.toString());
-	}
-
-	/**
 	 * reads a file's contents into a single string
 	 *
 	 * @param filename the location of the file
@@ -52,7 +35,7 @@ public class FileReaderService {
 
 		Scanner sc = new Scanner(file);
 
-		StringBuffer s = new StringBuffer();
+		StringBuilder s = new StringBuilder();
 		while (sc.hasNextLine()) {
 			s.append(sc.nextLine());
 			if(sc.hasNextLine())
@@ -68,7 +51,7 @@ public class FileReaderService {
 	 * @param filename the test suite file containing test cases
 	 * @param delimiter the character(s)/pattern that separates each test case in the file
 	 * @param format the data representation that the test cases are read into
-	 * @return
+	 * @return the test cases formatted as DataRepresentation objects
 	 */
 	public DataRepresentation[] readIntoDataRepresentation(String filename, String delimiter, DataRepresentation format) throws InvalidFormatException, FileNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 		if (format == null)
@@ -89,9 +72,9 @@ public class FileReaderService {
 
 		//all the file contents is in the system, now we need to read them into data representations
 		ArrayList<DataRepresentation> list = new ArrayList<>();
-		for(int i = 0; i < testCases.length; i++){
+		for (String testCase : testCases) {
 			DataRepresentation d = format.getClass().getConstructor().newInstance();
-			d.parse(testCases[i]);
+			d.parse(testCase);
 			list.add(d);
 		}
 		return list.toArray(new DataRepresentation[0]);
