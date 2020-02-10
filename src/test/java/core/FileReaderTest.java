@@ -2,6 +2,7 @@ package core;
 
 import data_representation.CSV;
 import data_representation.DataRepresentation;
+import data_representation.StateSequence;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -222,8 +223,8 @@ public class FileReaderTest {
     public void testFormatMismatch() {
         String filename = "test";
         String delimiter = "s";
-        DataRepresentation d = new CSV();
-        String contents = "\n\ns\n\n";
+        DataRepresentation d = new StateSequence();
+        String contents = "1(0)-OffProtected-4-StoppedProtected-13";
         createFile(filename, contents);
 
         try {

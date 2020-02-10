@@ -1,5 +1,6 @@
 package core;
 
+import data_representation.EventSequence;
 import model.Config;
 import org.junit.After;
 import org.junit.Before;
@@ -284,15 +285,11 @@ public class ControllerCompareTest {
     @Test
     /*test for the compare command with a test suite containing test cases that do not match the specified representation*/
     public void testCompareTestSuiteContentsAndDataRepresentationMismatch() {
-        /*we can just use on of the predetermined test suites made with newline delimiters,
-        but change the delimiter in the command to something else. This would cause the
-        system to read the whole thing as one test case, and CSVs throw a format mismatch
-        exception if the the CSV contains newlines*/
-        doComparison(singlePairTestSuiteName, null, null, null,
-                "-1", null, null);
+        //to ensure the comparison fails, we will use one of the files formatted as CSV with the EventSequence representation
+        c.processCommand("compare " + singlePairTestSuiteName + " EventSequence");
         assertEquals("one or more test cases in " + singlePairTestSuiteName +
-                " do not match the specified data representation: data_representation.CSV" +
-                System.lineSeparator(), outContent.toString());
+                " do not match the specified data representation: data_representation.EventSequence" +
+                ": sequence does not begin with Start state" + System.lineSeparator(), outContent.toString());
     }
 
     @Test
@@ -322,15 +319,14 @@ public class ControllerCompareTest {
     public void testCompareSecondTestSuiteContentsAndDataRepresentationMismatch() throws IOException {
         String testSuiteName = "test-test-suite";
         String delimiter = "-1";
-        String contents = "1,2,3,4,5,6" + delimiter + "1,2,3,5,4,6";
+        String contents = "Start-a-b-c" + delimiter + "Start-d-e-f";
         writeFile(testSuiteName, contents);
-
-        doComparison(testSuiteName, singlePairTestSuiteName, null, null,
-                "-1", null, null);
+        c.processCommand("compare " + testSuiteName + " " + singlePairTestSuiteName + " EventSequence -d -1");
         assertEquals("one or more test cases in " + singlePairTestSuiteName +
-                " do not match the specified data representation: data_representation.CSV"+System.lineSeparator(),
+                " do not match the specified data representation: data_representation.EventSequence" +
+                        ": sequence does not begin with Start state" + System.lineSeparator(),
                 outContent.toString());
-    deleteFiles(testSuiteName);
+        deleteFiles(testSuiteName);
     }
 
     @Test
