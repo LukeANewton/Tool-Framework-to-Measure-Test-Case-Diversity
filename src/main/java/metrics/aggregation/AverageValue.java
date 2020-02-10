@@ -31,6 +31,6 @@ public class AverageValue implements AggregationStrategy {
      */
     @Override
     public String getDescription() {
-        return "Chooses the average similarity value to represent the overall similarity of the test cases compared.";
+        return "Averages the similarities to represent the overall similarity of the test cases.";
     }
 }

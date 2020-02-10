@@ -31,6 +31,6 @@ public class MinimumValue implements AggregationStrategy {
      */
     @Override
     public String getDescription() {
-        return "Chooses the lowest similarity value to represent the overall similarity of the test cases compared.";
+        return "Chooses the lowest similarity to represent the overall similarity of the test cases.";
     }
 }
