@@ -35,7 +35,7 @@ public class ConsoleOutputServiceTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    /**test to ensure closeScanner properly closes the scanner.
+    /*test to ensure closeScanner properly closes the scanner.
      * test this by closing the scanner and then attempting to get input.
      * this should throw an IllegalStateException
      */
@@ -45,7 +45,7 @@ public class ConsoleOutputServiceTest {
     }
 
     @Test
-    /**Test for display results to check that if properly prints to the standard output*/
+    /*Test for display results to check that if properly prints to the standard output*/
     public void displayResults() {
         String s = "results";
         consoleOutputService.displayResults(s);
@@ -59,7 +59,7 @@ public class ConsoleOutputServiceTest {
     }
 
     @Test
-    /**test for getOverwriteChoice with a yes option*/
+    /*test for getOverwriteChoice with a yes option*/
     public void getOverwriteChoiceYes() {
         setInputForTest("y");
         OverwriteOption opt = consoleOutputService.getOverwriteChoice("filename");
@@ -67,7 +67,7 @@ public class ConsoleOutputServiceTest {
     }
 
     @Test
-    /**test for getOverwriteChoice with a no option*/
+    /*test for getOverwriteChoice with a no option*/
     public void getOverwriteChoiceNo() {
         setInputForTest("N");
         OverwriteOption opt = consoleOutputService.getOverwriteChoice("filename");
@@ -75,7 +75,7 @@ public class ConsoleOutputServiceTest {
     }
 
     @Test
-    /**test for getOverwriteChoice with an append option*/
+    /*test for getOverwriteChoice with an append option*/
     public void getOverwriteChoiceAppend() {
         setInputForTest("A");
         OverwriteOption opt = consoleOutputService.getOverwriteChoice("filename");
@@ -83,7 +83,7 @@ public class ConsoleOutputServiceTest {
     }
 
     @Test
-    /**test for getOverwriteChoice with an invalid option*/
+    /*test for getOverwriteChoice with an invalid option*/
     public void getOverwriteChoiceInvalid() {
         //the system should try to get input twice, first failing, then getting a Yes choice
         setInputForTest("banana" + System.lineSeparator() +"y");
@@ -106,7 +106,7 @@ public class ConsoleOutputServiceTest {
 
         //set the number of tasks to expect
         int numTasks = 10;
-        support.firePropertyChange(new PropertyChangeEvent(this, "numberTasks", 0 , 10));
+        support.firePropertyChange(new PropertyChangeEvent(this, "numberTasks", 0 , numTasks));
 
         //fire an event to simulate a task being completed, this should create the progress bar at 10% complete
         support.firePropertyChange(new PropertyChangeEvent(this, "completedTask", 0, 1));
