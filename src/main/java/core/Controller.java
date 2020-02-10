@@ -315,7 +315,8 @@ public class Controller {
         try {
             return fileReaderService.readIntoDataRepresentation(filename, delimiter, format);
         } catch (InvalidFormatException e) {
-            console.displayResults("one or more test cases in " + filename + " do not match the specified data representation: " + format.getClass().getName());
+            console.displayResults("one or more test cases in " + filename + " do not match the specified data representation: "
+                    + format.getClass().getName() + ": " + e.getMessage());
         } catch (FileNotFoundException e) {
             console.displayResults("file: " + filename + " could not be found");
         } catch (Exception e) {
