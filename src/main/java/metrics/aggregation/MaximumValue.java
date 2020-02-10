@@ -27,6 +27,6 @@ public class MaximumValue implements AggregationStrategy {
      */
     @Override
     public String getDescription() {
-        return "Chooses the highest similarity value to represent the overall similarity of the test cases compared.";
+        return "Chooses the largest similarity to represent the overall similarity of the test cases.";
     }
 }

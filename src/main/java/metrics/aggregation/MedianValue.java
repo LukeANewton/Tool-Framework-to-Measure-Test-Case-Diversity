@@ -36,6 +36,6 @@ public class MedianValue implements AggregationStrategy {
      */
     @Override
     public String getDescription() {
-        return "Chooses the median similarity value to represent the overall similarity of the test cases compared.";
+        return "Chooses the median similarity to represent the overall similarity of the test cases.";
     }
 }

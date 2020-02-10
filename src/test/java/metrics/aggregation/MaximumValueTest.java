@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class MaximumValueTest {
     private AggregationStrategy aggregationStrategy;
@@ -49,7 +50,6 @@ public class MaximumValueTest {
      */
     @Test
     public void getDescription() {
-        assertEquals(aggregationStrategy.getDescription(),
-                "Chooses the highest similarity value to represent the overall similarity of the test cases compared.");
+        assertNotNull(aggregationStrategy.getDescription());
     }
 }

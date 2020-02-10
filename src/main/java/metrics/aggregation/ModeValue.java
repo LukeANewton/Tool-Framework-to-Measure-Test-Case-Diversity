@@ -42,6 +42,6 @@ public class ModeValue implements AggregationStrategy {
      */
     @Override
     public String getDescription() {
-        return "Chooses the most frequent similarity value to represent the overall similarity of the test cases compared.";
+        return "Chooses the most frequent similarity to represent the overall similarity of the test cases.";
     }
 }
