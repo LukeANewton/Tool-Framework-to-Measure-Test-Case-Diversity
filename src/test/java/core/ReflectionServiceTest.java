@@ -42,8 +42,8 @@ public class ReflectionServiceTest {
     @Test
     public void testReflectNoArgsConstructor() throws InvalidFormatException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         Object instance = null;
-        String classPath = "metrics.comparison.CommonElements";
-        String implementedInterface = "metrics.comparison.PairwiseComparisonStrategy";
+        String classPath = "metrics.comparison.pairwise.CommonElements";
+        String implementedInterface = "metrics.comparison.pairwise.PairwiseComparisonStrategy";
         instance = reflector.loadClass(classPath, implementedInterface);
         assertNotNull("Failed to instantiate class '" + classPath + "'.", instance);
     }
@@ -61,7 +61,7 @@ public class ReflectionServiceTest {
     @Test
     public void testReflectNoArgsConstructorNullIF() throws InvalidFormatException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         Object instance = null;
-        String classPath = "metrics.comparison.CommonElements";
+        String classPath = "metrics.comparison.pairwise.CommonElements";
         instance = reflector.loadClass(classPath, null);
         assertNotNull("Failed to instantiate class '" + classPath + "' with a null interface.", instance);
 
@@ -169,7 +169,7 @@ public class ReflectionServiceTest {
         }
 
         classPath = "metrics/comparison.CommonElements";
-        implementedInterface = "metrics.comparison.PairwiseComparisonStrategy";
+        implementedInterface = "metrics.comparison.pairwise.PairwiseComparisonStrategy";
 
         try {
             reflector.loadClass(classPath, implementedInterface);
@@ -178,7 +178,7 @@ public class ReflectionServiceTest {
             assertTrue(e instanceof InvalidFormatException);
         }
 
-        classPath = "metrics.comparison.CommonElements";
+        classPath = "metrics.comparison.pairwise.CommonElements";
         implementedInterface = "metrics.comparison/PairwiseComparisonStrategy";
         try {
             reflector.loadClass(classPath, implementedInterface);
@@ -191,16 +191,16 @@ public class ReflectionServiceTest {
     @Test(expected= InputMismatchException.class)
     public void testClassNotClass() throws IllegalAccessException, InvocationTargetException, InvalidFormatException,
             InstantiationException, NoSuchMethodException, ClassNotFoundException {
-        String classPath = "metrics.comparison.PairwiseComparisonStrategy";
-        String implementedInterface = "metrics.comparison.PairwiseComparisonStrategy";
+        String classPath = "metrics.comparison.pairwise.PairwiseComparisonStrategy";
+        String implementedInterface = "metrics.comparison.pairwise.PairwiseComparisonStrategy";
         reflector.loadClass(classPath, implementedInterface);
     }
 
     @Test(expected= InputMismatchException.class)
     public void testInterfaceNotInterface() throws IllegalAccessException, InvocationTargetException, InvalidFormatException,
             InstantiationException, NoSuchMethodException, ClassNotFoundException {
-        String classPath = "metrics.comparison.CommonElements";
-        String implementedInterface = "metrics.comparison.CommonElements";
+        String classPath = "metrics.comparison.pairwise.CommonElements";
+        String implementedInterface = "metrics.comparison.pairwise.CommonElements";
         reflector.loadClass(classPath, implementedInterface);
     }
 
@@ -238,7 +238,7 @@ public class ReflectionServiceTest {
      */
     public void testSearchPackage() {
         try {
-            Object[] list = reflector.searchPackage("metrics.comparison", "metrics.comparison.PairwiseComparisonStrategy");
+            Object[] list = reflector.searchPackage("metrics.comparison.pairwise", "metrics.comparison.pairwise.PairwiseComparisonStrategy");
             assertEquals(7, list.length);
         } catch (Exception e) {
             e.printStackTrace();
@@ -262,7 +262,7 @@ public class ReflectionServiceTest {
 
         //do the test
         try {
-            Object[] list = reflector.searchPackage("metrics.comparison", "metrics.comparison.PairwiseComparisonStrategy");
+            Object[] list = reflector.searchPackage("metrics.comparison.pairwise", "metrics.comparison.pairwise.PairwiseComparisonStrategy");
             assertEquals(7, list.length);
         } catch (Exception e) {
             e.printStackTrace();

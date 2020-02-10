@@ -1,6 +1,8 @@
-package metrics.comparison;
+package metrics.comparison.pairwise;
 
 import data_representation.CSV;
+import metrics.comparison.pairwise.CompressionDistance;
+import metrics.comparison.pairwise.PairwiseComparisonStrategy;
 import org.junit.Before;
 import org.junit.Test;
 

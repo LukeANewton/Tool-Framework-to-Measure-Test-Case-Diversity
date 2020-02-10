@@ -1,6 +1,7 @@
-package metrics.comparison;
+package metrics.comparison.pairwise;
 
 import data_representation.CSV;
+import metrics.comparison.pairwise.JaccardIndex;
 import org.junit.Before;
 import org.junit.Test;
 

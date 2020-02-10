@@ -2,8 +2,8 @@ package core;
 
 import data_representation.DataRepresentation;
 import metrics.aggregation.AggregationStrategy;
-import metrics.comparison.PairwiseComparisonStrategy;
-import metrics.listwise.ListwiseComparisonStrategy;
+import metrics.comparison.pairwise.PairwiseComparisonStrategy;
+import metrics.comparison.listwise.ListwiseComparisonStrategy;
 import model.ListwiseCommand;
 import model.PairwiseCommand;
 import utilities.Tuple;

@@ -1,4 +1,4 @@
-package metrics.listwise;
+package metrics.comparison.listwise;
 
 
 import data_representation.DataRepresentation;

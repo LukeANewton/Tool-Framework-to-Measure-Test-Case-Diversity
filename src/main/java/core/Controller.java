@@ -2,7 +2,7 @@ package core;
 
 import data_representation.DataRepresentation;
 import metrics.aggregation.AggregationStrategy;
-import metrics.comparison.PairwiseComparisonStrategy;
+import metrics.comparison.pairwise.PairwiseComparisonStrategy;
 import model.*;
 import user_interface.ConsoleOutputService;
 import user_interface.InputParser;
@@ -24,7 +24,7 @@ public class Controller {
     //the name of the configuration file containing system defaults
     private static final String CONFIG_FILE = "config.json";
     private static final String DATA_REP_INTERFACE_PATH = "data_representation.DataRepresentation";
-    private static final String PAIRWISE_COMPARISON_INTERFACE_PATH = "metrics.comparison.PairwiseComparisonStrategy";
+    private static final String PAIRWISE_COMPARISON_INTERFACE_PATH = "metrics.comparison.pairwise.PairwiseComparisonStrategy";
     private static final String AGGREGATION_INTERFACE_PATH = "metrics.aggregation.AggregationStrategy";
 
     //configuration object containing config file values

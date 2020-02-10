@@ -1,6 +1,7 @@
-package metrics.comparison;
+package metrics.comparison.pairwise;
 
 import data_representation.CSV;
+import metrics.comparison.pairwise.CommonElements;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
