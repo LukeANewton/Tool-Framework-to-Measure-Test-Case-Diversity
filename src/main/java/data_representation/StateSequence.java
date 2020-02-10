@@ -8,29 +8,29 @@ import java.util.List;
 /**
  * this is a data representation for a format used in the case studies.
  * This format starts with an id enclosed in square brackets, and then
- * is a dash-separated list of states and events:
+ * is a dash-separated list of states then events:
  *
- *[<id>] Start-<event>-<state>-<event>...
+ *[<id>] State-<event>-<state>-<event>...
  *
  * this particular data representation reads that format in, but only
- * stores the events in the list
+ * stores the states in the list
  *
  * @author luke
  */
-public class EventSequence implements DataRepresentation {
+public class StateSequence implements DataRepresentation {
     List<String> events;
     Long id;
     int iteratorIndex;
 
     /**Constructor*/
-    public EventSequence(){
+    public StateSequence(){
         events = new ArrayList<>();
         id = null;
         iteratorIndex = 0;
     }
 
     /**Constructor*/
-    public EventSequence(String s) throws InvalidFormatException {
+    public StateSequence(String s) throws InvalidFormatException {
         events = new ArrayList<>();
         id = null;
         iteratorIndex = 0;
@@ -72,8 +72,8 @@ public class EventSequence implements DataRepresentation {
         String[] stateEventList = s.split("-");
         if(stateEventList.length == 1 && stateEventList[0].equals(""))
             throw new InvalidFormatException("no elements in the list");
-        //events are all the even positions in the list
-        for(int i = 0; i < stateEventList.length; i+=2)
+        //events are all the odd positions in the list
+        for(int i = 1; i < stateEventList.length; i+=2)
             events.add(stateEventList[i]);
     }
 
@@ -106,7 +106,7 @@ public class EventSequence implements DataRepresentation {
 
     @Override
     public String getDescription() {
-        return "reads in a dash-separated list of alternating events and states, but only stores the events";
+        return "reads in a dash-separated list of alternating events and states, but only stores the states";
     }
 
     @Override
