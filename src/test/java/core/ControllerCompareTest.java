@@ -1,6 +1,5 @@
 package core;
 
-import data_representation.EventSequence;
 import model.Config;
 import org.junit.After;
 import org.junit.Before;
