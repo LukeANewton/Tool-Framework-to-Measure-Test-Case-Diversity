@@ -73,8 +73,6 @@ public class FileReaderService {
 		//all the file contents is in the system, now we need to read them into data representations
 		ArrayList<DataRepresentation> list = new ArrayList<>();
 		for (String testCase : testCases) {
-			if (testCase.trim().equals("") )
-				continue;
 			DataRepresentation d = format.getClass().getConstructor().newInstance();
 			d.parse(testCase);
 			list.add(d);
