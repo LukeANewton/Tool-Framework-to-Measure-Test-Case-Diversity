@@ -35,7 +35,7 @@ public class Nei implements ListwiseComparisonStrategy{
             for (DataRepresentation testcase : testsuite) {
                 if (testcase.hasNext()) {
                     allCasesFullyTraversed = false;
-                    String s = testcase.next();
+                    String s = testcase.next().toString();
                     numElements++;
                     if (frequencies.containsKey(s))
                         frequencies.put(s, frequencies.get(s) + 1);

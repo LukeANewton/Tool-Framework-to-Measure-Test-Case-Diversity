@@ -20,7 +20,7 @@ public class CSV implements DataRepresentation {
 	 * @throws InvalidFormatException thrown when the supplied string does not match the specified format
 	 */
 	public CSV(String s) throws InvalidFormatException {
-		this.testcase = this.parse(s);
+		this.parse(s);
 		this.nextPosition = 0;
 	}
 	
@@ -37,7 +37,7 @@ public class CSV implements DataRepresentation {
 
 	@Override
 	public String next() {
-		StringBuffer s = new StringBuffer();
+		StringBuilder s = new StringBuilder();
 		while(this.hasNext() && this.testcase.charAt(this.nextPosition) != ',') {
 			s.append(this.testcase.charAt(this.nextPosition));
 			this.nextPosition++;
@@ -47,10 +47,9 @@ public class CSV implements DataRepresentation {
 	}
 
 	@Override
-	public String parse(String s) throws InvalidFormatException {	
+	public void parse(String s) throws InvalidFormatException {
 		if(this.checkFormat(s)) {
 			this.testcase = s;
-			return s;
 		}else
 			throw new InvalidFormatException();
 	}
