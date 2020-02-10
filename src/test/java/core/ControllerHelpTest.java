@@ -3,7 +3,6 @@ package core;
 import model.Config;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -11,6 +10,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class ControllerHelpTest {
     private Controller c;
@@ -104,14 +104,11 @@ public class ControllerHelpTest {
         compareAgainstString("help -m", expected);
     }
 
-    @Test @Ignore
+    @Test
     /*test for parsing data representation help*/
     public void testDataRepresentationHelp() {
-        String expected = "Available DataRepresentations are:" + System.lineSeparator() +
-                "\tCSV:" + System.lineSeparator() +
-                "\t\tcomma separated value" + System.lineSeparator() +
-                System.lineSeparator();
-        compareAgainstString("help -f", expected);
+        c.processCommand("help -f");
+        assertNotNull(outContent.toString());
     }
 
     @Test
