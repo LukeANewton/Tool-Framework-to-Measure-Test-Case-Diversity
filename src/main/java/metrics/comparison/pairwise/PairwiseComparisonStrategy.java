@@ -1,4 +1,4 @@
-package metrics.comparison;
+package metrics.comparison.pairwise;
 
 import core.HelpTarget;
 import data_representation.DataRepresentation;

@@ -1,6 +1,6 @@
 {
   "comparisonMethod": "CommonElements",
-  "comparisonMethodLocation": "metrics.comparison.",
+  "comparisonMethodLocation": "metrics.comparison.pairwise",
   "dataRepresentation": "CSV",
   "dataRepresentationLocation": "data_representation",
   "delimiter": "\r\n",

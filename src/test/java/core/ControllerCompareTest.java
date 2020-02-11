@@ -232,7 +232,7 @@ public class ControllerCompareTest {
         //set up a config file here that includes defaults
         config.setDataRepresentationLocation("data_representation");
         config.setComparisonMethod("JaccardIndex");
-        config.setComparisonMethodLocation("metrics.comparison");
+        config.setComparisonMethodLocation("metrics.comparison.pairwise");
         config.setAggregationMethod("AverageValue");
         config.setAggregationMethodLocation("metrics.aggregation");
         config.setDelimiter(System.lineSeparator());
@@ -251,7 +251,7 @@ public class ControllerCompareTest {
     public void testCompareInvalidMetric() {
         doComparison(singlePairTestSuiteName, null, "banana", null,
                 null, null, null);
-        assertEquals("no pairwise metric named banana in metrics.comparison. found" +
+        assertEquals("no pairwise metric named banana in metrics.comparison.pairwise. found" +
                 System.lineSeparator(), outContent.toString());
     }
 
@@ -297,7 +297,7 @@ public class ControllerCompareTest {
         doComparison(singlePairTestSuiteName, null, "PairwiseComparisonStrategy", null,
                 null, null, null);
         assertEquals("failed to instantiate pairwise metric: PairwiseComparisonStrategy: PairwiseComparisonStrategy " +
-                "is a metrics.comparison.PairwiseComparisonStrategy. Expected a class." +
+                "is a metrics.comparison.pairwise.PairwiseComparisonStrategy. Expected a class." +
                 System.lineSeparator(), outContent.toString());
     }
 

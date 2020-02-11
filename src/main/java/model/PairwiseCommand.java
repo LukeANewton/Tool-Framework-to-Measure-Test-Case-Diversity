@@ -1,7 +1,7 @@
 package model;
 
 import data_representation.DataRepresentation;
-import metrics.comparison.PairwiseComparisonStrategy;
+import metrics.comparison.pairwise.PairwiseComparisonStrategy;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;

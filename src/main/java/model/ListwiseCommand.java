@@ -1,7 +1,7 @@
 package model;
 
 import data_representation.DataRepresentation;
-import metrics.listwise.ListwiseComparisonStrategy;
+import metrics.comparison.listwise.ListwiseComparisonStrategy;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;

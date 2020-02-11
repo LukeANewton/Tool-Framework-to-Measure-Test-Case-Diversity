@@ -1,7 +1,7 @@
-package metrics.comparison;
+package metrics.comparison.pairwise;
 
-import core.InvalidFormatException;
 import data_representation.CSV;
+import metrics.comparison.pairwise.Levenshtein;
 import org.junit.Before;
 import org.junit.Test;
 
