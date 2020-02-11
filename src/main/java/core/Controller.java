@@ -12,7 +12,6 @@ import utilities.Tuple;
 
 import java.io.*;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -248,7 +247,7 @@ public class Controller {
 
         //generate the pairs for comparison
         pairingService = new PairingService();
-        List<Tuple<DataRepresentation, DataRepresentation>> pairs = new ArrayList<>();
+        List<Tuple<DataRepresentation, DataRepresentation>> pairs;
         console.displayResults("Pairing Test Cases...");
         if(testSuite2 == null)
             pairs = pairingService.makePairs(console, testSuite1);
