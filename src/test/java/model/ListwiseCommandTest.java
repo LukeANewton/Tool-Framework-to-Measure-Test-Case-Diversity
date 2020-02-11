@@ -77,7 +77,9 @@ public class ListwiseCommandTest {
                 null, 1));
         command = new ListwiseCommand(strategy, testsuite, c);
         command.call();
-        assertEquals("[==========]" + System.lineSeparator(), outContent.toString());
+        String expected = "[==========]" + System.lineSeparator();
+        String actual = outContent.toString();
+        assertEquals(expected, actual.substring(actual.length() - expected.length()));
         System.setOut(originalOut);
     }
 }

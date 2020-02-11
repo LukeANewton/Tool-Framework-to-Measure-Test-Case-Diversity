@@ -49,7 +49,7 @@ public class ListwiseCommand implements Callable<Object> {
         }
         double result = comparison.compare(testsuite);
         support.firePropertyChange(new PropertyChangeEvent(this, "complete",
-                null, null));
+                null, 1));
         return result;
     }
 }

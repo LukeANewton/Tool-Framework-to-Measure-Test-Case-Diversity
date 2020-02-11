@@ -12,6 +12,7 @@ import utilities.Tuple;
 
 import java.io.*;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -247,11 +248,12 @@ public class Controller {
 
         //generate the pairs for comparison
         pairingService = new PairingService();
-        List<Tuple<DataRepresentation, DataRepresentation>> pairs;
+        List<Tuple<DataRepresentation, DataRepresentation>> pairs = new ArrayList<>();
+        console.displayResults("Pairing Test Cases...");
         if(testSuite2 == null)
-            pairs = pairingService.makePairs(testSuite1);
+            pairs = pairingService.makePairs(console, testSuite1);
         else
-            pairs = pairingService.makePairs(testSuite1, testSuite2);
+            pairs = pairingService.makePairs(console, testSuite1, testSuite2);
         if(pairs.size() == 0){//no pairs could be made from the passed test suites
             console.displayResults("Test suite contains insufficient test cases to generate pairs");
             return;
@@ -268,6 +270,7 @@ public class Controller {
         }
 
         try {
+            console.displayResults("Performing Comparison...");
             result = comparisonService.pairwiseCompare(pairs, comparisonStrategy, aggregationStrategy, console, dto.isUseThreadPool());
         } catch (Exception e) {
             console.displayResults("Error in pairwise comparison calculation: " + e.toString());

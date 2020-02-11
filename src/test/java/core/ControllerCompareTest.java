@@ -137,17 +137,6 @@ public class ControllerCompareTest {
     }
 
     /**
-     * helper function to format an expected result in the way it is displayed on the console
-     *
-     * @param result the comparison result to format
-     * @return the result formated to match console display
-     */
-    private String buildSinglePairConsoleOutput(String result){
-        return "[==========]"+System.lineSeparator()+"Result:" + System.lineSeparator() +
-                System.lineSeparator() + result + System.lineSeparator();
-    }
-
-    /**
      * helper method to simulate input from the user for a test
      *
      * @param input the inpt to simulate doming from the user
@@ -168,11 +157,11 @@ public class ControllerCompareTest {
         assertTrue(new File(testOutputName).exists());
 
         //check that the file contents matches what is displayed to the console
-        String result = readFile(testOutputName);
-        assertEquals(outContent.toString(), buildSinglePairConsoleOutput(result));
-
+        String expected = readFile(testOutputName) + System.lineSeparator();
+        String actual = outContent.toString();
+        assertEquals(expected, actual.substring(actual.length() - expected.length()));
         //check the actual value of the comparison (hand calculated)
-        assertEquals(Double.parseDouble(result), 4.0, TOLERANCE);
+        assertEquals(Double.parseDouble(expected), 4.0, TOLERANCE);
 
         //clean up files created
         deleteFiles(testOutputName);
@@ -243,7 +232,9 @@ public class ControllerCompareTest {
                 null, null, null);
 
         //check the value of the resulting comparison. The singlePairTestSuite JaccardIndex should be 1
-        assertEquals(buildSinglePairConsoleOutput("1.0"), outContent.toString());
+        String expected = "1.0" + System.lineSeparator();
+        String actual = outContent.toString();
+        assertEquals(expected, actual.substring(actual.length() - expected.length()));
     }
 
     @Test
@@ -346,7 +337,9 @@ public class ControllerCompareTest {
     public void testGeneratePairsForTwoSmallSuites(){
         doComparison(singleCaseTestSuiteName, singleCaseTestSuiteName, "JaccardIndex", null,
                 null, null, null);
-        assertEquals(buildSinglePairConsoleOutput("1.0"), outContent.toString());
+        String expected = "1.0" + System.lineSeparator();
+        String actual = outContent.toString();
+        assertEquals(expected, actual.substring(actual.length() - expected.length()));
     }
 
     @Test
@@ -354,7 +347,9 @@ public class ControllerCompareTest {
     public void testCompareFailTooFewTestCases(){
         doComparison(singleCaseTestSuiteName, null, "JaccardIndex", null, null,
                 null, null);
-        assertEquals("Test suite contains insufficient test cases to generate pairs\r\n", outContent.toString());
+        String expected = "Test suite contains insufficient test cases to generate pairs" + System.lineSeparator();
+        String actual = outContent.toString();
+        assertEquals(expected, actual.substring(actual.length() - expected.length()));
     }
 
     @Test
