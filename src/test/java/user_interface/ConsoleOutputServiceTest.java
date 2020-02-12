@@ -111,7 +111,8 @@ public class ConsoleOutputServiceTest {
         //fire an event to simulate a task being completed, this should create the progress bar at 10% complete
         support.firePropertyChange(new PropertyChangeEvent(this, "completedTask", 0, 1));
         String expected = "[=         ]\r";
-        assertEquals(expected, outContent.toString());
+        String actual = outContent.toString();
+        assertEquals(expected, actual.substring(actual.length() - expected.length()));
 
         //fire 9 more events to complete all 10 tasks. then we should have a full progress bar
         for(int i = 0; i < 9; i++)

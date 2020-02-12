@@ -56,7 +56,9 @@ public class PairwiseCommandTest {
                 null, 1));
         command = new PairwiseCommand(strategy, new CSV("1,2,3,4,5,6"), new CSV("5,4,8,5,2,4,7") , c);
         command.call();
-        assertEquals("[==========]" + System.lineSeparator(), outContent.toString());
+        String expected = "[==========]" + System.lineSeparator();
+        String actual = outContent.toString();
+        assertEquals(expected, actual.substring(actual.length() - expected.length()));
         System.setOut(originalOut);
     }
 }
