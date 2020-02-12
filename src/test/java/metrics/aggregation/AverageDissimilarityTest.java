@@ -11,17 +11,14 @@ import java.util.Random;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-/**
- * Test suite for the average value aggregation strategy
- */
-public class AverageValueTest {
+public class AverageDissimilarityTest {
 
     private final double TOLERANCE = 0.01;
     private AggregationStrategy aggregationStrategy;
 
     @Before
     public void setup() {
-        aggregationStrategy = new AverageValue();
+        aggregationStrategy = new AverageDissimilarity();
     }
 
     /**
@@ -32,30 +29,20 @@ public class AverageValueTest {
         List<Double> similarityValues = new ArrayList<>();
         // Populate array with random values
         Random r = new Random(123456);
-        int SIMILARITY_VALUES = 10;
-        double MIN_RANGE = 0.00;
-        double MAX_RANGE = 1.00;
-        for (int i = 0; i < SIMILARITY_VALUES; i++) {
+        final int NUM_SIMILARITY_VALUES = 10;
+        final double MIN_RANGE = 0.00;
+        final double MAX_RANGE = 1.00;
+
+        for (int i = 0; i < NUM_SIMILARITY_VALUES; i++) {
             similarityValues.add(MIN_RANGE + (MAX_RANGE - MIN_RANGE) * r.nextDouble());
         }
-
         // Attempt to calculate the average value by other means. This will be our oracle.
         double sum = 0;
         for (Double value : similarityValues) {
             sum += value;
         }
-        double average = sum/ SIMILARITY_VALUES;
+        double average = sum / Math.pow(NUM_SIMILARITY_VALUES, 2);
         assertEquals(average, Double.parseDouble(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
-    }
-
-    /**
-     * Tests that the average is calculated correctly using predefined values.
-     * Variant: Result is 0.5
-     */
-    @Test
-    public void testHalfAverageValue() {
-        List<Double> similarityValues = new ArrayList<>(Arrays.asList(0.0, 0.0, 0.25, 0.5, 0.75, 1.0, 1.0));
-        assertEquals(0.5, Double.parseDouble(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
     }
 
     /**
@@ -65,7 +52,28 @@ public class AverageValueTest {
     @Test
     public void testNegativeAverageValue() {
         List<Double> similarityValues = new ArrayList<>(Arrays.asList(0.0, 0.0, 1.0, -1.0, -1.0));
-        assertEquals(-0.2, Double.parseDouble(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
+        assertEquals(-0.04, Double.parseDouble(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
+    }
+
+    /**
+     * Tests that the average is calculated correctly using predefined values.
+     * Variant: Averaging one value
+     */
+    @Test
+    public void testAverageOneValue() {
+        List<Double> similarityValues = new ArrayList<>();
+        similarityValues.add(1.0);
+        assertEquals(1.0, Double.parseDouble(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
+    }
+
+    /**
+     * Tests that the average is calculated correctly using predefined values.
+     * Variant: Result is zero
+     */
+    @Test
+    public void testZeroAverageValue() {
+        List<Double> similarityValues = new ArrayList<>(Arrays.asList(0.0, 0.0, 0.0, 0.0));
+        assertEquals(0.0, Double.parseDouble(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
     }
 
     /**
