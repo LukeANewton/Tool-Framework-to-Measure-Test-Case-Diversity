@@ -1,4 +1,4 @@
-package metrics.comparison;
+package metrics.comparison.pairwise;
 
 import data_representation.DataRepresentation;
 
@@ -25,13 +25,13 @@ public class JaccardIndex implements PairwiseComparisonStrategy {
 		HashSet<String> intersection = new HashSet<>();
 		
 		while(testCase1.hasNext()) {
-			String s = testCase1.next();
+			String s = testCase1.next().toString();
 			set1.add(s);
 			union.add(s);
 		}
 			
 		while(testCase2.hasNext()) {
-			String s = testCase2.next();
+			String s = testCase2.next().toString();
 			union.add(s);
 			if(set1.contains(s))
 				intersection.add(s);

@@ -1,40 +1,43 @@
-package metrics.comparison;
+package metrics.comparison.pairwise;
 
 import data_representation.CSV;
+import metrics.comparison.pairwise.JaccardIndex;
 import org.junit.Before;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
-public class CommonElementsTest {
-    private CommonElements metric;
-    private static final double THRESHOLD = 0;
+public class JaccardIndexTest {
+    private JaccardIndex metric;
+    private static final double THRESHOLD = 0.01;
 
     @Before
     public void setUp(){
-        metric = new CommonElements();
+        metric = new JaccardIndex();
     }
 
     @Test
-    /**test for the getDescription method, currently null*/
-    public void testCommonElementsGetDescription() {
-        assertEquals("counts the number of elements that appear at the same index in both sequences", metric.getDescription());
+    /*test for the getDescription method, currently null*/
+    public void testJaccardIndexGetDescription() {
+        assertEquals("provides a ratio between the intersection of two sets and the union of the sets",
+                metric.getDescription());
     }
 
     @Test
-    /**Test the common elements when both test cases are equal*/
-    public void testCommonElementsEqual() {
+    /*Test the JaccardIndex metric when both test cases are equal*/
+    public void testJaccardIndexEqual() {
         String testCase = "1,2,3,4,5,6,7,8,9";
         try {
             double result = metric.compare(new CSV(testCase), new CSV(testCase));
-            assertEquals("Result should be 9 but is: " + result,9, result,THRESHOLD);
+            assertEquals("Result should be 1 but is: " + result,1, result,THRESHOLD);
         } catch (Exception e) {
             fail();
         }
     }
 
     @Test
-    /**Test the common elements when test cases are completely different*/
-    public void testCommonElementsNotEqual() {
+    /*Test the JaccardIndex when test cases are completely different*/
+    public void testJaccardIndexNotEqual() {
         String testCase1 = "1,2,3,4,5";
         String testCase2 = "6,7,8,9,10";
         try {
@@ -46,26 +49,26 @@ public class CommonElementsTest {
     }
 
     @Test
-    /**Test the common elements between two lists with the same values in different order*/
-    public void testCommonElements() {
+    /*Test the common elements between two lists with the same values in different order*/
+    public void testJaccardIndex() {
         String testCase1 = "1,2,3,4,5,6";
         String testCase2 = "6,5,4,3,2,1";
         try {
             double result = metric.compare(new CSV(testCase1), new CSV(testCase2));
-            assertEquals("Result should be 0 but is: " + result,0,result,THRESHOLD);
+            assertEquals("Result should be 1 but is: " + result,1,result,THRESHOLD);
         } catch (Exception e) {
             fail();
         }
     }
 
     @Test
-    /**Test the common elements between two lists with one list longer than the other*/
+    /*Test the common elements between two lists with one list longer than the other*/
     public void testComparisonSwitchOperands() {
         String testCase1 = "1,2,3";
         String testCase2 = "1,2,3,4,5,6";
         try {
             double result = metric.compare(new CSV(testCase1), new CSV(testCase2));
-            assertEquals("Result should be 3 but is: " + result,3,result,THRESHOLD);
+            assertEquals("Result should be 0.5 but is: " + result,0.5,result,THRESHOLD);
         } catch (Exception e) {
             fail();
         }

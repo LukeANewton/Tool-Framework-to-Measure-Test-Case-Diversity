@@ -1,7 +1,7 @@
 package model;
 
 import data_representation.DataRepresentation;
-import metrics.listwise.ListwiseComparisonStrategy;
+import metrics.comparison.listwise.ListwiseComparisonStrategy;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -49,7 +49,7 @@ public class ListwiseCommand implements Callable<Object> {
         }
         double result = comparison.compare(testsuite);
         support.firePropertyChange(new PropertyChangeEvent(this, "complete",
-                null, null));
+                null, 1));
         return result;
     }
 }

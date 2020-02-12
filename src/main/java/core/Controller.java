@@ -2,7 +2,7 @@ package core;
 
 import data_representation.DataRepresentation;
 import metrics.aggregation.AggregationStrategy;
-import metrics.comparison.PairwiseComparisonStrategy;
+import metrics.comparison.pairwise.PairwiseComparisonStrategy;
 import model.*;
 import user_interface.ConsoleOutputService;
 import user_interface.InputParser;
@@ -24,7 +24,7 @@ public class Controller {
     //the name of the configuration file containing system defaults
     private static final String CONFIG_FILE = "config.json";
     private static final String DATA_REP_INTERFACE_PATH = "data_representation.DataRepresentation";
-    private static final String PAIRWISE_COMPARISON_INTERFACE_PATH = "metrics.comparison.PairwiseComparisonStrategy";
+    private static final String PAIRWISE_COMPARISON_INTERFACE_PATH = "metrics.comparison.pairwise.PairwiseComparisonStrategy";
     private static final String AGGREGATION_INTERFACE_PATH = "metrics.aggregation.AggregationStrategy";
 
     //configuration object containing config file values
@@ -248,10 +248,11 @@ public class Controller {
         //generate the pairs for comparison
         pairingService = new PairingService();
         List<Tuple<DataRepresentation, DataRepresentation>> pairs;
+        console.displayResults("Pairing Test Cases...");
         if(testSuite2 == null)
-            pairs = pairingService.makePairs(testSuite1);
+            pairs = pairingService.makePairs(console, testSuite1);
         else
-            pairs = pairingService.makePairs(testSuite1, testSuite2);
+            pairs = pairingService.makePairs(console, testSuite1, testSuite2);
         if(pairs.size() == 0){//no pairs could be made from the passed test suites
             console.displayResults("Test suite contains insufficient test cases to generate pairs");
             return;
@@ -268,6 +269,7 @@ public class Controller {
         }
 
         try {
+            console.displayResults("Performing Comparison...");
             result = comparisonService.pairwiseCompare(pairs, comparisonStrategy, aggregationStrategy, console, dto.isUseThreadPool());
         } catch (Exception e) {
             console.displayResults("Error in pairwise comparison calculation: " + e.toString());
@@ -315,7 +317,8 @@ public class Controller {
         try {
             return fileReaderService.readIntoDataRepresentation(filename, delimiter, format);
         } catch (InvalidFormatException e) {
-            console.displayResults("one or more test cases in " + filename + " do not match the specified data representation: " + format.getClass().getName());
+            console.displayResults("one or more test cases in " + filename + " do not match the specified data representation: "
+                    + format.getClass().getName() + ": " + e.getMessage());
         } catch (FileNotFoundException e) {
             console.displayResults("file: " + filename + " could not be found");
         } catch (Exception e) {

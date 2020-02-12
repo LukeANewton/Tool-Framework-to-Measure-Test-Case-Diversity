@@ -72,24 +72,22 @@ public class ConsoleOutputService implements PropertyChangeListener {
 		if(evt.getPropertyName().equals("numberTasks")) {
 			numberTasks = (Integer) evt.getNewValue();
 			completedComparisons = 0;
+			System.out.print("[          ]\r");
 		}else {
 			synchronized (this) {
-				completedComparisons++;
+				completedComparisons += (int) evt.getNewValue();
 				double percent = ((double) completedComparisons) / numberTasks;
 
-				if(percent - lastProgressMilestone >= 0.1) {
+				if (completedComparisons == numberTasks)
+					System.out.println("[==========]");
+				else if(percent - lastProgressMilestone >= 0.1) {
 					lastProgressMilestone = percent;
-					if (completedComparisons == numberTasks)
-						System.out.println("[==========]");
-					else {
-						int n = (int) (percent * 10);
-						System.out.print(
-								"[" +
-										String.format("%0" + n + "d", 0).replace("0", "=") +
-										String.format("%0" + (10 - n) + "d", 0).replace("0", " ")
-										+ "]\r"
-						);
-					}
+					int n = (int) (percent * 10);
+					System.out.print("[" +
+									String.format("%0" + n + "d", 0).replace("0", "=") +
+									String.format("%0" + (10 - n) + "d", 0).replace("0", " ")
+									+ "]\r"
+					);
 				}
 			}
 		}

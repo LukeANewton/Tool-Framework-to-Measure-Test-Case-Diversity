@@ -1,7 +1,7 @@
 package model;
 
 import data_representation.DataRepresentation;
-import metrics.comparison.PairwiseComparisonStrategy;
+import metrics.comparison.pairwise.PairwiseComparisonStrategy;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -40,7 +40,7 @@ public class PairwiseCommand implements Callable<Object> {
 
 		double result = comparison.compare(Data1, Data2);
 		support.firePropertyChange(new PropertyChangeEvent(this, "complete",
-				null, null));
+				null, 1));
 		return result;
 	}
 }

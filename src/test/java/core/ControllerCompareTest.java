@@ -137,17 +137,6 @@ public class ControllerCompareTest {
     }
 
     /**
-     * helper function to format an expected result in the way it is displayed on the console
-     *
-     * @param result the comparison result to format
-     * @return the result formated to match console display
-     */
-    private String buildSinglePairConsoleOutput(String result){
-        return "[==========]"+System.lineSeparator()+"Result:" + System.lineSeparator() +
-                System.lineSeparator() + result + System.lineSeparator();
-    }
-
-    /**
      * helper method to simulate input from the user for a test
      *
      * @param input the inpt to simulate doming from the user
@@ -168,11 +157,11 @@ public class ControllerCompareTest {
         assertTrue(new File(testOutputName).exists());
 
         //check that the file contents matches what is displayed to the console
-        String result = readFile(testOutputName);
-        assertEquals(outContent.toString(), buildSinglePairConsoleOutput(result));
-
+        String expected = readFile(testOutputName) + System.lineSeparator();
+        String actual = outContent.toString();
+        assertEquals(expected, actual.substring(actual.length() - expected.length()));
         //check the actual value of the comparison (hand calculated)
-        assertEquals(Double.parseDouble(result), 4.0, TOLERANCE);
+        assertEquals(Double.parseDouble(expected), 4.0, TOLERANCE);
 
         //clean up files created
         deleteFiles(testOutputName);
@@ -232,7 +221,7 @@ public class ControllerCompareTest {
         //set up a config file here that includes defaults
         config.setDataRepresentationLocation("data_representation");
         config.setComparisonMethod("JaccardIndex");
-        config.setComparisonMethodLocation("metrics.comparison");
+        config.setComparisonMethodLocation("metrics.comparison.pairwise");
         config.setAggregationMethod("AverageValue");
         config.setAggregationMethodLocation("metrics.aggregation");
         config.setDelimiter(System.lineSeparator());
@@ -243,7 +232,9 @@ public class ControllerCompareTest {
                 null, null, null);
 
         //check the value of the resulting comparison. The singlePairTestSuite JaccardIndex should be 1
-        assertEquals(buildSinglePairConsoleOutput("1.0"), outContent.toString());
+        String expected = "1.0" + System.lineSeparator();
+        String actual = outContent.toString();
+        assertEquals(expected, actual.substring(actual.length() - expected.length()));
     }
 
     @Test
@@ -251,7 +242,7 @@ public class ControllerCompareTest {
     public void testCompareInvalidMetric() {
         doComparison(singlePairTestSuiteName, null, "banana", null,
                 null, null, null);
-        assertEquals("no pairwise metric named banana in metrics.comparison. found" +
+        assertEquals("no pairwise metric named banana in metrics.comparison.pairwise. found" +
                 System.lineSeparator(), outContent.toString());
     }
 
@@ -284,15 +275,11 @@ public class ControllerCompareTest {
     @Test
     /*test for the compare command with a test suite containing test cases that do not match the specified representation*/
     public void testCompareTestSuiteContentsAndDataRepresentationMismatch() {
-        /*we can just use on of the predetermined test suites made with newline delimiters,
-        but change the delimiter in the command to something else. This would cause the
-        system to read the whole thing as one test case, and CSVs throw a format mismatch
-        exception if the the CSV contains newlines*/
-        doComparison(singlePairTestSuiteName, null, null, null,
-                "-1", null, null);
+        //to ensure the comparison fails, we will use one of the files formatted as CSV with the EventSequence representation
+        c.processCommand("compare " + singlePairTestSuiteName + " EventSequence");
         assertEquals("one or more test cases in " + singlePairTestSuiteName +
-                " do not match the specified data representation: data_representation.CSV" +
-                System.lineSeparator(), outContent.toString());
+                " do not match the specified data representation: data_representation.EventSequence" +
+                ": sequence does not begin with Start state" + System.lineSeparator(), outContent.toString());
     }
 
     @Test
@@ -301,7 +288,7 @@ public class ControllerCompareTest {
         doComparison(singlePairTestSuiteName, null, "PairwiseComparisonStrategy", null,
                 null, null, null);
         assertEquals("failed to instantiate pairwise metric: PairwiseComparisonStrategy: PairwiseComparisonStrategy " +
-                "is a metrics.comparison.PairwiseComparisonStrategy. Expected a class." +
+                "is a metrics.comparison.pairwise.PairwiseComparisonStrategy. Expected a class." +
                 System.lineSeparator(), outContent.toString());
     }
 
@@ -322,15 +309,14 @@ public class ControllerCompareTest {
     public void testCompareSecondTestSuiteContentsAndDataRepresentationMismatch() throws IOException {
         String testSuiteName = "test-test-suite";
         String delimiter = "-1";
-        String contents = "1,2,3,4,5,6" + delimiter + "1,2,3,5,4,6";
+        String contents = "Start-a-b-c" + delimiter + "Start-d-e-f";
         writeFile(testSuiteName, contents);
-
-        doComparison(testSuiteName, singlePairTestSuiteName, null, null,
-                "-1", null, null);
+        c.processCommand("compare " + testSuiteName + " " + singlePairTestSuiteName + " EventSequence -d -1");
         assertEquals("one or more test cases in " + singlePairTestSuiteName +
-                " do not match the specified data representation: data_representation.CSV"+System.lineSeparator(),
+                " do not match the specified data representation: data_representation.EventSequence" +
+                        ": sequence does not begin with Start state" + System.lineSeparator(),
                 outContent.toString());
-    deleteFiles(testSuiteName);
+        deleteFiles(testSuiteName);
     }
 
     @Test
@@ -351,7 +337,9 @@ public class ControllerCompareTest {
     public void testGeneratePairsForTwoSmallSuites(){
         doComparison(singleCaseTestSuiteName, singleCaseTestSuiteName, "JaccardIndex", null,
                 null, null, null);
-        assertEquals(buildSinglePairConsoleOutput("1.0"), outContent.toString());
+        String expected = "1.0" + System.lineSeparator();
+        String actual = outContent.toString();
+        assertEquals(expected, actual.substring(actual.length() - expected.length()));
     }
 
     @Test
@@ -359,7 +347,9 @@ public class ControllerCompareTest {
     public void testCompareFailTooFewTestCases(){
         doComparison(singleCaseTestSuiteName, null, "JaccardIndex", null, null,
                 null, null);
-        assertEquals("Test suite contains insufficient test cases to generate pairs\r\n", outContent.toString());
+        String expected = "Test suite contains insufficient test cases to generate pairs" + System.lineSeparator();
+        String actual = outContent.toString();
+        assertEquals(expected, actual.substring(actual.length() - expected.length()));
     }
 
     @Test

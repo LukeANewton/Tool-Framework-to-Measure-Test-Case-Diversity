@@ -4,9 +4,9 @@ import data_representation.CSV;
 import data_representation.DataRepresentation;
 import metrics.aggregation.AggregationStrategy;
 import metrics.aggregation.AverageValue;
-import metrics.comparison.CommonElements;
-import metrics.comparison.PairwiseComparisonStrategy;
-import metrics.listwise.ShannonIndex;
+import metrics.comparison.pairwise.CommonElements;
+import metrics.comparison.pairwise.PairwiseComparisonStrategy;
+import metrics.comparison.listwise.ShannonIndex;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -120,9 +120,11 @@ public class ComparisonServiceTest {
     /*Test for the Comparison service with a listwise comparison that uses the thread pool*/
     public void testPairwiseThreadPoolDoesNotChangeResult() throws Exception {
         PairingService p = new PairingService();
-        assertEquals(Double.parseDouble(comparisonService.pairwiseCompare(p.makePairs(buildTestSuite().toArray(new DataRepresentation[3])),
+        assertEquals(Double.parseDouble(comparisonService.pairwiseCompare(p.makePairs(null,
+                buildTestSuite().toArray(new DataRepresentation[3])),
                 new CommonElements(), aggregationStrategy, null, true)),
-                Double.parseDouble(comparisonService.pairwiseCompare(p.makePairs(buildTestSuite().toArray(new DataRepresentation[3])),
+                Double.parseDouble(comparisonService.pairwiseCompare(p.makePairs(null,
+                        buildTestSuite().toArray(new DataRepresentation[3])),
                         new CommonElements(), aggregationStrategy, null, false)),
                 TOLERANCE);
     }

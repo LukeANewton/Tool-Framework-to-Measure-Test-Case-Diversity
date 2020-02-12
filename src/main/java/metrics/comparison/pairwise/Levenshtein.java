@@ -1,4 +1,4 @@
-package metrics.comparison;
+package metrics.comparison.pairwise;
 
 import java.util.ArrayList;
 
@@ -29,9 +29,9 @@ public class Levenshtein implements PairwiseComparisonStrategy {
 		ArrayList<String> t1 = new ArrayList<>();
 		ArrayList<String> t2 = new ArrayList<>();
 		while (testCase1.hasNext())
-			t1.add(testCase1.next());
+			t1.add(testCase1.next().toString());
 		while (testCase2.hasNext())
-			t2.add(testCase2.next());
+			t2.add(testCase2.next().toString());
 		
 		//create matrix for distances, initialized to all zeros
 		int[][] m = new int[t1.size()][t2.size()];
