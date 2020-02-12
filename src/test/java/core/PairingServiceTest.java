@@ -12,13 +12,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertEquals;
 
 /*Test Suite that tests the test case pairing functions for the pairing service*/
 public class PairingServiceTest {
-    private PairingService pairingService = new PairingService(Executors.newFixedThreadPool(1));
+    private PairingService pairingService = new PairingService();
     private DataRepresentation[] representations1, representations2, representations3,
             representations4, representations5, representations6, largeSuite, emptySuite;
     private PrintStream originalOut;
@@ -58,14 +57,14 @@ public class PairingServiceTest {
 
     @Test
     /*Tests that each element in a test suite is paired with another element in the same suite at least once that is not itself.*/
-    public void testSingleSuite() throws Exception {
+    public void testSingleSuite() {
         assertEquals("Failed to correctly pair test cases using a single suite.",
                 3, pairingService.makePairs(null, representations1).size());
     }
 
     @Test
     /*Tests that each element in a large test suite is paired with another element in the same suite at least once that is not itself.*/
-    public void testLargeSingleSuite() throws Exception {
+    public void testLargeSingleSuite() {
         List<Tuple<DataRepresentation, DataRepresentation>> pairs = pairingService.makePairs(null, largeSuite);
         assertEquals("Failed to correctly pair test cases using a single, large suite. Pairs: " + Arrays.toString(pairs.toArray()),
                 36, pairs.size());
@@ -75,21 +74,21 @@ public class PairingServiceTest {
     /*Tests that each element in a test suite is paired with another element in another test suite at least once.
      * There should be (number of test cases in a suite)^(number of test suites) pairs.
      * Three test cases in each suite, with three suites yields 3^3 = 27 pairs.*/
-    public void testMultipleSuites() throws Exception {
+    public void testMultipleSuites() {
         assertEquals("Failed to correctly pair test cases with multiple test suites.",
                 27, pairingService.makePairs(null, representations1, representations2, representations3).size());
     }
 
     @Test
     /*Tests that an empty suite will return no pairs.*/
-    public void testEmptySuite() throws Exception {
+    public void testEmptySuite(){
         assertEquals("Returned a pair when there are no test cases.",
                 0, pairingService.makePairs(null, emptySuite).size());
     }
 
     @Test
     /*Tests that an empty suite will return zero pairs when we compare a populated suite with it.*/
-    public void testMultipleSuitesWithEmptySuite() throws Exception {
+    public void testMultipleSuitesWithEmptySuite() {
         assertEquals("Returned a pair when there are no test cases to make pairs from.",
                 0, pairingService.makePairs(null, representations1, emptySuite).size());
     }
@@ -98,13 +97,13 @@ public class PairingServiceTest {
     /*Tests that each element in a test suite is paired with another element in another test suite at least once.
      * Variant: Different number of test cases in each suite
      * There should be (number of test cases in a suite)^(number of test suites) pairs. */
-    public void testMultipleSuitesGivenVariableSuiteSizes() throws Exception {
+    public void testMultipleSuitesGivenVariableSuiteSizes() {
         assertEquals("Failed to correctly pair test cases using suites of varied sizes on the multiple test suites function.",
                 11, pairingService.makePairs(null, representations4, representations5, representations6).size());
     }
 
     /*helper method for checking that the progress bar successfully completed in an operation*/
-    private void checkProgressHelper(DataRepresentation[]... testSuites) throws Exception {
+    private void checkProgressHelper(DataRepresentation[]... testSuites){
         if(testSuites.length == 1)
             pairingService.makePairs(c,testSuites[0]);
         else
@@ -116,13 +115,13 @@ public class PairingServiceTest {
 
     @Test
     /*test to ensure that the progress ar works for single list pairing*/
-    public void testProgressBarSingleList() throws Exception {
+    public void testProgressBarSingleList() {
         checkProgressHelper(representations1);
     }
 
     @Test
     /*test to ensure that the progress ar works for multi list pairing*/
-    public void testProgressBarMultipleList() throws Exception {
+    public void testProgressBarMultipleList() {
         checkProgressHelper(representations1, representations2, representations3, representations4);
     }
 }

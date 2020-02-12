@@ -6,7 +6,7 @@
   "delimiter": "\r\n",
   "aggregationMethod": "AverageValue",
   "aggregationMethodLocation": "metrics.aggregation.",
-  "numThreads":  15,
+  "numThreads":  3,
   "resultRoundingScale": 2,
   "resultRoundingMode": "HALF_UP",
   "outputFileName": "comparison_result",

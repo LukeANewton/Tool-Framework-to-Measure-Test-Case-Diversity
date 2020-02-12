@@ -7,13 +7,13 @@ import metrics.aggregation.AverageValue;
 import metrics.comparison.pairwise.CommonElements;
 import metrics.comparison.pairwise.PairwiseComparisonStrategy;
 import metrics.comparison.listwise.ShannonIndex;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import utilities.Tuple;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertEquals;
 
@@ -49,7 +49,17 @@ public class ComparisonServiceTest {
 
         strategy = new CommonElements();
         aggregationStrategy = new AverageValue();
-        comparisonService = new ComparisonService(Executors.newFixedThreadPool(2));
+        comparisonService = new ComparisonService();
+        comparisonService.setUpThreadPool(2);
+    }
+
+    @After
+    public void clean() {
+        try {
+            comparisonService.shutdown();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     /*
@@ -109,7 +119,7 @@ public class ComparisonServiceTest {
     @Test
     /*Test for the Comparison service with a listwise comparison that uses the thread pool*/
     public void testPairwiseThreadPoolDoesNotChangeResult() throws Exception {
-        PairingService p = new PairingService(Executors.newFixedThreadPool(1));
+        PairingService p = new PairingService();
         assertEquals(Double.parseDouble(comparisonService.pairwiseCompare(p.makePairs(null,
                 buildTestSuite().toArray(new DataRepresentation[3])),
                 new CommonElements(), aggregationStrategy, null, true)),

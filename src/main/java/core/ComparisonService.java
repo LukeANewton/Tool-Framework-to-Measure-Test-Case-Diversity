@@ -32,9 +32,12 @@ public class ComparisonService {
 		support = new PropertyChangeSupport(this);
 	}
 
-	public ComparisonService(ExecutorService threadPool) {
-		this.threadPool = threadPool;
-		support = new PropertyChangeSupport(this);
+	/**
+	 * method to set up the comparison service for the use of a thread pool
+	 * @param threads the number of threads for the thread pool to use
+	 */
+	public void setUpThreadPool(int threads){
+		threadPool = Executors.newFixedThreadPool(threads);
 	}
 
 	/**
@@ -50,8 +53,8 @@ public class ComparisonService {
 	 * @return a double representing the similarity between the two list of tests
 	 */
 	public String pairwiseCompare(List<Tuple<DataRepresentation, DataRepresentation>> testCasePairs,
-								  PairwiseComparisonStrategy strategy, AggregationStrategy aggregation,
-								  PropertyChangeListener pcl, boolean useThreadPool) throws Exception {
+										  PairwiseComparisonStrategy strategy, AggregationStrategy aggregation,
+										  PropertyChangeListener pcl, boolean useThreadPool) throws Exception {
 		List<Callable<Object>> tasks = new ArrayList<>();
 		for (Tuple testCasePair : testCasePairs) {
 			tasks.add(new PairwiseCommand(strategy, (DataRepresentation)testCasePair.getLeft(),
@@ -95,7 +98,7 @@ public class ComparisonService {
 	 * @return a double representing the diversity of the testsuite comparisons
 	 */
 	private String threadPoolCompareHelper(List<Callable<Object>> tasks, AggregationStrategy aggregation,
-										   PropertyChangeListener pcl) throws ExecutionException, InterruptedException {
+								   PropertyChangeListener pcl) throws ExecutionException, InterruptedException {
 		if (pcl != null)
 			support.addPropertyChangeListener(pcl);
 
@@ -135,4 +138,13 @@ public class ComparisonService {
 		else
 			return sequentialCompareHelper(tasks, aggregation, pcl);
 	}
+
+	/**
+	 * Shuts down the thread pool when we're done with the object.
+	 */
+	public void shutdown() throws InterruptedException {
+		threadPool.shutdown();
+		threadPool.awaitTermination(5000, TimeUnit.SECONDS);
+	}
+
 }

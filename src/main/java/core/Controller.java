@@ -13,8 +13,6 @@ import utilities.Tuple;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * The Controller is the main logic for the program. It pieces together the different services to
@@ -247,35 +245,29 @@ public class Controller {
             }
         }
 
-        //create thread pool for pairing and comparison
-        if(dto.getNumberOfThreads() == null)
-            dto.setNumberOfThreads(config.getNumThreads());
-        ExecutorService threadPool = Executors.newFixedThreadPool(dto.getNumberOfThreads());
-
         //generate the pairs for comparison
-        pairingService = new PairingService(threadPool);
+        pairingService = new PairingService();
         List<Tuple<DataRepresentation, DataRepresentation>> pairs;
         console.displayResults("Pairing Test Cases...");
-        try {
-            if(testSuite2 == null)
-                pairs = pairingService.makePairs(console, testSuite1);
-            else
-                pairs = pairingService.makePairs(console, testSuite1, testSuite2);
-        } catch (Exception e) {
-            console.displayResults("Error during pair generation: " + e.toString());
-            return;
-        }
+        if(testSuite2 == null)
+            pairs = pairingService.makePairs(console, testSuite1);
+        else
+            pairs = pairingService.makePairs(console, testSuite1, testSuite2);
         if(pairs.size() == 0){//no pairs could be made from the passed test suites
             console.displayResults("Test suite contains insufficient test cases to generate pairs");
             return;
         }
 
         //now perform the actual comparison
-        if(dto.isUseThreadPool())
-            comparisonService = new ComparisonService(threadPool);
-        else
-            comparisonService = new ComparisonService();
+        comparisonService = new ComparisonService();
         String result;
+        if(dto.isUseThreadPool()){
+            if(dto.getNumberOfThreads() != null)//only update thread count if command specifies it
+                comparisonService.setUpThreadPool(dto.getNumberOfThreads());
+            else
+                comparisonService.setUpThreadPool(config.getNumThreads());
+        }
+
         try {
             console.displayResults("Performing Comparison...");
             result = comparisonService.pairwiseCompare(pairs, comparisonStrategy, aggregationStrategy, console, dto.isUseThreadPool());
@@ -283,7 +275,6 @@ public class Controller {
             console.displayResults("Error in pairwise comparison calculation: " + e.toString());
             return;
         }
-        threadPool.shutdown();
 
         //output results to file, if required
         filename = dto.getOutputFilename();
