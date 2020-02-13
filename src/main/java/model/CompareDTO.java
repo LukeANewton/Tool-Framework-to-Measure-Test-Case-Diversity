@@ -12,7 +12,7 @@ public class CompareDTO extends DataTransferObject {
 	//the pairwise diversity metric to use to compare pairs of test cases
 	private String pairwiseMethod;
 	//the method to aggregate all pairwise diversity values into a single value
-	private String aggregationMethod;
+	private String[] aggregationMethods;
 	//the location of the first test case/suite
 	private String testCaseLocationOne;
 	//the location of the second test case/suite
@@ -43,12 +43,12 @@ public class CompareDTO extends DataTransferObject {
 		this.pairwiseMethod = pairwiseMethod;
 	}
 
-	public String getAggregationMethod() {
-		return aggregationMethod;
+	public String[] getAggregationMethods() {
+		return aggregationMethods;
 	}
 
-	public void setAggregationMethod(String aggregationMethod) {
-		this.aggregationMethod = aggregationMethod;
+	public void setAggregationMethods(String[] aggregationMethods) {
+		this.aggregationMethods = aggregationMethods;
 	}
 
 	public String getTestCaseLocationOne() {

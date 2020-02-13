@@ -24,7 +24,7 @@ public class ComparisonServiceTest {
 
     private List<Tuple<DataRepresentation, DataRepresentation>> differentTestCasePairs, sameTestCasePairs, halfSimilarPairs;
     private PairwiseComparisonStrategy strategy;
-    private AggregationStrategy aggregationStrategy;
+    private AggregationStrategy[] aggregationStrategy;
     private ComparisonService comparisonService;
     private final double TOLERANCE = 0.01;
 
@@ -48,8 +48,16 @@ public class ComparisonServiceTest {
         }
 
         strategy = new CommonElements();
-        aggregationStrategy = new AverageValue();
         comparisonService = new ComparisonService(Executors.newFixedThreadPool(2));
+        aggregationStrategy = new AggregationStrategy[]{new AverageValue()};
+
+    @After
+    public void clean() {
+        try {
+            comparisonService.shutdown();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     /*
@@ -57,9 +65,9 @@ public class ComparisonServiceTest {
      */
     @Test
     public void testCompareSimilarPairs() throws Exception {
-        assertEquals(1.0,
-                Double.parseDouble(comparisonService.pairwiseCompare(sameTestCasePairs, strategy, aggregationStrategy, null, false)),
-                TOLERANCE);
+        String[] results = comparisonService.pairwiseCompare(sameTestCasePairs, strategy, aggregationStrategy, null, false);
+        assertEquals(1, results.length);
+        assertEquals(1.0, Double.parseDouble(results[0]), TOLERANCE);
     }
 
     /*
@@ -67,9 +75,9 @@ public class ComparisonServiceTest {
      */
     @Test
     public void testCompareDissimilarPairs() throws Exception {
-        assertEquals(0.0,
-                Double.parseDouble(comparisonService.pairwiseCompare(differentTestCasePairs, strategy, aggregationStrategy, null, false)),
-                TOLERANCE);
+        String[] results = comparisonService.pairwiseCompare(differentTestCasePairs, strategy, aggregationStrategy, null, false);
+        assertEquals(1, results.length);
+        assertEquals(0.0, Double.parseDouble(results[0]), TOLERANCE);
     }
 
     /*
@@ -78,9 +86,9 @@ public class ComparisonServiceTest {
      */
     @Test
     public void testCompareHalfSimilarPairs() throws Exception {
-        assertEquals(0.5,
-                Double.parseDouble(comparisonService.pairwiseCompare(halfSimilarPairs, strategy, aggregationStrategy, null, false)),
-                TOLERANCE);
+        String[] results = comparisonService.pairwiseCompare(halfSimilarPairs, strategy, aggregationStrategy, null, false);
+        assertEquals(1, results.length);
+        assertEquals(0.5, Double.parseDouble(results[0]), TOLERANCE);
     }
 
     @Test
@@ -93,9 +101,9 @@ public class ComparisonServiceTest {
         testsuite.add(new CSV("1,1,1,4,5,8"));
         testsuites.add(testsuite);
 
-        assertEquals(1.92,
-                Double.parseDouble(comparisonService.listwiseCompare(testsuites, new ShannonIndex(), aggregationStrategy, null, false)),
-                TOLERANCE);
+        String[] results = comparisonService.listwiseCompare(testsuites, new ShannonIndex(), aggregationStrategy, null, false);
+        assertEquals(1, results.length);
+        assertEquals(1.92, Double.parseDouble(results[0]), TOLERANCE);
     }
 
     private  List<DataRepresentation> buildTestSuite() throws InvalidFormatException {
@@ -112,10 +120,10 @@ public class ComparisonServiceTest {
         PairingService p = new PairingService(Executors.newFixedThreadPool(1));
         assertEquals(Double.parseDouble(comparisonService.pairwiseCompare(p.makePairs(null,
                 buildTestSuite().toArray(new DataRepresentation[3])),
-                new CommonElements(), aggregationStrategy, null, true)),
+                new CommonElements(), aggregationStrategy, null, true)[0]),
                 Double.parseDouble(comparisonService.pairwiseCompare(p.makePairs(null,
                         buildTestSuite().toArray(new DataRepresentation[3])),
-                        new CommonElements(), aggregationStrategy, null, false)),
+                        new CommonElements(), aggregationStrategy, null, false)[0]),
                 TOLERANCE);
     }
 
@@ -127,8 +135,8 @@ public class ComparisonServiceTest {
         testsuites1.add(buildTestSuite());
         testsuites2.add(buildTestSuite());
 
-        assertEquals(Double.parseDouble(comparisonService.listwiseCompare(testsuites1, new ShannonIndex(), aggregationStrategy, null, true)),
-                Double.parseDouble(comparisonService.listwiseCompare(testsuites2, new ShannonIndex(), aggregationStrategy, null, false)),
+        assertEquals(Double.parseDouble(comparisonService.listwiseCompare(testsuites1, new ShannonIndex(), aggregationStrategy, null, true)[0]),
+                Double.parseDouble(comparisonService.listwiseCompare(testsuites2, new ShannonIndex(), aggregationStrategy, null, false)[0]),
                 TOLERANCE);
     }
 }

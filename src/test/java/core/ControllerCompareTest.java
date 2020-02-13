@@ -381,6 +381,26 @@ public class ControllerCompareTest {
     }
 
     @Test
+    /*test for the compare command that checks the number of threads, or choice or threads/sequential
+     does not change the calculation result*/
+    public void testCompareMultipleAggregations() throws IOException {
+        String output1 = "out-1";
+
+        doComparison(sampleTestSuiteA, null, "CommonElements", "AverageValue MinimumValue", null,
+                output1, "7");
+        /*hand calculated value:
+        sampleTestSuiteA generates 10 pairs
+        with common elements: [4 4 4 4 5 9 9 5 5 12]*/
+        String contents = readFile(output1);
+        String[] results = contents.split(System.lineSeparator());
+
+        assertEquals(6.1, Double.parseDouble(results[0]), TOLERANCE);
+        assertEquals(4, Double.parseDouble(results[1]), TOLERANCE);
+
+        deleteFiles(output1);
+    }
+
+    @Test
     /*test for the compare command that checks results can be correctly appended to a file*/
     public void testCompareFileExistsAppend() throws IOException {
         String filename = "out";

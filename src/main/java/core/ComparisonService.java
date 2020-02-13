@@ -45,13 +45,13 @@ public class ComparisonService {
 	 *
 	 * @param testCasePairs the list of test case pairs
 	 * @param strategy    	the strategy to use to compare the tests
-	 * @param aggregation 	the aggregation metric to use to assimilate all the
+	 * @param aggregations	the aggregation metrics to use to assimilate all the
 	 *                    	comparisons
-	 * @return a double representing the similarity between the two list of tests
+	 * @return an array of strings, where each string is the result of an aggregation strategy
 	 */
-	public String pairwiseCompare(List<Tuple<DataRepresentation, DataRepresentation>> testCasePairs,
-								  PairwiseComparisonStrategy strategy, AggregationStrategy aggregation,
-								  PropertyChangeListener pcl, boolean useThreadPool) throws Exception {
+	public String[] pairwiseCompare(List<Tuple<DataRepresentation, DataRepresentation>> testCasePairs,
+										  PairwiseComparisonStrategy strategy, AggregationStrategy[] aggregations,
+										  PropertyChangeListener pcl, boolean useThreadPool) throws Exception {
 		List<Callable<Object>> tasks = new ArrayList<>();
 		for (Tuple testCasePair : testCasePairs) {
 			tasks.add(new PairwiseCommand(strategy, (DataRepresentation)testCasePair.getLeft(),
@@ -59,20 +59,20 @@ public class ComparisonService {
 		}
 
 		if(useThreadPool)
-			return threadPoolCompareHelper(tasks, aggregation, pcl);
+			return threadPoolCompareHelper(tasks, aggregations, pcl);
 		else
-			return sequentialCompareHelper(tasks, aggregation, pcl);
+			return sequentialCompareHelper(tasks, aggregations, pcl);
 	}
 
 	/**
 	 * private helper method to perform comparison sequentially
 	 *
 	 * @param tasks the comparisons to make
-	 * @param aggregation the aggregation metric to use to assimilate all the
+	 * @param aggregations the aggregation metric to use to assimilate all the
 	 * 	 *                    	comparisons
-	 * @return a double representing the diversity of the testsuite comparisons
+	 * @return an array of strings, where each string is the result of an aggregation strategy
 	 */
-	private String sequentialCompareHelper(List<Callable<Object>> tasks, AggregationStrategy aggregation,
+	private String[] sequentialCompareHelper(List<Callable<Object>> tasks, AggregationStrategy[] aggregations,
 										   PropertyChangeListener pcl) throws Exception {
 		if (pcl != null)
 			support.addPropertyChangeListener(pcl);
@@ -83,19 +83,23 @@ public class ComparisonService {
 		for (Callable<Object> task : tasks)
 			results.add((double)task.call());
 
-		return aggregation.aggregate(results);
+		List<String> aggregateResults = new ArrayList<>();
+		for(AggregationStrategy aggregation: aggregations)
+			aggregateResults.add(aggregation.aggregate(results));
+		return aggregateResults.toArray(new String[0]);
 	}
 
 	/**
 	 * private helper method to perform comparison with thread pool
 	 *
 	 * @param tasks the comparisons to make in the thread pool
-	 * @param aggregation the aggregation metric to use to assimilate all the
+	 * @param aggregations the aggregation metric to use to assimilate all the
 	 * 	 *                    	comparisons
-	 * @return a double representing the diversity of the testsuite comparisons
+	 * @return an array of strings, where each string is the result of an aggregation strategy
 	 */
-	private String threadPoolCompareHelper(List<Callable<Object>> tasks, AggregationStrategy aggregation,
-										   PropertyChangeListener pcl) throws ExecutionException, InterruptedException {
+
+	private String[] threadPoolCompareHelper(List<Callable<Object>> tasks, AggregationStrategy[] aggregations,
+								   PropertyChangeListener pcl) throws ExecutionException, InterruptedException {
 		if (pcl != null)
 			support.addPropertyChangeListener(pcl);
 
@@ -108,7 +112,10 @@ public class ComparisonService {
 
 		threadPool.shutdown();
 
-		return aggregation.aggregate(results);
+		List<String> aggregateResults = new ArrayList<>();
+		for(AggregationStrategy aggregation: aggregations)
+			aggregateResults.add(aggregation.aggregate(results));
+		return aggregateResults.toArray(new String[0]);
 	}
 
 
@@ -119,20 +126,20 @@ public class ComparisonService {
 	 *
 	 * @param testsuites 	the list of test suites
 	 * @param strategy    	the strategy to use to calculate testsuite diversity
-	 * @param aggregation 	the aggregation metric to use to assimilate all the
+	 * @param aggregations 	the aggregation metrics to use to assimilate all the
 	 *                    	comparisons
-	 * @return a double representing the diversity of the testsuite comparisons
+	 * @return an array of strings, where each string is the result of an aggregation strategy
 	 */
-	public String listwiseCompare(List<List<DataRepresentation>> testsuites,
-								  ListwiseComparisonStrategy strategy, AggregationStrategy aggregation,
+	public String[] listwiseCompare(List<List<DataRepresentation>> testsuites,
+								  ListwiseComparisonStrategy strategy, AggregationStrategy[] aggregations,
 								  PropertyChangeListener pcl, boolean useThreadPool) throws Exception {
 		List<Callable<Object>> tasks = new ArrayList<>();
 		for(List<DataRepresentation> testsuite: testsuites)
 			tasks.add(new ListwiseCommand(strategy, testsuite, pcl));
 
 		if(useThreadPool)
-			return threadPoolCompareHelper(tasks, aggregation, pcl);
+			return threadPoolCompareHelper(tasks, aggregations, pcl);
 		else
-			return sequentialCompareHelper(tasks, aggregation, pcl);
+			return sequentialCompareHelper(tasks, aggregations, pcl);
 	}
 }

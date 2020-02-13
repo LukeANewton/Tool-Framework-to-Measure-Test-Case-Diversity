@@ -12,6 +12,7 @@ import utilities.Tuple;
 
 import java.io.*;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -170,18 +171,26 @@ public class Controller {
      * @param dto the DataTransferObject containing information to run a compare command
      * @return an instance of the PairwiseComparisonStrategy specified in the dto
      */
-    private AggregationStrategy loadAggregationStrategy(CompareDTO dto) {
-        String name = dto.getAggregationMethod();
+    private AggregationStrategy[] loadAggregationStrategy(CompareDTO dto) {
+        String[] names = dto.getAggregationMethods();
 
-        if (name == null)//nothing specified in dto, so load default from config file
-            name = config.getAggregationMethod();
+        if (names == null)//nothing specified in dto, so load default from config file
+            names = new String[]{config.getAggregationMethod()};
 
         //set the package to look in
         String packageName = config.getAggregationMethodLocation();
 
         //try to load the class
-        return (AggregationStrategy) loadRequiredImplementation(name, packageName,
-                AGGREGATION_INTERFACE_PATH, "aggregation method");
+        List<AggregationStrategy> strategies = new ArrayList<>();
+        for(String name: names){
+            AggregationStrategy strategy = (AggregationStrategy) loadRequiredImplementation(name, packageName,
+                    AGGREGATION_INTERFACE_PATH, "aggregation method");
+            if(strategy == null)
+                return null;
+            else
+                strategies.add(strategy);
+        }
+        return strategies.toArray(new AggregationStrategy[0]);
     }
 
     private Object loadRequiredImplementation(String name, String packageName, String interfacePath, String interfaceType){
@@ -216,9 +225,9 @@ public class Controller {
         if(comparisonStrategy == null)
             return;
 
-        //load the aggregation method
-        AggregationStrategy aggregationStrategy = loadAggregationStrategy(dto);
-        if(aggregationStrategy == null)
+        //load the aggregation methods
+        AggregationStrategy[] aggregationStrategies = loadAggregationStrategy(dto);
+        if(aggregationStrategies == null)
             return;
 
         //read in the first test suite file
@@ -271,19 +280,29 @@ public class Controller {
         }
 
         //now perform the actual comparison
-        if(dto.isUseThreadPool())
-            comparisonService = new ComparisonService(threadPool);
-        else
-            comparisonService = new ComparisonService();
-        String result;
+        comparisonService = new ComparisonService();
+        if(dto.isUseThreadPool()){
+            if(dto.getNumberOfThreads() != null)//only update thread count if command specifies it
+                comparisonService.setUpThreadPool(dto.getNumberOfThreads());
+            else
+                comparisonService.setUpThreadPool(config.getNumThreads());
+        }
+        String[] results;
+
         try {
             console.displayResults("Performing Comparison...");
-            result = comparisonService.pairwiseCompare(pairs, comparisonStrategy, aggregationStrategy, console, dto.isUseThreadPool());
+            results = comparisonService.pairwiseCompare(pairs, comparisonStrategy, aggregationStrategies, console, dto.isUseThreadPool());
         } catch (Exception e) {
             console.displayResults("Error in pairwise comparison calculation: " + e.toString());
             return;
         }
         threadPool.shutdown();
+        StringBuilder s = new StringBuilder();
+        s.append(results[0]);
+        for(int i = 1; i < results.length; i++){
+            s.append(System.lineSeparator()).append(results[i]);
+        }
+        String result = s.toString();
 
         //output results to file, if required
         filename = dto.getOutputFilename();
