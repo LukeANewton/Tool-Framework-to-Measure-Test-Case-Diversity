@@ -40,7 +40,7 @@ public class ComparisonServiceTest {
                 value = i;
                 differentTestCasePairs.add(new Tuple<>(new CSV(value + ""), new CSV(++value + "")));
                 sameTestCasePairs.add(new Tuple<>(new CSV(value + ""), new CSV(value + "")));
-                dissimilarValue = (i < 5)? value : 99;
+                dissimilarValue = (i < 5) ? value : 99;
                 halfSimilarPairs.add(new Tuple<>(new CSV(value + ""), new CSV(dissimilarValue + "")));
             }
         } catch (InvalidFormatException e) {
@@ -50,14 +50,6 @@ public class ComparisonServiceTest {
         strategy = new CommonElements();
         comparisonService = new ComparisonService(Executors.newFixedThreadPool(2));
         aggregationStrategy = new AggregationStrategy[]{new AverageValue()};
-
-    @After
-    public void clean() {
-        try {
-            comparisonService.shutdown();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     /*

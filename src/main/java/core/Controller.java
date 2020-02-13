@@ -280,15 +280,8 @@ public class Controller {
         }
 
         //now perform the actual comparison
-        comparisonService = new ComparisonService();
-        if(dto.isUseThreadPool()){
-            if(dto.getNumberOfThreads() != null)//only update thread count if command specifies it
-                comparisonService.setUpThreadPool(dto.getNumberOfThreads());
-            else
-                comparisonService.setUpThreadPool(config.getNumThreads());
-        }
+        comparisonService = new ComparisonService(threadPool);
         String[] results;
-
         try {
             console.displayResults("Performing Comparison...");
             results = comparisonService.pairwiseCompare(pairs, comparisonStrategy, aggregationStrategies, console, dto.isUseThreadPool());
