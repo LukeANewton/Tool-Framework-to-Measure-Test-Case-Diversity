@@ -32,9 +32,9 @@ public class AverageValueTest {
         List<Double> similarityValues = new ArrayList<>();
         // Populate array with random values
         Random r = new Random(123456);
-        int SIMILARITY_VALUES = 10;
-        double MIN_RANGE = 0.00;
-        double MAX_RANGE = 1.00;
+        final int SIMILARITY_VALUES = 10;
+        final double MIN_RANGE = 0.00;
+        final double MAX_RANGE = 1.00;
         for (int i = 0; i < SIMILARITY_VALUES; i++) {
             similarityValues.add(MIN_RANGE + (MAX_RANGE - MIN_RANGE) * r.nextDouble());
         }

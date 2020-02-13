@@ -30,6 +30,6 @@ public class AverageDissimilarity implements AggregationStrategy {
      */
     @Override
     public String getDescription() {
-        return "Averages the similarity values and divides the average by the squared number of similarities.";
+        return "Sums the similarity values and divides the sum by the squared number of similarities.";
     }
 }
