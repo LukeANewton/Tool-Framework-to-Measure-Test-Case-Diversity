@@ -14,6 +14,8 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * The Controller is the main logic for the program. It pieces together the different services to
@@ -254,14 +256,24 @@ public class Controller {
             }
         }
 
+        //create thread pool for pairing and comparison
+        if(dto.getNumberOfThreads() == null)
+            dto.setNumberOfThreads(config.getNumThreads());
+        ExecutorService threadPool = Executors.newFixedThreadPool(dto.getNumberOfThreads());
+
         //generate the pairs for comparison
-        pairingService = new PairingService();
+        pairingService = new PairingService(threadPool);
         List<Tuple<DataRepresentation, DataRepresentation>> pairs;
         console.displayResults("Pairing Test Cases...");
-        if(testSuite2 == null)
-            pairs = pairingService.makePairs(console, testSuite1);
-        else
-            pairs = pairingService.makePairs(console, testSuite1, testSuite2);
+        try {
+            if(testSuite2 == null)
+                pairs = pairingService.makePairs(console, testSuite1);
+            else
+                pairs = pairingService.makePairs(console, testSuite1, testSuite2);
+        } catch (Exception e) {
+            console.displayResults("Error during pair generation: " + e.toString());
+            return;
+        }
         if(pairs.size() == 0){//no pairs could be made from the passed test suites
             console.displayResults("Test suite contains insufficient test cases to generate pairs");
             return;
@@ -276,6 +288,7 @@ public class Controller {
                 comparisonService.setUpThreadPool(config.getNumThreads());
         }
         String[] results;
+
         try {
             console.displayResults("Performing Comparison...");
             results = comparisonService.pairwiseCompare(pairs, comparisonStrategy, aggregationStrategies, console, dto.isUseThreadPool());
@@ -283,6 +296,7 @@ public class Controller {
             console.displayResults("Error in pairwise comparison calculation: " + e.toString());
             return;
         }
+        threadPool.shutdown();
         StringBuilder s = new StringBuilder();
         s.append(results[0]);
         for(int i = 1; i < results.length; i++){
