@@ -280,7 +280,7 @@ public class ConfigTest {
         }
 
         @Test
-        /*test the two string method*/
+        /*test the to string method*/
         public void testToString() {
                assertEquals(config.toString(), "Config{" +
                        "listwiseMethod=\'ShannonIndex\'," +

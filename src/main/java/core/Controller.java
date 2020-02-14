@@ -212,7 +212,7 @@ public class Controller {
      * @throws Exception occurs when the class could not be found at the specified location, or if the class does not implement the specified interface
      */
     private Object loadComparisonStrategy(String name, String defaultName, String packageName, String interfaceName) throws Exception {
-        if (name == null)
+        if (name == null || name.equals(""))
             name = defaultName;
         if (!packageName.endsWith("."))
             packageName = packageName + ".";

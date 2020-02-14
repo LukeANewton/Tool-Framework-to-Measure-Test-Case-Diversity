@@ -10,8 +10,10 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.util.InputMismatchException;
 
 import static org.junit.Assert.*;
@@ -233,36 +235,22 @@ public class ReflectionServiceTest {
 
     @Test
     /*test for the searchPackage() method, which searches a package for all objects that implement a specified interface*/
-    public void testSearchPackage() {
-        try {
-            Object[] list = reflector.searchPackage("metrics.comparison.pairwise", "metrics.comparison.pairwise.PairwiseComparisonStrategy");
-            assertEquals(7, list.length);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
+    public void testSearchPackage() throws IllegalAccessException, URISyntaxException, InvalidFormatException, IOException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException {
+        Object[] list = reflector.searchPackage("metrics.comparison.pairwise", "metrics.comparison.pairwise.PairwiseComparisonStrategy");
+        assertEquals(7, list.length);
     }
 
     @Test
     /*test for the searchPackage() method, which searches a package for all objects that implement a specified interface.
      * This method introduces a non-class file in the package to ensure that it is skipped over and does not cause any error*/
-    public void testSearchPackageWithNonClassFile() {
+    public void testSearchPackageWithNonClassFile() throws IllegalAccessException, URISyntaxException, InvalidFormatException, IOException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException {
         //create file
         File file = new File("target/classes/metrics/comparison/banana");
-        try {
-            file.createNewFile();
-        } catch (Exception e) {
-            fail();
-        }
+        file.createNewFile();
 
         //do the test
-        try {
-            Object[] list = reflector.searchPackage("metrics.comparison.pairwise", "metrics.comparison.pairwise.PairwiseComparisonStrategy");
-            assertEquals(7, list.length);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
+        Object[] list = reflector.searchPackage("metrics.comparison.pairwise", "metrics.comparison.pairwise.PairwiseComparisonStrategy");
+        assertEquals(7, list.length);
 
         //remove file
         file.delete();
@@ -271,40 +259,24 @@ public class ReflectionServiceTest {
     @Test
     /*test for the searchPackage() method, which searches a package for all objects that implement a specified interface.
      * this test is for the case where the package being searched for does not exist*/
-    public void testSearchPackageNoSuchDirectory() {
-        try {
-            Object[] list = reflector.searchPackage("banana", "PairwiseComparisonStrategy");
-            assertNull(list);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
+    public void testSearchPackageNoSuchDirectory() throws IllegalAccessException, URISyntaxException, InvalidFormatException, IOException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException {
+        Object[] list = reflector.searchPackage("banana", "PairwiseComparisonStrategy");
+        assertNull(list);
+
     }
 
     @Test
     /*test for the retrieveConfigSetter() method, which looks to see if there is a setter in the Config object for a
      * given field. This is for the positive case, where the setter can be found*/
-    public void testRetrieveConfigSetterExists(){
+    public void testRetrieveConfigSetterExists() throws NoSuchMethodException, FileNotFoundException {
         //read JSON
-        JsonReader jsonReader = null;
-        try {
-            jsonReader = new JsonReader(new FileReader("config.json"));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            fail();
-        }
+        JsonReader jsonReader = new JsonReader(new FileReader("config.json"));
         Gson gson = new Gson();
         Config config = gson.fromJson(jsonReader, Config.class);
 
         //attempt to find setter for a field
         String fieldName = "pairwiseMethod";
-        Method setter = null;
-        try {
-            setter = reflector.retrieveConfigSetter(config, String.class, fieldName);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-            fail();
-        }
+        Method setter = reflector.retrieveConfigSetter(config, String.class, fieldName);
 
         //call the obtained method
         String currentValue = config.getPairwiseMethod();
@@ -321,28 +293,17 @@ public class ReflectionServiceTest {
         config.setPairwiseMethod(currentValue);
     }
 
-    @Test
+    @Test(expected = NoSuchMethodException.class)
     /*test for the retrieveConfigSetter() method, which looks to see if there is a setter in the Config object for a
      * given field.This is for the negative case, where the setter does not exist*/
-    public void testRetrieveConfigSetterNotExists(){
+    public void testRetrieveConfigSetterNotExists() throws NoSuchMethodException, FileNotFoundException {
         //read JSON
-        JsonReader jsonReader = null;
-        try {
-            jsonReader = new JsonReader(new FileReader("config.json"));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            fail();
-        }
+        JsonReader jsonReader = new JsonReader(new FileReader("config.json"));
         Gson gson = new Gson();
         Config config = gson.fromJson(jsonReader, Config.class);
 
         //attempt to find setter for a field
         String fieldName = "banana";
-        try {
-            reflector.retrieveConfigSetter(config, String.class, fieldName);
-            fail();
-        } catch (Exception e) {
-            assertTrue(e instanceof  NoSuchMethodException);
-        }
+        reflector.retrieveConfigSetter(config, String.class, fieldName);
     }
 }
