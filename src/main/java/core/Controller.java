@@ -3,6 +3,8 @@ package core;
 import data_representation.DataRepresentation;
 import metrics.aggregation.AggregationStrategy;
 import metrics.comparison.pairwise.PairwiseComparisonStrategy;
+import metrics.report_format.DefaultFormat;
+import metrics.report_format.ReportFormat;
 import model.*;
 import user_interface.ConsoleOutputService;
 import user_interface.InputParser;
@@ -281,21 +283,28 @@ public class Controller {
 
         //now perform the actual comparison
         comparisonService = new ComparisonService(threadPool);
-        String[] results;
+        //TODO: As long as rows * cols != MAX_INT (i.e. 2.1 billion), we're good, assuming the user has ~20GB RAM available to the JVM.
+        // TODO: Another example: The user will need to have 12GB available for 75 000 000 pairs or similarities created x20 different comparison strategies at one time.
+        // TODO: Putting that in perspective, one strategy with a 'large' test suite of 1400 test cases and about 7 elements in each case only created 960 000 pairs (8MB).
+        List<Double> similarityValuesForEachComparisonStrategy;
         try {
             console.displayResults("Performing Comparison...");
-            results = comparisonService.pairwiseCompare(pairs, comparisonStrategy, aggregationStrategies, console, dto.isUseThreadPool());
+            similarityValuesForEachComparisonStrategy = comparisonService.pairwiseCompare(pairs, comparisonStrategy, console, dto.isUseThreadPool());
         } catch (Exception e) {
             console.displayResults("Error in pairwise comparison calculation: " + e.toString());
             return;
         }
         threadPool.shutdown();
-        StringBuilder s = new StringBuilder();
-        s.append(results[0]);
-        for(int i = 1; i < results.length; i++){
-            s.append(System.lineSeparator()).append(results[i]);
+
+        List<String> aggregateResults = new ArrayList<>();
+        for(AggregationStrategy aggregation : aggregationStrategies) {
+            aggregateResults.add(aggregation.aggregate(similarityValuesForEachComparisonStrategy));
         }
-        String result = s.toString();
+
+        // TODO: Swap report formats
+        ReportFormat reportFormat = new DefaultFormat();
+        // TODO: Do we need to convert aggregateResults to String[]?
+        String result = reportFormat.format(dto, pairs, similarityValuesForEachComparisonStrategy, aggregateResults.toArray(new String[0]));
 
         //output results to file, if required
         filename = dto.getOutputFilename();
