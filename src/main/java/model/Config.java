@@ -6,8 +6,10 @@ package model;
  * @author crushton
  */
 public class Config {
-    private String comparisonMethod;
-    private String comparisonMethodLocation;
+    private String listwiseMethod;
+    private String listwiseMethodLocation;
+    private String pairwiseMethod;
+    private String pairwiseMethodLocation;
     private String dataRepresentation;
     private String dataRepresentationLocation;
     private String delimiter; // delimiter used when separating values for comparison
@@ -22,20 +24,36 @@ public class Config {
     public Config() {
     }
 
-    public String getComparisonMethod() {
-        return comparisonMethod;
+    public String getListwiseMethod() {
+        return listwiseMethod;
+}
+
+    public void setListwiseMethod(String listwiseMethod) {
+        this.listwiseMethod = listwiseMethod;
     }
 
-    public void setComparisonMethod(String comparisonMethod) {
-        this.comparisonMethod = comparisonMethod;
+    public String getListwiseMethodLocation() {
+        return listwiseMethodLocation;
     }
 
-    public String getComparisonMethodLocation() {
-        return comparisonMethodLocation;
+    public void setListwiseMethodLocation(String listwiseMethodLocation) {
+        this.listwiseMethodLocation = listwiseMethodLocation;
     }
 
-    public void setComparisonMethodLocation(String comparisonMethodLocation) {
-        this.comparisonMethodLocation = comparisonMethodLocation;
+    public String getPairwiseMethod() {
+        return pairwiseMethod;
+    }
+
+    public void setPairwiseMethod(String pairwiseMethod) {
+        this.pairwiseMethod = pairwiseMethod;
+    }
+
+    public String getPairwiseMethodLocation() {
+        return pairwiseMethodLocation;
+    }
+
+    public void setPairwiseMethodLocation(String pairwiseMethodLocation) {
+        this.pairwiseMethodLocation = pairwiseMethodLocation;
     }
 
     public String getDataRepresentation() {
@@ -121,8 +139,10 @@ public class Config {
     @Override
     public String toString() {
         return "Config{" +
-                "comparisonMethod='" + comparisonMethod + '\'' +
-                ", comparisonMethodLocation='" + comparisonMethodLocation + '\'' +
+                "listwiseMethod='" + listwiseMethod + '\'' +
+                ", listwiseMethodLocation='" + listwiseMethodLocation + '\'' +
+                ", pairwiseMethod='" + pairwiseMethod + '\'' +
+                ", pairwiseMethodLocation='" + pairwiseMethodLocation + '\'' +
                 ", dataRepresentation='" + dataRepresentation + '\'' +
                 ", dataRepresentationLocation='" + dataRepresentationLocation + '\'' +
                 ", delimiter=" + delimiter +

@@ -16,8 +16,10 @@ public class ConfigTest {
         private Config config;
         private String configPath = "TestConfig.json";
         private String testJson = "{\n" +
-                "  \"comparisonMethod\": \"CommonElements\",\n" +
-                "  \"comparisonMethodLocation\": \"metrics.comparison.\",\n" +
+                "  \"listwiseMethod\": \"ShannonIndex\",\n" +
+                "  \"listwiseMethodLocation\": \"metrics.comparison.listwise\",\n" +
+                "  \"pairwiseMethod\": \"CommonElements\",\n" +
+                "  \"pairwiseMethodLocation\": \"metrics.comparison.pairwise\",\n" +
                 "  \"dataRepresentation\": \"CSV\",\n" +
                 "  \"dataRepresentationLocation\": \"data_representation\",\n" +
                 "  \"delimiter\": \"\n\",\n" +
@@ -30,9 +32,7 @@ public class ConfigTest {
                 "  \"outputFileLocation\": \"\"\n" +
                 "}";
 
-        /**
-         * Make a json file exclusively for testing purposes.
-         */
+        /*Make a json file exclusively for testing purposes.*/
         @Before
         public void setup() {
                 FileWriter writer = null;
@@ -69,9 +69,7 @@ public class ConfigTest {
                 }
         }
 
-        /**
-         * Clean up json file used for testing.
-         */
+        /*Clean up json file used for testing.*/
         @After
         public void teardown() {
                 File file = new File(configPath);
@@ -85,93 +83,70 @@ public class ConfigTest {
                 }
         }
 
-    /*these are left here in case this is the only record of code that reads/write JSON, but these are not proper tests:
         @Test
-        public void readConfigJson() {
-                FileReader reader = null;
-                try {
-                        reader = new FileReader(configPath);
-                        JsonReader jsonReader = new JsonReader(reader);
-                        Gson gson = new Gson();
-                        Config config = gson.fromJson(jsonReader, Config.class);
-                        assertNotNull(config.getComparisonMethod());
-                        assertEquals("Failed to read proper test value.", testValue, config.getComparisonMethod());
-                } catch (FileNotFoundException e) {
-                        System.out.println("Unable to load file '" + configPath + "'.");
-                        e.printStackTrace();
-                } finally {
-                        try {
-                                Objects.requireNonNull(reader).close();
-                        } catch (IOException e) {
-                                e.printStackTrace();
-                        }
-                }
-        }
-        @Test
-        public void writeConfigJson() {
-                FileReader reader = null;
-                FileWriter writer = null;
-                Config config = new Config();
-                config.setComparisonMethod(testValue);
-                Gson gson = new Gson();
-                try {
-                        writer = new FileWriter(configPath);
-                        gson.toJson(config, writer); // Write to json file
-                        Objects.requireNonNull(writer).close();
-                        reader = new FileReader(configPath);
-                        JsonReader jsonReader = new JsonReader(reader); // set up the reader
-                        Config newConfig = gson.fromJson(jsonReader, Config.class); // read written value to confirm it was written successfully
-                        assertNotNull(newConfig.getComparisonMethod());
-                        assertEquals("Failed to read proper test value.", testValue, newConfig.getComparisonMethod());
-                } catch (IOException e) {
-                        System.err.println("Failed to create dummy json file for testing Config.java.");
-                        e.printStackTrace();
-                } finally {
-                        try {
-                                Objects.requireNonNull(reader).close();
-                        } catch (IOException e) {
-                                e.printStackTrace();
-                        }
-                }
-        }
-        */
-
-        @Test
-        /**test the getter for default comparison method*/
-        public void getComparisonMethod() {
-                assertEquals(config.getComparisonMethod(), "CommonElements");
+        /*test the getter for default pairwise method*/
+        public void getPairwiseMethod() {
+                assertEquals(config.getPairwiseMethod(), "CommonElements");
         }
 
         @Test
-        /**test the setter for default comparison method*/
-        public void setComparisonMethod() {
+        /*test the setter for default pairwise method*/
+        public void setPairwiseMethod() {
                 String newMethod = "JaccardIndex";
-                config.setComparisonMethod(newMethod);
-                assertEquals(config.getComparisonMethod(), newMethod);
+                config.setPairwiseMethod(newMethod);
+                assertEquals(config.getPairwiseMethod(), newMethod);
         }
 
         @Test
-        /**test the getter for location of comparison metrics*/
-        public void getComparisonMethodLocation() {
-                assertEquals(config.getComparisonMethodLocation(), "metrics.comparison.");
+        /*test the getter for location of pairwise metrics*/
+        public void getPairwiseMethodLocation() {
+                assertEquals(config.getPairwiseMethodLocation(), "metrics.comparison.pairwise");
         }
 
         @Test
-        /**test the setter for location of comparison metrics*/
-        public void setComparisonMethodLocation() {
+        /*test the setter for location of pairwise metrics*/
+        public void setPairwiseMethodLocation() {
                 String newLocation = "java.util";
-                config.setComparisonMethodLocation(newLocation);
-                assertEquals(config.getComparisonMethodLocation(), newLocation);
+                config.setPairwiseMethodLocation(newLocation);
+                assertEquals(config.getPairwiseMethodLocation(), newLocation);
         }
 
         @Test
-        /**test the getter for default data representation*/
+        /*test the getter for default listwise method*/
+        public void getListwiseMethod() {
+                assertEquals(config.getListwiseMethod(), "ShannonIndex");
+        }
+
+        @Test
+        /*test the setter for default listwise method*/
+        public void setListwiseMethod() {
+                String newMethod = "JaccardIndex";
+                config.setListwiseMethod(newMethod);
+                assertEquals(config.getListwiseMethod(), newMethod);
+        }
+
+        @Test
+        /*test the getter for location of listwise metrics*/
+        public void getListwiseMethodLocation() {
+                assertEquals(config.getListwiseMethodLocation(), "metrics.comparison.listwise");
+        }
+
+        @Test
+        /*test the setter for location of listwise metrics*/
+        public void setListwiseMethodLocation() {
+                String newLocation = "java.util";
+                config.setListwiseMethodLocation(newLocation);
+                assertEquals(config.getListwiseMethodLocation(), newLocation);
+        }
+
+        @Test
+        /*test the getter for default data representation*/
         public void getDataRepresentation() {
                 assertEquals(config.getDataRepresentation(), "CSV");
         }
         
         @Test
-        /**test the setter for default data representation*/
+        /*test the setter for default data representation*/
         public void setDataRepresentation() {
                 String newDR = "AdjacencyGraph";
                 config.setDataRepresentation(newDR);
@@ -179,13 +154,13 @@ public class ConfigTest {
         }
 
         @Test
-        /**test the getter for location of data representations*/
+        /*test the getter for location of data representations*/
         public void getGetDataRepresentationLocation() {
                 assertEquals(config.getDataRepresentationLocation(), "data_representation");
         }
 
         @Test
-        /**test the setter for location of data representations*/
+        /*test the setter for location of data representations*/
         public void setGetDataRepresentationLocation() {
                 String newLocation = "java.util";
                 config.setDataRepresentationLocation(newLocation);
@@ -193,13 +168,13 @@ public class ConfigTest {
         }
 
         @Test
-        /**test the getter for default delimiter between test cases*/
+        /*test the getter for default delimiter between test cases*/
         public void getDelimiter() {
                 assertEquals(config.getDelimiter(), "\n");
         }
 
         @Test
-        /**test the setter for default delimiter between test cases*/
+        /*test the setter for default delimiter between test cases*/
         public void setDelimiter() {
                 String newDelimiter = "\n**********\n";
                 config.setDelimiter(newDelimiter);
@@ -207,13 +182,13 @@ public class ConfigTest {
         }
 
         @Test
-        /**set the getter for the default aggregation method*/
+        /*set the getter for the default aggregation method*/
         public void getAggregationMethod() {
                 assertEquals(config.getAggregationMethod(), "");
         }
 
         @Test
-        /**set the getter for the default aggregation method*/
+        /*set the getter for the default aggregation method*/
         public void setAggregationMethod() {
                 String newAM = "Average";
                 config.setAggregationMethod(newAM);
@@ -221,13 +196,13 @@ public class ConfigTest {
         }
 
         @Test
-        /**test the getter for location of aggregation methods*/
+        /*test the getter for location of aggregation methods*/
         public void getAggregationMethodLocation() {
                 assertEquals(config.getAggregationMethodLocation(), "metrics.aggregation.");
         }
 
         @Test
-        /**test the setter for location of aggregation methods*/
+        /*test the setter for location of aggregation methods*/
         public void setAggregationMethodLocation() {
                 String newLocation = "java.util";
                 config.setAggregationMethodLocation(newLocation);
@@ -235,13 +210,13 @@ public class ConfigTest {
         }
 
         @Test
-        /**test the getter for the default number of threads to use in a thread pool*/
+        /*test the getter for the default number of threads to use in a thread pool*/
         public void getNumThreads() {
                 assertEquals(config.getNumThreads(), 3);
         }
 
         @Test
-        /**test the getter for the default number of threads to use in a thread pool*/
+        /*test the getter for the default number of threads to use in a thread pool*/
         public void setNumThreads() {
                 int newNumThreads = 5;
                 config.setNumThreads(newNumThreads);
@@ -249,13 +224,13 @@ public class ConfigTest {
         }
 
         @Test
-        /**test the getter for the number of decimal places to round results*/
+        /*test the getter for the number of decimal places to round results*/
         public void getResultRoundingScale() {
                 assertEquals(config.getResultRoundingScale(), 2);
         }
 
         @Test
-        /**test the getter for the number of decimal places to round results*/
+        /*test the getter for the number of decimal places to round results*/
         public void setResultRoundingScale() {
                 int newRoundingScale = 5;
                 config.setResultRoundingScale(newRoundingScale);
@@ -263,13 +238,13 @@ public class ConfigTest {
         }
 
         @Test
-        /**test the getter for the rounding mode to use*/
+        /*test the getter for the rounding mode to use*/
         public void getResultRoundingMode() {
                 assertEquals(config.getResultRoundingMode(), "HALF_UP");
         }
 
         @Test
-        /**test the setter for the rounding mode to use*/
+        /*test the setter for the rounding mode to use*/
         public void setResultRoundingMode() {
                 String newRoundingMode = "HALF_DOWN";
                 config.setResultRoundingMode(newRoundingMode);
@@ -277,13 +252,13 @@ public class ConfigTest {
         }
 
         @Test
-        /**test the getter for the default name of output file*/
+        /*test the getter for the default name of output file*/
         public void getOutputFileName() {
                 assertEquals(config.getOutputFileName(), "comparison_result");
         }
 
         @Test
-        /**test the getter for the default name of output file*/
+        /*test the getter for the default name of output file*/
         public void setOutputFileName() {
                 String newOutputName = "out";
                 config.setOutputFileName(newOutputName);
@@ -291,13 +266,13 @@ public class ConfigTest {
         }
 
         @Test
-        /**test the getter for the default location to save output files*/
+        /*test the getter for the default location to save output files*/
         public void getOutputFileLocation() {
                 assertEquals(config.getOutputFileLocation(), "");
         }
 
         @Test
-        /**test the setter for the default location to save output files*/
+        /*test the setter for the default location to save output files*/
         public void setOutputFileLocation() {
                 String newLocation = "C://";
                 config.setOutputFileLocation(newLocation);
@@ -305,21 +280,23 @@ public class ConfigTest {
         }
 
         @Test
-        /**test the two string method*/
+        /*test the two string method*/
         public void testToString() {
                assertEquals(config.toString(), "Config{" +
-                       "comparisonMethod='" + "CommonElements" + '\'' +
-                       ", comparisonMethodLocation='" + "metrics.comparison." + '\'' +
-                       ", dataRepresentation='" + "CSV" + '\'' +
-                       ", dataRepresentationLocation='" + "data_representation" + '\'' +
-                       ", delimiter=" + "\n" +
-                       ", aggregationMethod='" + "" + '\'' +
-                       ", aggregationMethodLocation='" + "metrics.aggregation." + '\'' +
-                       ", numThreads=" + "3" +
-                       ", resultRoundingScale=" + "2" +
-                       ", resultRoundingMode='" + "HALF_UP" + '\'' +
-                       ", outputFileName='" + "comparison_result" + '\'' +
-                       ", outputFileLocation='" + "" + '\'' +
-                       '}');
+                       "listwiseMethod=\'ShannonIndex\'," +
+                       " listwiseMethodLocation=\'metrics.comparison.listwise\'," +
+                       " pairwiseMethod=\'CommonElements\'," +
+                       " pairwiseMethodLocation=\'metrics.comparison.pairwise\'," +
+                       " dataRepresentation=\'CSV\'," +
+                       " dataRepresentationLocation=\'data_representation\'," +
+                       " delimiter=\n," +
+                       " aggregationMethod=\'\'," +
+                       " aggregationMethodLocation=\'metrics.aggregation.\'," +
+                       " numThreads=3," +
+                       " resultRoundingScale=2," +
+                       " resultRoundingMode=\'HALF_UP\'," +
+                       " outputFileName=\'comparison_result\'," +
+                       " outputFileLocation=\'\'" +
+                       "}");
         }
 }

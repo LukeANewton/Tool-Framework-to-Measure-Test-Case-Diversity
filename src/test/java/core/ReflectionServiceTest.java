@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import model.Config;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.awt.*;
@@ -41,7 +40,7 @@ public class ReflectionServiceTest {
      */
     @Test
     public void testReflectNoArgsConstructor() throws InvalidFormatException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        Object instance = null;
+        Object instance;
         String classPath = "metrics.comparison.pairwise.CommonElements";
         String implementedInterface = "metrics.comparison.pairwise.PairwiseComparisonStrategy";
         instance = reflector.loadClass(classPath, implementedInterface);
@@ -60,7 +59,7 @@ public class ReflectionServiceTest {
      */
     @Test
     public void testReflectNoArgsConstructorNullIF() throws InvalidFormatException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        Object instance = null;
+        Object instance;
         String classPath = "metrics.comparison.pairwise.CommonElements";
         instance = reflector.loadClass(classPath, null);
         assertNotNull("Failed to instantiate class '" + classPath + "' with a null interface.", instance);
@@ -106,7 +105,7 @@ public class ReflectionServiceTest {
      */
     @Test
     public void testReflectArgsConstructor() throws NoSuchMethodException, InvalidFormatException, IllegalAccessException, InstantiationException, InvocationTargetException, ClassNotFoundException {
-        Object instance = null;
+        Object instance;
         String classPath = "java.awt.Rectangle";
         String implementedInterface = "java.io.Serializable";
         Class[] constructorTemplate = new Class[] {int.class, int.class};
@@ -131,13 +130,13 @@ public class ReflectionServiceTest {
      */
     @Test
     public void testReflectArgsConstructorInvalidIF() throws NoSuchMethodException, InvalidFormatException, IllegalAccessException, InstantiationException, InvocationTargetException, ClassNotFoundException {
-        Object instance = null;
+        Object instance;
         String classPath = "java.awt.Rectangle";
-        String implementedInterface = null;
+        String implementedInterface;
         Class[] constructorTemplate = new Class[] {int.class, int.class};
         Object[] constructorValues = new Object[] {5, 10};
 
-        instance = reflector.loadClass(classPath, implementedInterface, constructorTemplate, constructorValues);
+        instance = reflector.loadClass(classPath, null, constructorTemplate, constructorValues);
         assertNotNull("Failed to instantiate class '" + classPath + "' with null interface.", instance);
 
         Rectangle rec = (Rectangle) instance;
@@ -233,9 +232,7 @@ public class ReflectionServiceTest {
     }
 
     @Test
-    /**
-     * test for the searchPackage() method, which searches a package for all objects that implement a specified interface
-     */
+    /*test for the searchPackage() method, which searches a package for all objects that implement a specified interface*/
     public void testSearchPackage() {
         try {
             Object[] list = reflector.searchPackage("metrics.comparison.pairwise", "metrics.comparison.pairwise.PairwiseComparisonStrategy");
@@ -247,10 +244,8 @@ public class ReflectionServiceTest {
     }
 
     @Test
-    /**
-     * test for the searchPackage() method, which searches a package for all objects that implement a specified interface.
-     * This method introduces a non-class file in the package to ensure that it is skipped over and does not cause any errors
-     */
+    /*test for the searchPackage() method, which searches a package for all objects that implement a specified interface.
+     * This method introduces a non-class file in the package to ensure that it is skipped over and does not cause any error*/
     public void testSearchPackageWithNonClassFile() {
         //create file
         File file = new File("target/classes/metrics/comparison/banana");
@@ -274,10 +269,8 @@ public class ReflectionServiceTest {
     }
 
     @Test
-    /**
-     * test for the searchPackage() method, which searches a package for all objects that implement a specified interface.
-     * this test is for the case where the package being searched for does not exist
-     */
+    /*test for the searchPackage() method, which searches a package for all objects that implement a specified interface.
+     * this test is for the case where the package being searched for does not exist*/
     public void testSearchPackageNoSuchDirectory() {
         try {
             Object[] list = reflector.searchPackage("banana", "PairwiseComparisonStrategy");
@@ -289,10 +282,8 @@ public class ReflectionServiceTest {
     }
 
     @Test
-    /**
-     * test for the retrieveConfigSetter() method, which looks to see if there is a setter in the Config object for a
-     * given field. This is for the positive case, where the setter can be found
-     */
+    /*test for the retrieveConfigSetter() method, which looks to see if there is a setter in the Config object for a
+     * given field. This is for the positive case, where the setter can be found*/
     public void testRetrieveConfigSetterExists(){
         //read JSON
         JsonReader jsonReader = null;
@@ -306,7 +297,7 @@ public class ReflectionServiceTest {
         Config config = gson.fromJson(jsonReader, Config.class);
 
         //attempt to find setter for a field
-        String fieldName = "comparisonMethod";
+        String fieldName = "pairwiseMethod";
         Method setter = null;
         try {
             setter = reflector.retrieveConfigSetter(config, String.class, fieldName);
@@ -316,28 +307,23 @@ public class ReflectionServiceTest {
         }
 
         //call the obtained method
-        String currentValue = config.getComparisonMethod();
+        String currentValue = config.getPairwiseMethod();
         String newValue = "banana";
         try {
             setter.invoke(config, newValue);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            fail();
-        } catch (InvocationTargetException e) {
+        } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
             fail();
         }
-        assertEquals(newValue, config.getComparisonMethod());
+        assertEquals(newValue, config.getPairwiseMethod());
 
         //restore old value in config file
-        config.setComparisonMethod(currentValue);
+        config.setPairwiseMethod(currentValue);
     }
 
     @Test
-    /**
-     * test for the retrieveConfigSetter() method, which looks to see if there is a setter in the Config object for a
-     * given field.This is for the negative case, where the setter does not exist
-     */
+    /*test for the retrieveConfigSetter() method, which looks to see if there is a setter in the Config object for a
+     * given field.This is for the negative case, where the setter does not exist*/
     public void testRetrieveConfigSetterNotExists(){
         //read JSON
         JsonReader jsonReader = null;

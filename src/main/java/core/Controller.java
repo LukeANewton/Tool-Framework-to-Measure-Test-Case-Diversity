@@ -2,6 +2,7 @@ package core;
 
 import data_representation.DataRepresentation;
 import metrics.aggregation.AggregationStrategy;
+import metrics.comparison.listwise.ListwiseComparisonStrategy;
 import metrics.comparison.pairwise.PairwiseComparisonStrategy;
 import model.*;
 import user_interface.ConsoleOutputService;
@@ -13,6 +14,7 @@ import utilities.Tuple;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,6 +30,7 @@ public class Controller {
     private static final String CONFIG_FILE = "config.json";
     private static final String DATA_REP_INTERFACE_PATH = "data_representation.DataRepresentation";
     private static final String PAIRWISE_COMPARISON_INTERFACE_PATH = "metrics.comparison.pairwise.PairwiseComparisonStrategy";
+    private static final String LISTWISE_COMPARISON_INTERFACE_PATH = "metrics.comparison.listwise.ListwiseComparisonStrategy";
     private static final String AGGREGATION_INTERFACE_PATH = "metrics.aggregation.AggregationStrategy";
 
     //configuration object containing config file values
@@ -151,26 +154,6 @@ public class Controller {
      * @param dto the DataTransferObject containing information to run a compare command
      * @return an instance of the PairwiseComparisonStrategy specified in the dto
      */
-    private PairwiseComparisonStrategy loadPairwiseStrategy(CompareDTO dto) {
-        String name = dto.getPairwiseMethod();
-
-        if (name == null)//nothing specified in dto, so load default from config file
-            name = config.getComparisonMethod();
-
-        //set the package to look in
-        String packageName = config.getComparisonMethodLocation();
-
-        //try to load the class
-        return (PairwiseComparisonStrategy) loadRequiredImplementation(name, packageName,
-                PAIRWISE_COMPARISON_INTERFACE_PATH, "pairwise metric");
-    }
-
-    /**
-     * contains the logic for obtaining the PairwiseComparisonStrategy for a compare command
-     *
-     * @param dto the DataTransferObject containing information to run a compare command
-     * @return an instance of the PairwiseComparisonStrategy specified in the dto
-     */
     private AggregationStrategy[] loadAggregationStrategy(CompareDTO dto) {
         String[] names = dto.getAggregationMethods();
 
@@ -193,6 +176,15 @@ public class Controller {
         return strategies.toArray(new AggregationStrategy[0]);
     }
 
+    /**
+     * loads an object of class name located at packageName, that implements the interface at interfacePath
+     *
+     * @param name the name of the class to instantiate
+     * @param packageName the location of the class
+     * @param interfacePath the location of the interface the class should implement
+     * @param interfaceType the string description of the class to instantiate, to aid in error reporting
+     * @return an instance of the class specified by name
+     */
     private Object loadRequiredImplementation(String name, String packageName, String interfacePath, String interfaceType){
         if (!packageName.endsWith("."))
             packageName = packageName + ".";
@@ -210,6 +202,24 @@ public class Controller {
     }
 
     /**
+     * loads a comparison strategy specified by name, that should implement a specified interface
+     *
+     * @param name the name of the class to instantiate
+     * @param defaultName the default name to use if the name in the dto is unspecified
+     * @param packageName the location of the class
+     * @param interfaceName the location of the interface the class should implement
+     * @return an instance of the specified class
+     * @throws Exception occurs when the class could not be found at the specified location, or if the class does not implement the specified interface
+     */
+    private Object loadComparisonStrategy(String name, String defaultName, String packageName, String interfaceName) throws Exception {
+        if (name == null)
+            name = defaultName;
+        if (!packageName.endsWith("."))
+            packageName = packageName + ".";
+        return reflectionService.loadClass(packageName + name, interfaceName);
+    }
+
+    /**
      * performs a "compare" operation that is characterized by the contents of the passed CompareDTO
      *
      * @param dto data transfer object containing information on the requested compare command
@@ -217,13 +227,29 @@ public class Controller {
     private void processCompareCommand(CompareDTO dto) {
         //load the data representation
         DataRepresentation dataRepresentation = loadDataRepresentation(dto);
-        if(dataRepresentation == null)
+        if (dataRepresentation == null)
             return;
 
-        //load the pairwise comparison metric
-        PairwiseComparisonStrategy comparisonStrategy = loadPairwiseStrategy(dto);
-        if(comparisonStrategy == null)
+        //determine whether the comparison metric is pairwise or listwise
+        PairwiseComparisonStrategy pairwiseStrategy = null;
+        ListwiseComparisonStrategy listwiseStrategy = null;
+        String name = dto.getComparisonMethod();
+        ComparisonType type;
+        try {
+            pairwiseStrategy = (PairwiseComparisonStrategy) loadComparisonStrategy(name, config.getPairwiseMethod(),
+                    config.getPairwiseMethodLocation(), PAIRWISE_COMPARISON_INTERFACE_PATH);
+        } catch (Exception ignored) {}
+        try {
+            listwiseStrategy = (ListwiseComparisonStrategy) loadComparisonStrategy(name, config.getListwiseMethod(),
+                    config.getListwiseMethodLocation(), LISTWISE_COMPARISON_INTERFACE_PATH);
+        } catch (Exception ignored) {}
+        if (pairwiseStrategy == null && listwiseStrategy == null) {
+            console.displayResults("The specified metric either cannot be found, or does not implement the required interface");
             return;
+        } else if (pairwiseStrategy == null)
+            type = ComparisonType.listwise;
+        else
+            type = ComparisonType.pairwise;
 
         //load the aggregation methods
         AggregationStrategy[] aggregationStrategies = loadAggregationStrategy(dto);
@@ -261,35 +287,65 @@ public class Controller {
             dto.setNumberOfThreads(config.getNumThreads());
         ExecutorService threadPool = Executors.newFixedThreadPool(dto.getNumberOfThreads());
 
-        //generate the pairs for comparison
-        pairingService = new PairingService(threadPool);
-        List<Tuple<DataRepresentation, DataRepresentation>> pairs;
-        console.displayResults("Pairing Test Cases...");
-        try {
-            if(testSuite2 == null)
-                pairs = pairingService.makePairs(console, testSuite1);
-            else
-                pairs = pairingService.makePairs(console, testSuite1, testSuite2);
-        } catch (Exception e) {
-            console.displayResults("Error during pair generation: " + e.toString());
-            return;
-        }
-        if(pairs.size() == 0){//no pairs could be made from the passed test suites
-            console.displayResults("Test suite contains insufficient test cases to generate pairs");
-            return;
-        }
-
-        //now perform the actual comparison
-        comparisonService = new ComparisonService(threadPool);
         String[] results;
-        try {
-            console.displayResults("Performing Comparison...");
-            results = comparisonService.pairwiseCompare(pairs, comparisonStrategy, aggregationStrategies, console, dto.isUseThreadPool());
-        } catch (Exception e) {
-            console.displayResults("Error in pairwise comparison calculation: " + e.toString());
-            return;
+        switch(type){//pairing and comparison is dependent on the type of comparison metric being used
+            case pairwise:
+                //generate the pairs for comparison
+                pairingService = new PairingService(threadPool);
+                List<Tuple<DataRepresentation, DataRepresentation>> pairs;
+                console.displayResults("Pairing Test Cases...");
+                try {
+                    if (testSuite2 == null)
+                        pairs = pairingService.makePairs(console, testSuite1);
+                    else
+                        pairs = pairingService.makePairs(console, testSuite1, testSuite2);
+                } catch (Exception e) {
+                    console.displayResults("Error during pair generation: " + e.toString());
+                    return;
+                }
+                if (pairs.size() == 0) {//no pairs could be made from the passed test suites
+                    console.displayResults("Test suite contains insufficient test cases to generate pairs");
+                    return;
+                }
+                //now perform the actual comparison
+                comparisonService = new ComparisonService(threadPool);
+                try {
+                    console.displayResults("Performing Comparison...");
+                    results = comparisonService.pairwiseCompare(pairs, pairwiseStrategy, aggregationStrategies, console, dto.isUseThreadPool());
+                } catch (Exception e) {
+                    console.displayResults("Error in pairwise comparison calculation: " + e.toString());
+                    return;
+                }
+                break;
+            case listwise:
+                //now perform the actual comparison
+                comparisonService = new ComparisonService(threadPool);
+                try {
+                    console.displayResults("Performing Comparison...");
+                    List<List<DataRepresentation>> suites = new ArrayList<>();
+                    suites.add(Arrays.asList(testSuite1));
+                    if (testSuite2 != null)
+                        suites.add(Arrays.asList(testSuite2));
+                    results = comparisonService.listwiseCompare(suites, listwiseStrategy,
+                            aggregationStrategies, console, dto.isUseThreadPool());
+                } catch (Exception e) {
+                    console.displayResults("Error in pairwise comparison calculation: " + e.toString());
+                    return;
+                }
+                break;
+            default:
+                results = new String[0];
         }
         threadPool.shutdown();
+
+        if(results.length == 0) {
+            console.displayResults("no results were obtained from the calculation");
+        } else {
+            outputResults(results, dto);
+        }
+    }
+
+    private void outputResults(String[] results, CompareDTO dto){
         StringBuilder s = new StringBuilder();
         s.append(results[0]);
         for(int i = 1; i < results.length; i++){
@@ -298,7 +354,7 @@ public class Controller {
         String result = s.toString();
 
         //output results to file, if required
-        filename = dto.getOutputFilename();
+        String filename = dto.getOutputFilename();
         if(filename != null){
             File output = new File(filename);
             try {
@@ -400,9 +456,6 @@ public class Controller {
     private void processHelpCommand(HelpDTO dto) {
         HelpType helpType = dto.getHelpType();
         StringBuilder result = new StringBuilder();
-
-        String packageName = null;
-        String interfacePath = null;
         //determine which type of help is needed, each works the same way except for Command help
         switch(helpType){
             case Command:
@@ -422,23 +475,28 @@ public class Controller {
                 result.append("\t\t\t-f: lists the available data representations in the system").append(System.lineSeparator());
                 console.displayResults(result.toString());
                 return;
-            case PairwiseMetric:
-                packageName = config.getComparisonMethodLocation();
-                interfacePath = PAIRWISE_COMPARISON_INTERFACE_PATH;
+            case Metric:
+                displayHelp(config.getPairwiseMethodLocation(),
+                        PAIRWISE_COMPARISON_INTERFACE_PATH, "pairwise metric");
+                displayHelp(config.getListwiseMethodLocation(),
+                        LISTWISE_COMPARISON_INTERFACE_PATH, "listwise metric");
                 break;
             case AggregationMethod:
-                packageName = config.getAggregationMethodLocation();
-                interfacePath = AGGREGATION_INTERFACE_PATH;
+                displayHelp(config.getAggregationMethodLocation(),
+                        AGGREGATION_INTERFACE_PATH, "aggregation method");
                 break;
             case DataRepresentation:
-                packageName = config.getDataRepresentationLocation();
-                interfacePath = DATA_REP_INTERFACE_PATH;
+                displayHelp(config.getDataRepresentationLocation(),
+                        DATA_REP_INTERFACE_PATH, "data representation");
                 break;
         }
 
-        /* for comparison metrics, aggregation methods, and data representations, we search for every
-            class of the method and get the description from each*/
+
+    }
+
+    private void displayHelp(String packageName, String interfacePath, String helpType){
         try {
+            StringBuilder result = new StringBuilder();
             Object[] objects = reflectionService.searchPackage(packageName, interfacePath);
             result.append("Available ").append(helpType).append("s are:").append(System.lineSeparator());
             if(objects == null)
