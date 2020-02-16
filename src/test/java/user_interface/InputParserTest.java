@@ -38,7 +38,7 @@ public class InputParserTest {
             case DataRepresentation:
                 command.append(" -f");
                 break;
-            case PairwiseMetric:
+            case Metric:
                 command.append(" -m");
                 break;
             case Command:
@@ -65,7 +65,7 @@ public class InputParserTest {
     @Test
     /*test for parsing comparison metric help*/
     public void testPairwiseHelp() throws InvalidCommandException {
-        helpHelper(HelpType.PairwiseMetric);
+        helpHelper(HelpType.Metric);
     }
 
     @Test
@@ -173,14 +173,17 @@ public class InputParserTest {
      * @throws InvalidCommandException when the parameters specified result in an invalid command
      */
     private void compareHelper(String file1, String file2, String dataRepresentation, String comparisonMethod,
-                               String aggregationMethod, String delimiter, String outputFilename,
+                               String[] aggregationMethods, String delimiter, String outputFilename,
                                boolean save, Integer numThreads) throws InvalidCommandException {
         StringBuilder command = new StringBuilder();
         command.append("compare").append(" ").append(file1).append(" ").append(file2).append(" ").append(dataRepresentation);
         if(comparisonMethod != null)
             command.append(" -m ").append(comparisonMethod);
-        if(aggregationMethod != null)
-            command.append(" -a ").append(aggregationMethod);
+        if(aggregationMethods != null) {
+            command.append(" -a");
+            for(String aggregationMethod : aggregationMethods)
+                command.append(" ").append(aggregationMethod);
+        }
         if(delimiter != null)
             command.append(" -d ").append(delimiter);
         if(save){
@@ -197,8 +200,8 @@ public class InputParserTest {
         assertEquals(file1, ((CompareDTO)dto).getTestCaseLocationOne());
         assertEquals(file2, ((CompareDTO)dto).getTestCaseLocationTwo());
         assertEquals(dataRepresentation, ((CompareDTO)dto).getDataRepresentation());
-        assertEquals(comparisonMethod, ((CompareDTO)dto).getPairwiseMethod());
-        assertEquals(aggregationMethod, ((CompareDTO)dto).getAggregationMethod());
+        assertEquals(comparisonMethod, ((CompareDTO)dto).getComparisonMethod());
+        assertArrayEquals(aggregationMethods, ((CompareDTO) dto).getAggregationMethods());
         assertEquals(delimiter, ((CompareDTO)dto).getDelimiter());
         assertEquals(outputFilename, ((CompareDTO)dto).getOutputFilename());
         assertEquals(numThreads, ((CompareDTO)dto).getNumberOfThreads());
@@ -297,7 +300,18 @@ public class InputParserTest {
         String file2 = "file2";
         String dataRepresentation = "CSV";
         String metric = "out";
-        compareHelper(file1, file2, dataRepresentation, null, metric,
+        compareHelper(file1, file2, dataRepresentation, null, new String[]{metric},
+                null, null, false, null);
+    }
+
+    @Test
+    /*test for parsing a valid compare command with aggregation metric flag*/
+    public void testCompareMultipleAggregationsFlag() throws InvalidCommandException {
+        String file1 = "file1";
+        String file2 = "file2";
+        String dataRepresentation = "CSV";
+        String metric = "out";
+        compareHelper(file1, file2, dataRepresentation, null, new String[]{metric, metric, metric},
                 null, null, false, null);
     }
 
@@ -399,7 +413,7 @@ public class InputParserTest {
         DataTransferObject dto = input.parse("compare " + file1 + " " + dataRepresentation + " -t -m metricname");
         assertTrue(((CompareDTO)dto).isUseThreadPool());
         assertNull(((CompareDTO)dto).getNumberOfThreads());
-        assertEquals(((CompareDTO)dto).getPairwiseMethod(), "metricname");
+        assertEquals(((CompareDTO)dto).getComparisonMethod(), "metricname");
     }
 
     @Test
@@ -439,20 +453,8 @@ public class InputParserTest {
         String metric = "out";
         Integer numThreads = 4;
         String outputFile = "out.txt";
-
-        compareHelper(file1, file2, dataRepresentation, metric, metric,
+        compareHelper(file1, file2, dataRepresentation, metric, new String[]{metric},
                 delimiter, outputFile, true, numThreads);
-    }
-
-    @Test
-    /*test for parsing a valid compare command with every flag specified and some extra bits*/
-    public void testCompareTooLong() {
-        try {
-            input.parse("compare file1 file2 CSV -m metricname -a aggregation -d *** -t 67 -s out.txt banana republic");
-            fail();
-        }catch(InvalidCommandException e){
-            assertEquals("Unexpected additional tokens: [banana, republic]", e.getErrorMessage());
-        }
     }
 
     @Test
@@ -472,8 +474,8 @@ public class InputParserTest {
         assertEquals(file1, ((CompareDTO)dto).getTestCaseLocationOne());
         assertNull(((CompareDTO) dto).getTestCaseLocationTwo());
         assertEquals(dataRepresentation, ((CompareDTO)dto).getDataRepresentation());
-        assertEquals(metric, ((CompareDTO)dto).getPairwiseMethod());
-        assertNull(((CompareDTO) dto).getAggregationMethod());
+        assertEquals(metric, ((CompareDTO)dto).getComparisonMethod());
+        assertNull(((CompareDTO) dto).getAggregationMethods());
         assertEquals(delimiter, ((CompareDTO)dto).getDelimiter());
         assertNull(((CompareDTO) dto).getOutputFilename());
         assertEquals(numThreads, ((CompareDTO)dto).getNumberOfThreads());

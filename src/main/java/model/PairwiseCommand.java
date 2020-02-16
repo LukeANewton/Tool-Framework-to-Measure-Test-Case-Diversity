@@ -40,7 +40,7 @@ public class PairwiseCommand implements Callable<Object> {
 
 		double result = comparison.compare(Data1, Data2);
 		support.firePropertyChange(new PropertyChangeEvent(this, "complete",
-				null, null));
+				null, 1));
 		return result;
 	}
 }

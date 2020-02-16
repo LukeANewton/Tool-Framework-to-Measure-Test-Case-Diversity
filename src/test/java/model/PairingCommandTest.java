@@ -3,43 +3,33 @@ package model;
 import core.InvalidFormatException;
 import data_representation.CSV;
 import data_representation.DataRepresentation;
-import data_representation.StateSequence;
-import metrics.comparison.pairwise.Dice;
-import metrics.comparison.pairwise.PairwiseComparisonStrategy;
 import org.junit.Before;
 import org.junit.Test;
 import user_interface.ConsoleOutputService;
+import utilities.Tuple;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeSupport;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class PairwiseCommandTest {
-    PairwiseComparisonStrategy strategy;
+public class PairingCommandTest {
     DataRepresentation[] testsuite;
-    PairwiseCommand command;
+    PairingCommand command;
 
     @Before
     public void setUp() throws InvalidFormatException {
-        strategy = new Dice();
-        command = new PairwiseCommand(strategy, new CSV("1,2,3,4,5,6"), new CSV("5,4,8,5,2,4,7"), null);
+        testsuite = new DataRepresentation[]{new CSV("1,2,3,4,5,6"), new CSV("5,4,8,5,2,4,7"), new CSV("1,1,1,4,5,8")};
+        command = new PairingCommand(null, new CSV("1,6,7,9,2"), testsuite);
     }
 
     @Test
-    public void call() throws Exception {
-        double result = (Double) command.call();
-        double expected = 0.5454; //hand-calculated value
-        assertEquals(expected, result, 0.05);
-    }
-
-    @Test(expected = TestCaseFormatMismatchException.class)
-    public void callWithDifferentDataRepresentations() throws Exception {
-        command = new PairwiseCommand(strategy, new CSV("1,2,3,4,5,6"),
-                new StateSequence("[43] Start-1(0)-OffProtected-4-StoppedProtected-13-PlayingProtected"), null);
-        command.call();
+    public void call() {
+        List<Tuple<DataRepresentation, DataRepresentation>> result = command.call();
+        assertEquals(3, result.size());
     }
 
     @Test
@@ -53,8 +43,8 @@ public class PairwiseCommandTest {
         PropertyChangeSupport support = new PropertyChangeSupport(this);
         support.addPropertyChangeListener(c);
         support.firePropertyChange(new PropertyChangeEvent(this, "numberTasks",
-                null, 1));
-        command = new PairwiseCommand(strategy, new CSV("1,2,3,4,5,6"), new CSV("5,4,8,5,2,4,7") , c);
+                null, 3));
+        command = new PairingCommand(c, new CSV("1,6,7,9,2"), testsuite);
         command.call();
         String expected = "[==========]" + System.lineSeparator();
         String actual = outContent.toString();
