@@ -3,8 +3,8 @@ package core;
 import data_representation.DataRepresentation;
 import metrics.aggregation.AggregationStrategy;
 import metrics.comparison.pairwise.PairwiseComparisonStrategy;
-import metrics.report_format.DefaultFormat;
 import metrics.report_format.ReportFormat;
+import metrics.report_format.XMLFormat;
 import model.*;
 import user_interface.ConsoleOutputService;
 import user_interface.InputParser;
@@ -98,7 +98,7 @@ public class Controller {
      *
      * @param command the command for the system to execute
      */
-    public void processCommand(String command){
+    public void processCommand(String command) {
         //parse the command into a DTO
         DataTransferObject dto;
         try {
@@ -114,7 +114,7 @@ public class Controller {
 
         //determine which command is being parsed
         CommandType commandType = dto.getCommandType();
-        switch(commandType){
+        switch(commandType) {
             case Help:
                 processHelpCommand((HelpDTO)dto);
                 break;
@@ -133,17 +133,17 @@ public class Controller {
      * @param dto the DataTransferObject containing information to run a compare command
      * @return an instance of the DataRepresentation specified in the dto
      */
-    private DataRepresentation loadDataRepresentation(CompareDTO dto){
-        String name = dto.getDataRepresentation();
+    private DataRepresentation loadDataRepresentation(CompareDTO dto) {
 
-        if (name == null)//nothing specified in dto, so load default from config file
-            name = config.getDataRepresentation();
+        if (dto.getDataRepresentation() == null) { // Nothing specified in dto, so load default from config file
+            dto.setDataRepresentation(config.getDataRepresentation());
+        }
 
         //set the package to look in
         String packageName = config.getDataRepresentationLocation();
 
         //try to load the class
-        return (DataRepresentation) loadRequiredImplementation(name, packageName,
+        return (DataRepresentation) loadRequiredImplementation(dto.getDataRepresentation(), packageName,
                 DATA_REP_INTERFACE_PATH, "data representation");
     }
 
@@ -154,16 +154,16 @@ public class Controller {
      * @return an instance of the PairwiseComparisonStrategy specified in the dto
      */
     private PairwiseComparisonStrategy loadPairwiseStrategy(CompareDTO dto) {
-        String name = dto.getPairwiseMethod();
 
-        if (name == null)//nothing specified in dto, so load default from config file
-            name = config.getComparisonMethod();
+        if (dto.getPairwiseMethod() == null) { // Nothing specified in dto, so load default from config file
+            dto.setPairwiseMethod(config.getComparisonMethod());
+        }
 
         //set the package to look in
         String packageName = config.getComparisonMethodLocation();
 
         //try to load the class
-        return (PairwiseComparisonStrategy) loadRequiredImplementation(name, packageName,
+        return (PairwiseComparisonStrategy) loadRequiredImplementation(dto.getPairwiseMethod(), packageName,
                 PAIRWISE_COMPARISON_INTERFACE_PATH, "pairwise metric");
     }
 
@@ -174,17 +174,16 @@ public class Controller {
      * @return an instance of the PairwiseComparisonStrategy specified in the dto
      */
     private AggregationStrategy[] loadAggregationStrategy(CompareDTO dto) {
-        String[] names = dto.getAggregationMethods();
 
-        if (names == null)//nothing specified in dto, so load default from config file
-            names = new String[]{config.getAggregationMethod()};
+        if (dto.getAggregationMethods() == null) // Nothing specified in dto, so load default from config file and set it in the dto to be passed to the report
+            dto.setAggregationMethods(new String[]{config.getAggregationMethod()});
 
         //set the package to look in
         String packageName = config.getAggregationMethodLocation();
 
         //try to load the class
         List<AggregationStrategy> strategies = new ArrayList<>();
-        for(String name: names){
+        for (String name : dto.getAggregationMethods()) {
             AggregationStrategy strategy = (AggregationStrategy) loadRequiredImplementation(name, packageName,
                     AGGREGATION_INTERFACE_PATH, "aggregation method");
             if(strategy == null)
@@ -302,9 +301,9 @@ public class Controller {
         }
 
         // TODO: Swap report formats
-        ReportFormat reportFormat = new DefaultFormat();
+        ReportFormat reportFormat = new XMLFormat();
         // TODO: Do we need to convert aggregateResults to String[]?
-        String result = reportFormat.format(dto, pairs, similarityValuesForEachComparisonStrategy, aggregateResults.toArray(new String[0]));
+        String result = reportFormat.format(dto, similarityValuesForEachComparisonStrategy, aggregateResults.toArray(new String[0]));
 
         //output results to file, if required
         filename = dto.getOutputFilename();
@@ -331,7 +330,7 @@ public class Controller {
         }
 
         //output results to console
-        console.displayResults("Result:" + System.lineSeparator() + System.lineSeparator() + result);
+        console.displayResults(System.lineSeparator() + System.lineSeparator() + result);
     }
 
     /**

@@ -1,9 +1,7 @@
 package metrics.report_format;
 
-import data_representation.DataRepresentation;
 import model.CompareDTO;
 import model.DataTransferObject;
-import utilities.Tuple;
 
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -14,25 +12,22 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
- * Interface for all report formats
  * @author crushton
  */
 public interface ReportFormat {
 
-    String DATE_FORMAT = "MM/dd/yyyy HH:mm:ss";
+    String DATE_FORMAT = "MM/dd/yyyy HH:mm";
     // The recommended maximum size to nicely print in the report format
-    int SIMILARITIES_SIZE_THRESHOLD = 100;
-    // The default value of any null or undefined attributes
-    String DEFAULT_VALUE = "Undefined";
+    int SIMILARITY_THRESHOLD = 100;
 
     /**
-     * Formats the similarity values, aggregations of the similarity values and data from the DTO into a convenient  format.
+     * Formats the similarity values, aggregations of the similarity values and data from the DTO into a convenient format.
      * @param dto The data transfer object given to the controller to start comparison
      * @param similarities The similarity values found by the comparison service
      * @param aggregations The aggregated similarity values calculated by one or more aggregation strategies
      * @return A nicely formatted string
      */
-    String format(CompareDTO dto, List<Tuple<DataRepresentation, DataRepresentation>> pairs, List<Double> similarities, String[] aggregations);
+    String format(CompareDTO dto, List<Double> similarities, String[] aggregations);
 
     /**
      * Provides a description of the format
@@ -58,20 +53,23 @@ public interface ReportFormat {
         return dtf.format(now);
     }
 
-    default Map<String, String> getRunParameters(DataTransferObject dto) {
+    default Map<String, String> getRunParameters(CompareDTO dto) {
+        // Don't display the number of threads if we don't use a thread pool
+        if (!dto.isUseThreadPool()) {
+            dto.setNumberOfThreads(null);
+        }
+
         Map<String, String> parameterValuePairs = new HashMap<>();
         try {
             Arrays.stream(Introspector.getBeanInfo(dto.getClass(), DataTransferObject.class)
                     .getPropertyDescriptors())
-                    // Filter out properties that only have setters
+                    // Filter out properties that only have setters or are null
                     .filter(pd -> Objects.nonNull(pd.getReadMethod()))
                     .forEach(pd -> { // Invoke the method to get the value
                         try {
                             Object value = pd.getReadMethod().invoke(dto);
                             if (value != null) {
-                                parameterValuePairs.put(pd.getName(), value.toString());
-                            } else { // Give the caller as much data as possible without making them work too hard
-                                parameterValuePairs.put(pd.getName(), DEFAULT_VALUE);
+                                parameterValuePairs.put(pd.getName(), value.getClass().isArray()? Arrays.toString((String[]) value) : value.toString());
                             }
                         } catch (Exception ignore) {}
                     });
@@ -97,7 +95,7 @@ public interface ReportFormat {
                 " * Comparison Report" + System.lineSeparator() +
                 " * User: " + getUser() + System.lineSeparator() +
                 " * Host: " + getHost() + System.lineSeparator() +
-                " * Date (" + DATE_FORMAT + "): " + getDateTime() +
+                " * Date: " + getDateTime() + " (" + DATE_FORMAT + ")" + System.lineSeparator() +
                 " ******************" + System.lineSeparator();
     }
 }
