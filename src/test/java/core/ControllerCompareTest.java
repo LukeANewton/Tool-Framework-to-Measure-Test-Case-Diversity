@@ -399,7 +399,7 @@ public class ControllerCompareTest {
         String output1 = "out-1";
 
         doComparison(sampleTestSuiteA, null, "CommonElements", "AverageValue MinimumValue", null,
-                output1, "7");
+                true, output1, "7");
         /*hand calculated value:
         sampleTestSuiteA generates 10 pairs
         with common elements: [4 4 4 4 5 9 9 5 5 12]*/
@@ -493,7 +493,7 @@ public class ControllerCompareTest {
     public void testListwiseCompare() throws IOException {
         String filename = "out";
         doComparison(singlePairTestSuiteName, null, "ShannonIndex", null, null,
-                filename, null);
+                true, filename, null);
         assertEquals(1.79 ,Double.parseDouble(readFile(filename)), 0.01);
         deleteFiles(filename);
     }
@@ -503,7 +503,7 @@ public class ControllerCompareTest {
     public void testListwiseCompareMultipleFiles() throws IOException {
         String filename = "out";
         doComparison(singlePairTestSuiteName, sampleTestSuiteA, "ShannonIndex", "MinimumValue", null,
-                filename, null);
+                true, filename, null);
         assertEquals(1.79 ,Double.parseDouble(readFile(filename)), 0.01);
         deleteFiles(filename);
     }
@@ -515,13 +515,13 @@ public class ControllerCompareTest {
         String outputName2 = "test-out2";
 
         doComparison(singlePairTestSuiteName, null, "CommonElements", "AverageValue",
-                null, outputName1, null);
+                null, true, outputName1, null);
         config.setPairwiseMethodLocation(config.getPairwiseMethodLocation()+".");
         config.setAggregationMethodLocation(config.getAggregationMethodLocation()+".");
         writer.writeConfig(CONFIG_NAME, config);
         c = Controller.getController();
         doComparison(singlePairTestSuiteName, null, "CommonElements", "AverageValue",
-                null, outputName2, null);
+                null, true, outputName2, null);
 
         //check that the results are the same for each file
         assertEquals(readFile(outputName1), readFile(outputName2));

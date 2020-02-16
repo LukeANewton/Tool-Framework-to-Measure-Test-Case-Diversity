@@ -355,6 +355,7 @@ public class Controller {
 
         //output results to file, if required
         if(dto.getSave()) {
+            String filename;
             if(dto.getOutputFilename() != null){
                 filename = dto.getOutputFilename();
             } else {
