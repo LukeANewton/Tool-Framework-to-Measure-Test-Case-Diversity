@@ -220,8 +220,8 @@ public class ControllerCompareTest {
     public void testCompareAllDefaults() throws IOException {
         //set up a config file here that includes defaults
         config.setDataRepresentationLocation("data_representation");
-        config.setComparisonMethod("JaccardIndex");
-        config.setComparisonMethodLocation("metrics.comparison.pairwise");
+        config.setPairwiseMethod("JaccardIndex");
+        config.setPairwiseMethodLocation("metrics.comparison.pairwise");
         config.setAggregationMethod("AverageValue");
         config.setAggregationMethodLocation("metrics.aggregation");
         config.setDelimiter(System.lineSeparator());
@@ -242,7 +242,7 @@ public class ControllerCompareTest {
     public void testCompareInvalidMetric() {
         doComparison(singlePairTestSuiteName, null, "banana", null,
                 null, null, null);
-        assertEquals("no pairwise metric named banana in metrics.comparison.pairwise. found" +
+        assertEquals("The specified metric either cannot be found, or does not implement the required interface" +
                 System.lineSeparator(), outContent.toString());
     }
 
@@ -283,12 +283,20 @@ public class ControllerCompareTest {
     }
 
     @Test
-    /*test for the compare command with a comparison metric that cannot  be instantiated*/
+    /*test for the compare command with a comparison metric that cannot be instantiated*/
     public void testCompareMetricCannotBeInstantiated() {
         doComparison(singlePairTestSuiteName, null, "PairwiseComparisonStrategy", null,
                 null, null, null);
-        assertEquals("failed to instantiate pairwise metric: PairwiseComparisonStrategy: PairwiseComparisonStrategy " +
-                "is a metrics.comparison.pairwise.PairwiseComparisonStrategy. Expected a class." +
+        assertEquals("The specified metric either cannot be found, or does not implement the required interface" +
+                System.lineSeparator(), outContent.toString());
+    }
+
+    @Test
+    /*test for the compare command with a data representation that cannot be instantiated*/
+    public void testCompareRepresentationCannotBeInstantiated() {
+        c.processCommand("compare " + singlePairTestSuiteName + " DataRepresentation");
+        assertEquals("failed to instantiate data representation: DataRepresentation: DataRepresentation is a " +
+                "data_representation.DataRepresentation. Expected a class." +
                 System.lineSeparator(), outContent.toString());
     }
 
@@ -441,5 +449,47 @@ public class ControllerCompareTest {
         c = Controller.getController();
         doComparison(sampleTestSuiteA, null, "CommonElements", null, null,
                 filename, null);
+    }
+
+    @Test
+    /*test the compare command for a listwise command*/
+    public void testListwiseCompare() throws IOException {
+        String filename = "out";
+        doComparison(singlePairTestSuiteName, null, "ShannonIndex", null, null,
+                filename, null);
+        assertEquals(1.79 ,Double.parseDouble(readFile(filename)), 0.01);
+        deleteFiles(filename);
+    }
+
+    @Test
+    /*test the compare command for a listwise command*/
+    public void testListwiseCompareMultipleFiles() throws IOException {
+        String filename = "out";
+        doComparison(singlePairTestSuiteName, sampleTestSuiteA, "ShannonIndex", "MinimumValue", null,
+                filename, null);
+        assertEquals(1.79 ,Double.parseDouble(readFile(filename)), 0.01);
+        deleteFiles(filename);
+    }
+
+    @Test
+    /*test for compare that ensures the config locations work with or without a dot at the end*/
+    public void testCompareMetricLocationEndsInDot() throws IOException {
+        String outputName1 = "test-out1";
+        String outputName2 = "test-out2";
+
+        doComparison(singlePairTestSuiteName, null, "CommonElements", "AverageValue",
+                null, outputName1, null);
+        config.setPairwiseMethodLocation(config.getPairwiseMethodLocation()+".");
+        config.setAggregationMethodLocation(config.getAggregationMethodLocation()+".");
+        writer.writeConfig(CONFIG_NAME, config);
+        c = Controller.getController();
+        doComparison(singlePairTestSuiteName, null, "CommonElements", "AverageValue",
+                null, outputName2, null);
+
+        //check that the results are the same for each file
+        assertEquals(readFile(outputName1), readFile(outputName2));
+
+        //clean up files created
+        deleteFiles(outputName1, outputName2);
     }
 }

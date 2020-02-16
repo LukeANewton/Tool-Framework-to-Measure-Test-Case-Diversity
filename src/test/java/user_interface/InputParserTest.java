@@ -38,7 +38,7 @@ public class InputParserTest {
             case DataRepresentation:
                 command.append(" -f");
                 break;
-            case PairwiseMetric:
+            case Metric:
                 command.append(" -m");
                 break;
             case Command:
@@ -65,7 +65,7 @@ public class InputParserTest {
     @Test
     /*test for parsing comparison metric help*/
     public void testPairwiseHelp() throws InvalidCommandException {
-        helpHelper(HelpType.PairwiseMetric);
+        helpHelper(HelpType.Metric);
     }
 
     @Test
@@ -197,7 +197,7 @@ public class InputParserTest {
         assertEquals(file1, ((CompareDTO)dto).getTestCaseLocationOne());
         assertEquals(file2, ((CompareDTO)dto).getTestCaseLocationTwo());
         assertEquals(dataRepresentation, ((CompareDTO)dto).getDataRepresentation());
-        assertEquals(comparisonMethod, ((CompareDTO)dto).getPairwiseMethod());
+        assertEquals(comparisonMethod, ((CompareDTO)dto).getComparisonMethod());
         assertArrayEquals(aggregationMethods, ((CompareDTO) dto).getAggregationMethods());
         assertEquals(delimiter, ((CompareDTO)dto).getDelimiter());
         assertEquals(outputFilename, ((CompareDTO)dto).getOutputFilename());
@@ -413,7 +413,7 @@ public class InputParserTest {
         DataTransferObject dto = input.parse("compare " + file1 + " " + dataRepresentation + " -t -m metricname");
         assertTrue(((CompareDTO)dto).isUseThreadPool());
         assertNull(((CompareDTO)dto).getNumberOfThreads());
-        assertEquals(((CompareDTO)dto).getPairwiseMethod(), "metricname");
+        assertEquals(((CompareDTO)dto).getComparisonMethod(), "metricname");
     }
 
     @Test
@@ -474,7 +474,7 @@ public class InputParserTest {
         assertEquals(file1, ((CompareDTO)dto).getTestCaseLocationOne());
         assertNull(((CompareDTO) dto).getTestCaseLocationTwo());
         assertEquals(dataRepresentation, ((CompareDTO)dto).getDataRepresentation());
-        assertEquals(metric, ((CompareDTO)dto).getPairwiseMethod());
+        assertEquals(metric, ((CompareDTO)dto).getComparisonMethod());
         assertNull(((CompareDTO) dto).getAggregationMethods());
         assertEquals(delimiter, ((CompareDTO)dto).getDelimiter());
         assertNull(((CompareDTO) dto).getOutputFilename());

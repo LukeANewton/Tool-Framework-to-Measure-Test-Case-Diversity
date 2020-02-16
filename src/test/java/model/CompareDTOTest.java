@@ -29,7 +29,7 @@ public class CompareDTOTest {
         compare.setDelimiter(delimiter);
         compare.setNumberOfThreads(numberOfThreads);
         compare.setOutputFilename(outputFileName);
-        compare.setPairwiseMethod(pairwiseMethod);
+        compare.setComparisonMethod(pairwiseMethod);
         compare.setTestCaseLocationOne(testCaseLocationOne);compare.setTestCaseLocationTwo(testCaseLocationTwo);
         compare.setUseThreadPool(useThreadPool);
 
@@ -45,8 +45,8 @@ public class CompareDTOTest {
                 compare.getNumberOfThreads(), numberOfThreads);
         assertEquals("OutputFileName should be " + outputFileName + ", but is: " + compare.getOutputFilename(),
                 compare.getOutputFilename(), outputFileName);
-        assertEquals("PairwiseMethod should be " + pairwiseMethod + ", but is: " + compare.getPairwiseMethod(),
-                compare.getPairwiseMethod(), pairwiseMethod);
+        assertEquals("PairwiseMethod should be " + pairwiseMethod + ", but is: " + compare.getComparisonMethod(),
+                compare.getComparisonMethod(), pairwiseMethod);
         assertEquals("TestCaseLocationOne should be " + testCaseLocationOne + ", but is: " + compare.getTestCaseLocationOne(),
                 compare.getTestCaseLocationOne(), testCaseLocationOne);
         assertEquals("TestCaseLocationTwo should be " + testCaseLocationTwo + ", but is: " + compare.getTestCaseLocationTwo(),
@@ -65,7 +65,7 @@ public class CompareDTOTest {
         assertNull("Delimiter should be null, but is: " + compareEmpty.getDelimiter(), compareEmpty.getDelimiter());
         assertNull("NumberOfThreads should be null, but is: " + compareEmpty.getNumberOfThreads(), compareEmpty.getNumberOfThreads());
         assertNull("OutputFileName should be null, but is: " + compareEmpty.getOutputFilename(), compareEmpty.getOutputFilename());
-        assertNull("PairwiseMethod should be null, but is: " + compareEmpty.getPairwiseMethod(), compareEmpty.getPairwiseMethod());
+        assertNull("PairwiseMethod should be null, but is: " + compareEmpty.getComparisonMethod(), compareEmpty.getComparisonMethod());
         assertNull("TestCaseLocationOne should be null, but is: " + compareEmpty.getTestCaseLocationOne(), compareEmpty.getTestCaseLocationOne());
         assertNull("TestCaseLocationTwo should be null, but is: " + compareEmpty.getTestCaseLocationTwo(), compareEmpty.getTestCaseLocationTwo());
         assertFalse(compareEmpty.isUseThreadPool());

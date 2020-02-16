@@ -138,7 +138,7 @@ public class InputParser {
 					if (isTokenCompareFlag(tokens.get(i))) {// the next token is a flag, so there is no value after the flag
 						throw new InvalidCommandException("No metric specified after pairwise flag.");
 					} else { //the next token should be the pairwise metric name
-						compare.setPairwiseMethod(tokens.get(i));
+						compare.setComparisonMethod(tokens.get(i));
 					}
 					break;
 				case AGGREGATION_METHOD_FLAG: //found an aggregation method flag
@@ -249,7 +249,7 @@ public class InputParser {
 		} else if (tokens.size() == 1) {
 			switch (tokens.get(0)) {
 				case DIVERISTY_METRIC_FLAG:  //need to provide list of diversity metrics
-					help.setHelpType(HelpType.PairwiseMetric);
+					help.setHelpType(HelpType.Metric);
 					break;
 				case AGGREGATION_METHOD_FLAG: //need to provide list of aggregation methods
 					help.setHelpType(HelpType.AggregationMethod);
