@@ -275,26 +275,34 @@ public class Controller {
         }
 
         //output results to file, if required
-        filename = dto.getOutputFilename();
-        if(filename != null){
-            File output = new File(filename);
-            try {
-                if(output.exists()){
-                    OverwriteOption overwriteOption = console.getOverwriteChoice(filename);
-                    switch (overwriteOption) {
-                        case Yes:
-                            fileWriterService.write(filename, result, true, false);
-                            break;
-                        case No:
-                            console.displayResults("file writing cancelled since file already exists");
-                            break;
-                        case Append: //write the results out on a new line
-                            fileWriterService.write(filename, result, false, true);
-                    }
-                } else
-                    fileWriterService.write(filename, result, false, false);
-            }catch(IOException e){
-                console.displayResults("failed to write to " + filename + ": " + e.getMessage());
+        if(dto.getSave()) {
+            if(dto.getOutputFilename() != null){
+                filename = dto.getOutputFilename();
+            } else {
+                filename = config.getOutputFileName();
+            }
+            if(filename != null) {
+                File output = new File(filename);
+                try {
+                    if (output.exists()) {
+                        OverwriteOption overwriteOption = console.getOverwriteChoice(filename);
+                        switch (overwriteOption) {
+                            case Yes:
+                                fileWriterService.write(filename, result, true, false);
+                                break;
+                            case No:
+                                console.displayResults("file writing cancelled since file already exists");
+                                break;
+                            case Append: //write the results out on a new line
+                                fileWriterService.write(filename, result, false, true);
+                        }
+                    } else
+                        fileWriterService.write(filename, result, false, false);
+                } catch (IOException e) {
+                    console.displayResults("failed to write to " + filename + ": " + e.getMessage());
+                }
+            } else {
+                console.displayResults("failed to save, outputFileName not given");
             }
         }
 

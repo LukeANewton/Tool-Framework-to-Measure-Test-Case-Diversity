@@ -181,13 +181,9 @@ public class InputParser {
 					}
 				}
 			} else if(tokens.get(i).equals(SAVE_FLAG)) {//found a flag to specify if saving results to a file
-				if(isAtLastElement) {//reached the end of the tokens, so there is no value after the flag
-					throw new InvalidCommandException("No filename specified after save flag.");
-				}
-				i++;
-				if(isTokenCompareFlag(tokens.get(i))) {// the next token is a flag, so there is no value after the flag
-					throw new InvalidCommandException("No filename specified after save flag.");
-				} else { //the next token should be the filename to save output to
+				compare.setSave(true);
+				if(!isAtLastElement && !isTokenCompareFlag(tokens.get(i+1))) {// the next token is a not flag
+					i++;
 					compare.setOutputFilename(tokens.get(i));
 				}
 			} else {//the token is not a flag, and should not be in the command

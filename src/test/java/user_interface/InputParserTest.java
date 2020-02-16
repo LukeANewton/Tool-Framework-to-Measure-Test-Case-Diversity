@@ -174,7 +174,7 @@ public class InputParserTest {
      */
     private void compareHelper(String file1, String file2, String dataRepresentation, String comparisonMethod,
                                String aggregationMethod, String delimiter, String outputFilename,
-                               Integer numThreads) throws InvalidCommandException {
+                               boolean save, Integer numThreads) throws InvalidCommandException {
         StringBuilder command = new StringBuilder();
         command.append("compare").append(" ").append(file1).append(" ").append(file2).append(" ").append(dataRepresentation);
         if(comparisonMethod != null)
@@ -183,8 +183,11 @@ public class InputParserTest {
             command.append(" -a ").append(aggregationMethod);
         if(delimiter != null)
             command.append(" -d ").append(delimiter);
-        if(outputFilename != null)
-            command.append(" -s ").append(outputFilename);
+        if(save){
+            command.append(" -s");
+            if(outputFilename != null)
+                command.append(" ").append(outputFilename);
+        }
         if(numThreads != null)
             command.append(" -t ").append(numThreads);
 
@@ -199,6 +202,7 @@ public class InputParserTest {
         assertEquals(delimiter, ((CompareDTO)dto).getDelimiter());
         assertEquals(outputFilename, ((CompareDTO)dto).getOutputFilename());
         assertEquals(numThreads, ((CompareDTO)dto).getNumberOfThreads());
+        assertEquals(save, ((CompareDTO) dto).getSave());
         assertEquals(numThreads!=null, ((CompareDTO)dto).isUseThreadPool());
     }
 
@@ -209,7 +213,7 @@ public class InputParserTest {
         String file2 = "file2";
         String dataRepresentation = "CSV";
         compareHelper(file1, file2, dataRepresentation, null, null,
-                null, null, null);
+                null, null, false, null);
     }
 
     @Test
@@ -220,35 +224,30 @@ public class InputParserTest {
         String dataRepresentation = "CSV";
         String output = "out";
         compareHelper(file1, file2, dataRepresentation, null, null,
-                null, output, null);
+                null, output, true, null);
     }
 
     @Test
     /*test for parsing a compare command with save flag but no filename*/
-    public void testCompareSaveFlagNoValueEndOfCommand(){
+    public void testCompareSaveFlagNoValueEndOfCommand() throws InvalidCommandException {
         String file1 = "file1";
+        String file2 = "file2";
         String dataRepresentation = "CSV";
 
-        try {
-            input.parse("compare " + file1 + " " + dataRepresentation + " -s");
-            fail();
-        }catch(InvalidCommandException e){
-            assertEquals("No filename specified after save flag.", e.getErrorMessage());
-        }
+        compareHelper(file1, file2, dataRepresentation, null, null,
+                null, null, true, null);
     }
 
     @Test
-    /*test for parsing a compare command with save flag but no filename*/
-    public void testCompareSaveFlagNoValue(){
+    /*test for parsing a compare command with save flag but no filename and followed by another token*/
+    public void testCompareSaveFlagNoValue() throws InvalidCommandException {
         String file1 = "file1";
+        String file2 = "file2";
         String dataRepresentation = "CSV";
+        int numThreads = 2;
 
-        try {
-            input.parse("compare " + file1 + " " + dataRepresentation + " -s -m metricname");
-            fail();
-        }catch(InvalidCommandException e){
-            assertEquals("No filename specified after save flag.", e.getErrorMessage());
-        }
+        compareHelper(file1, file2, dataRepresentation, null, null,
+                null, null, true, numThreads);
     }
 
     @Test
@@ -258,8 +257,9 @@ public class InputParserTest {
         String file2 = "file2";
         String dataRepresentation = "CSV";
         String metric = "out";
+
         compareHelper(file1, file2, dataRepresentation, metric, null,
-                null, null, null);
+                null, null, true, null);
     }
 
     @Test
@@ -298,7 +298,7 @@ public class InputParserTest {
         String dataRepresentation = "CSV";
         String metric = "out";
         compareHelper(file1, file2, dataRepresentation, null, metric,
-                null, null, null);
+                null, null, false, null);
     }
 
     @Test
@@ -337,7 +337,7 @@ public class InputParserTest {
         String dataRepresentation = "CSV";
         String delimiter = "out";
         compareHelper(file1, file2, dataRepresentation, null, null,
-                delimiter, null, null);
+                delimiter, null, false, null);
     }
 
     @Test
@@ -376,7 +376,7 @@ public class InputParserTest {
         String dataRepresentation = "CSV";
         Integer numThreads = 4;
         compareHelper(file1, file2, dataRepresentation, null, null,
-                null, null, numThreads);
+                null, null, false, numThreads);
     }
 
     @Test
@@ -426,7 +426,7 @@ public class InputParserTest {
         String metric = "out";
         Integer numThreads = 4;
         compareHelper(file1, file2, dataRepresentation, metric, null,
-                delimiter, null, numThreads);
+                delimiter, null, false, numThreads);
     }
 
     @Test
@@ -439,8 +439,9 @@ public class InputParserTest {
         String metric = "out";
         Integer numThreads = 4;
         String outputFile = "out.txt";
+
         compareHelper(file1, file2, dataRepresentation, metric, metric,
-                delimiter, outputFile, numThreads);
+                delimiter, outputFile, true, numThreads);
     }
 
     @Test
@@ -464,7 +465,7 @@ public class InputParserTest {
         Integer numThreads = 4;
 
         String command = "compare " + file1 + " " + dataRepresentation + " -t " +
-                numThreads + " -m " + metric + " -d " + delimiter;
+                numThreads + " -m " + metric + " -s -d " + delimiter;
 
         DataTransferObject dto = input.parse(command);
         assertEquals(dto.getCommandType(), CommandType.Compare);
@@ -476,6 +477,7 @@ public class InputParserTest {
         assertEquals(delimiter, ((CompareDTO)dto).getDelimiter());
         assertNull(((CompareDTO) dto).getOutputFilename());
         assertEquals(numThreads, ((CompareDTO)dto).getNumberOfThreads());
+        assertTrue(((CompareDTO) dto).getSave());
     }
 
     @Test
