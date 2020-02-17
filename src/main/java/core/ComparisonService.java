@@ -49,9 +49,8 @@ public class ComparisonService {
 	 * @param strategy    	the strategy to use to compare the tests
 	 * @return the list of calculated similarities as Doubles
 	 */
-	public List<Double> pairwiseCompare(List<Tuple<DataRepresentation, DataRepresentation>> testCasePairs,
-										PairwiseComparisonStrategy strategy, PropertyChangeListener pcl,
-										boolean useThreadPool) throws Exception {
+	public List<Double> pairwiseCompare(List<Tuple<DataRepresentation, DataRepresentation>> testCasePairs, PairwiseComparisonStrategy strategy,
+										PropertyChangeListener pcl, boolean useThreadPool) throws Exception {
 		List<Callable<Object>> tasks = new ArrayList<>();
 		for (Tuple testCasePair : testCasePairs) {
 			tasks.add(new PairwiseCommand(strategy, (DataRepresentation)testCasePair.getLeft(),
@@ -70,8 +69,7 @@ public class ComparisonService {
 	 * @param tasks the comparisons to make
 	 * @return the list of calculated similarities as Doubles
 	 */
-	private List<Double> sequentialCompareHelper(List<Callable<Object>> tasks, PropertyChangeListener pcl)
-			throws Exception {
+	private List<Double> sequentialCompareHelper(List<Callable<Object>> tasks, PropertyChangeListener pcl) throws Exception {
 		if (pcl != null)
 			support.addPropertyChangeListener(pcl);
 
@@ -90,8 +88,7 @@ public class ComparisonService {
 	 * @return the list of calculated similarities as Doubles
 	 */
 
-	private List<Double> threadPoolCompareHelper(List<Callable<Object>> tasks, PropertyChangeListener pcl)
-			throws ExecutionException, InterruptedException {
+	private List<Double> threadPoolCompareHelper(List<Callable<Object>> tasks, PropertyChangeListener pcl) throws ExecutionException, InterruptedException {
 		if (pcl != null)
 			support.addPropertyChangeListener(pcl);
 
@@ -116,9 +113,8 @@ public class ComparisonService {
 	 * @param strategy    	the strategy to use to calculate testsuite diversity
 	 * @return the list of calculated similarities as Doubles
 	 */
-	public List<Double> listwiseCompare(List<List<DataRepresentation>> testsuites,
-										ListwiseComparisonStrategy strategy, PropertyChangeListener pcl,
-										boolean useThreadPool) throws Exception {
+	public List<Double> listwiseCompare(List<List<DataRepresentation>> testsuites, ListwiseComparisonStrategy strategy,
+										PropertyChangeListener pcl, boolean useThreadPool) throws Exception {
 		List<Callable<Object>> tasks = new ArrayList<>();
 		for(List<DataRepresentation> testsuite: testsuites)
 			tasks.add(new ListwiseCommand(strategy, testsuite, pcl));

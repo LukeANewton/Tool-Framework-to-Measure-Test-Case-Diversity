@@ -1,6 +1,8 @@
 {
-  "comparisonMethod": "CommonElements",
-  "comparisonMethodLocation": "metrics.comparison.pairwise",
+  "listwiseMethod": "ShannonIndex",
+  "listwiseMethodLocation": "metrics.comparison.listwise",
+  "pairwiseMethod": "CommonElements",
+  "pairwiseMethodLocation": "metrics.comparison.pairwise",
   "dataRepresentation": "CSV",
   "dataRepresentationLocation": "data_representation",
   "delimiter": "\r\n",

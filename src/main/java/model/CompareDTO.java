@@ -10,7 +10,7 @@ package model;
  */
 public class CompareDTO extends DataTransferObject {
 	//the pairwise diversity metric to use to compare pairs of test cases
-	private String pairwiseMethod;
+	private String comparisonMethod;
 	//the method to aggregate all pairwise diversity values into a single value
 	private String[] aggregationMethods;
 	//the location of the first test case/suite
@@ -35,12 +35,12 @@ public class CompareDTO extends DataTransferObject {
 		useThreadPool = false;
 	}
 
-	public String getPairwiseMethod() {
-		return pairwiseMethod;
+	public String getComparisonMethod() {
+		return comparisonMethod;
 	}
 
-	public void setPairwiseMethod(String pairwiseMethod) {
-		this.pairwiseMethod = pairwiseMethod;
+	public void setComparisonMethod(String comparisonMethod) {
+		this.comparisonMethod = comparisonMethod;
 	}
 
 	public String[] getAggregationMethods() {
