@@ -46,6 +46,13 @@ public class FileReaderService {
 		return s.toString();
 	}
 
+	/**
+	 * recursively reads through a folder structure to find all test cases in a folder
+	 *
+	 * @param file the name of the file to read from
+	 * @return a list of all file contents found
+	 * @throws FileNotFoundException occurs when a file specified does not exist
+	 */
 	private ArrayList<String> readFromFolder(File file) throws FileNotFoundException {
 		ArrayList<String> list = new ArrayList<>();
 
