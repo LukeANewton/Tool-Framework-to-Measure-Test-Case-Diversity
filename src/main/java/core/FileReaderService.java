@@ -29,9 +29,6 @@ public class FileReaderService {
 	 * @throws FileNotFoundException thrown when no file with the specified name is found
 	 */
 	private String readFile(String filename) throws FileNotFoundException {
-		if(filename.equals(""))
-			throw new FileNotFoundException();
-
 		File file = new File(filename);
 
 		Scanner sc = new Scanner(file);
