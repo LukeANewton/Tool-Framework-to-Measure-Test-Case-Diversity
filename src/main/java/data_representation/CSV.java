@@ -48,7 +48,8 @@ public class CSV implements DataRepresentation {
 
 	@Override
 	public void parse(String s) throws InvalidFormatException {
-		if(this.checkFormat(s)) {
+		//this regex checks that a string is one or more groups of non-newline characters, separated by commas
+		if(s.matches("(.+?)(?:,\\s*|$)")) {
 			this.testcase = s;
 		}else
 			throw new InvalidFormatException();
@@ -62,11 +63,5 @@ public class CSV implements DataRepresentation {
 	@Override
 	public String getDescription() {
 		return "comma separated value";
-	}
-
-	@Override
-	public boolean checkFormat(String s){
-		String regex = "(.+?)(?:,\\s*|$)";
-		return s.matches(regex);
 	}
 }
