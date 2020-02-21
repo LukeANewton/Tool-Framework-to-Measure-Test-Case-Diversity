@@ -5,7 +5,6 @@ import metrics.aggregation.AggregationStrategy;
 import metrics.comparison.listwise.ListwiseComparisonStrategy;
 import metrics.comparison.pairwise.PairwiseComparisonStrategy;
 import metrics.report_format.ReportFormat;
-import metrics.report_format.XMLFormat;
 import model.*;
 import user_interface.ConsoleOutputService;
 import user_interface.InputParser;
@@ -34,6 +33,7 @@ public class Controller {
     private static final String PAIRWISE_COMPARISON_INTERFACE_PATH = "metrics.comparison.pairwise.PairwiseComparisonStrategy";
     private static final String LISTWISE_COMPARISON_INTERFACE_PATH = "metrics.comparison.listwise.ListwiseComparisonStrategy";
     private static final String AGGREGATION_INTERFACE_PATH = "metrics.aggregation.AggregationStrategy";
+    private static final String REPORT_FORMAT_INTERFACE_PATH = "metrics.report_format.ReportFormat";
 
     //configuration object containing config file values
     private Config config;
@@ -147,7 +147,7 @@ public class Controller {
 
         //try to load the class
         return (DataRepresentation) loadRequiredImplementation(dto.getDataRepresentation(), packageName,
-                DATA_REP_INTERFACE_PATH, "data representation");
+                DATA_REP_INTERFACE_PATH, InterfaceType.DATA_REPRESENTATION.getName());
     }
 
     /**
@@ -168,13 +168,43 @@ public class Controller {
         List<AggregationStrategy> strategies = new ArrayList<>();
         for (String name : dto.getAggregationMethods()) {
             AggregationStrategy strategy = (AggregationStrategy) loadRequiredImplementation(name, packageName,
-                    AGGREGATION_INTERFACE_PATH, "aggregation method");
-            if(strategy == null)
-                return null;
-            else
+                    AGGREGATION_INTERFACE_PATH, InterfaceType.AGGREGATION_STRATEGY.getName());
+            if (strategy == null) {
+                return new AggregationStrategy[0];
+            } else {
                 strategies.add(strategy);
+            }
         }
         return strategies.toArray(new AggregationStrategy[0]);
+    }
+
+    /**
+     * Obtains the report formats for a compare command
+     *
+     * @param dto the DataTransferObject containing information to run a compare command
+     * @return an instance of the report formats specified in the dto
+     */
+    private ReportFormat[] loadReportFormats(CompareDTO dto) {
+
+        // Nothing specified in dto, so load default from config file and set it in the dto to be passed to the report
+        if (dto.getReportFormats() == null)
+            dto.setReportFormats(new String[]{config.getReportFormat()});
+
+        //set the package to look in
+        String packageName = config.getReportFormatLocation();
+
+        //try to load the class
+        List<ReportFormat> formats = new ArrayList<>();
+        for (String className : dto.getReportFormats()) {
+            ReportFormat format = (ReportFormat) loadRequiredImplementation(className, packageName,
+                    REPORT_FORMAT_INTERFACE_PATH, InterfaceType.REPORT_FORMAT.getName());
+            if (format == null) {
+                return new ReportFormat[0];
+            } else {
+                formats.add(format);
+            }
+        }
+        return (ReportFormat[]) formats.toArray();
     }
 
     /**
@@ -254,8 +284,14 @@ public class Controller {
 
         //load the aggregation methods
         AggregationStrategy[] aggregationStrategies = loadAggregationStrategy(dto);
-        if(aggregationStrategies == null)
+        if (aggregationStrategies.length == 0) {
             return;
+        }
+
+        ReportFormat[] reportFormats = loadReportFormats(dto);
+        if (reportFormats.length == 0) {
+            return;
+        }
 
         //read in the first test suite file
         String delimiter = dto.getDelimiter();
@@ -282,12 +318,13 @@ public class Controller {
         }
 
         //create thread pool for pairing and comparison
-        if(dto.getNumberOfThreads() == null)
+        if (dto.getNumberOfThreads() == null) {
             dto.setNumberOfThreads(config.getNumThreads());
+        }
         ExecutorService threadPool = Executors.newFixedThreadPool(dto.getNumberOfThreads());
         List<Double> similarityValuesForEachComparisonStrategy;
         comparisonService = new ComparisonService(threadPool);
-        switch(type){//pairing and comparison is dependent on the type of comparison metric being used
+        switch(type) { //pairing and comparison is dependent on the type of comparison metric being used
             case pairwise:
                 //generate the pairs for comparison
                 pairingService = new PairingService(threadPool);
@@ -342,37 +379,40 @@ public class Controller {
             }
         }
 
-        // TODO: Swap report formats
-        ReportFormat reportFormat = new XMLFormat();
         // TODO: Do we need to convert aggregateResults to String[]?
-        String result = reportFormat.format(dto, similarityValuesForEachComparisonStrategy, aggregateResults.toArray(new String[0]));
+        for (ReportFormat reportFormat : reportFormats) {
+            String result = reportFormat.format(dto, similarityValuesForEachComparisonStrategy, aggregateResults);
 
-        //output results to file, if required
-        String filename = dto.getOutputFilename();
-        if(filename != null){
-            File output = new File(filename);
-            try {
-                if(output.exists()){
-                    OverwriteOption overwriteOption = console.getOverwriteChoice(filename);
-                    switch (overwriteOption) {
-                        case Yes:
-                            fileWriterService.write(filename, result, true, false);
-                            break;
-                        case No:
-                            console.displayResults("file writing cancelled since file already exists");
-                            break;
-                        case Append: //write the results out on a new line
-                            fileWriterService.write(filename, result, false, true);
-                    }
-                } else
-                    fileWriterService.write(filename, result, false, false);
-            }catch(IOException e){
-                console.displayResults("failed to write to " + filename + ": " + e.getMessage());
+            //output results to file, if required
+            String filename = dto.getOutputFilename();
+            if (reportFormats.length > 1) {
+                filename = filename + reportFormat.getClass().getSimpleName();
             }
-        }
+            if (filename != null) {
+                File output = new File(filename);
+                try {
+                    if (output.exists()) {
+                        OverwriteOption overwriteOption = console.getOverwriteChoice(filename);
+                        switch (overwriteOption) {
+                            case Yes:
+                                fileWriterService.write(filename, result, true, false);
+                                break;
+                            case No:
+                                console.displayResults("file writing cancelled since file already exists");
+                                break;
+                            case Append: //write the results out on a new line
+                                fileWriterService.write(filename, result, false, true);
+                        }
+                    } else
+                        fileWriterService.write(filename, result, false, false);
+                } catch (IOException e) {
+                    console.displayResults("failed to write to " + filename + ": " + e.getMessage());
+                }
+            }
 
-        //output results to console
-        console.displayResults(System.lineSeparator() + System.lineSeparator() + result);
+            //output results to console
+            console.displayResults(System.lineSeparator() + System.lineSeparator() + result);
+        }
     }
 
     /**

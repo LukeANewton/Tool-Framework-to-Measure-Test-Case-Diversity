@@ -15,6 +15,8 @@ public class Config {
     private String delimiter; // delimiter used when separating values for comparison
     private String aggregationMethod;
     private String aggregationMethodLocation;
+    private String reportFormat;
+    private String reportFormatLocation;
     private int numThreads;
     private int resultRoundingScale; // Scale used when calling setScale() on BigDecimals
     private String resultRoundingMode; // Rounding mode used when calling setScale() on BigDecimals
@@ -136,6 +138,22 @@ public class Config {
         this.outputFileLocation = outputFileLocation;
     }
 
+    public String getReportFormat() {
+        return reportFormat;
+    }
+
+    public void setReportFormat(String reportFormat) {
+        this.reportFormat = reportFormat;
+    }
+
+    public String getReportFormatLocation() {
+        return reportFormatLocation;
+    }
+
+    public void setReportFormatLocation(String reportFormatLocation) {
+        this.reportFormatLocation = reportFormatLocation;
+    }
+
     @Override
     public String toString() {
         return "Config{" +
@@ -145,9 +163,11 @@ public class Config {
                 ", pairwiseMethodLocation='" + pairwiseMethodLocation + '\'' +
                 ", dataRepresentation='" + dataRepresentation + '\'' +
                 ", dataRepresentationLocation='" + dataRepresentationLocation + '\'' +
-                ", delimiter=" + delimiter +
+                ", delimiter='" + delimiter + '\'' +
                 ", aggregationMethod='" + aggregationMethod + '\'' +
                 ", aggregationMethodLocation='" + aggregationMethodLocation + '\'' +
+                ", reportFormat='" + reportFormat + '\'' +
+                ", reportFormatLocation='" + reportFormatLocation + '\'' +
                 ", numThreads=" + numThreads +
                 ", resultRoundingScale=" + resultRoundingScale +
                 ", resultRoundingMode='" + resultRoundingMode + '\'' +

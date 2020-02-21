@@ -19,7 +19,7 @@ public class RawResultFormat implements ReportFormat {
      * @return A nicely formatted string
      */
     @Override
-    public String format(CompareDTO dto, List<Double> similarities, String[] aggregations) {
+    public String format(CompareDTO dto, List<Double> similarities, List<String> aggregations) {
         StringBuilder formattedResults = new StringBuilder();
         for (String aggregation : aggregations) {
             formattedResults.append(aggregation).append(System.lineSeparator());

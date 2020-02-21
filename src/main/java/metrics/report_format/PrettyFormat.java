@@ -21,7 +21,7 @@ public class PrettyFormat implements ReportFormat {
      * @return A nicely formatted string
      */
     @Override
-    public String format(CompareDTO dto, List<Double> similarities, String[] aggregations) {
+    public String format(CompareDTO dto, List<Double> similarities, List<String> aggregations) {
 
         StringBuilder formattedData = new StringBuilder();
         formattedData.append(getReportHeader()).append(System.lineSeparator());

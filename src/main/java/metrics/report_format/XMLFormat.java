@@ -25,7 +25,7 @@ public class XMLFormat implements ReportFormat {
      * @return A nicely formatted string
      */
     @Override
-    public String format(CompareDTO dto, List<Double> similarities, String[] aggregations) {
+    public String format(CompareDTO dto, List<Double> similarities, List<String> aggregations) {
 
         append("<report>").append(System.lineSeparator());
         indentation = SINGLE_INDENT;

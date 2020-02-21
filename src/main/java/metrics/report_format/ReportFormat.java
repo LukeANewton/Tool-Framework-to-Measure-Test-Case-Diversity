@@ -27,7 +27,7 @@ public interface ReportFormat {
      * @param aggregations The aggregated similarity values calculated by one or more aggregation strategies
      * @return A nicely formatted string
      */
-    String format(CompareDTO dto, List<Double> similarities, String[] aggregations);
+    String format(CompareDTO dto, List<Double> similarities, List<String> aggregations);
 
     /**
      * Provides a description of the format
@@ -79,13 +79,13 @@ public interface ReportFormat {
         }
     }
 
-    default Map<String, String> getAggregations(CompareDTO dto, String[] aggregations) {
+    default Map<String, String> getAggregations(CompareDTO dto, List<String> aggregations) {
         Map<String, String> methodValuePair = new HashMap<>();
         String[] methods = dto.getAggregationMethods();
 
         // Assuming methods.length == aggregations.length
-        for (int i = 0; i < aggregations.length; i++) {
-            methodValuePair.put(methods[i], aggregations[i]);
+        for (int i = 0; i < aggregations.size(); i++) {
+            methodValuePair.put(methods[i], aggregations.get(i));
         }
         return methodValuePair;
     }
