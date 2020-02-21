@@ -110,8 +110,6 @@ public class ComparisonService {
 		for (Future<Object> future : futureList)
 			results.add((Double) future.get());
 
-		threadPool.shutdown();
-
 		List<String> aggregateResults = new ArrayList<>();
 		for(AggregationStrategy aggregation: aggregations)
 			aggregateResults.add(aggregation.aggregate(results));
