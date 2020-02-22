@@ -16,7 +16,6 @@ import static org.junit.Assert.*;
 
 
 public class FileReaderTest {
-
     private static FileReaderService fileReader;
 
     @Before
@@ -64,7 +63,7 @@ public class FileReaderTest {
 
     @Test
     /*
-     * Test for: String[] read(String filename, String delimiter, DataRepresentation format)
+     * Test for: DataRepresentation[] readIntoDataRepresentation(String filename, String delimiter, DataRepresentation format)
      *
      * tests the 'normal' case for reading a file. That is, the file exists and the format passed
      * matches the format of the file contents. The contents read in should match the contents of
@@ -84,7 +83,7 @@ public class FileReaderTest {
 
     @Test
     /*
-     * Test for: String[] read(String filename, String delimiter, DataRepresentation format)
+     * Test for: DataRepresentation[] readIntoDataRepresentation(String filename, String delimiter, DataRepresentation format)
      *
      * tests the 'normal' case for reading a file. That is, the file exists, the delimiter is in the file,
      * and the format passed matches the format of the file contents. The result should be a list of test
@@ -108,26 +107,25 @@ public class FileReaderTest {
 
     @Test
     /*
-     * Test for: String[] read(String filename, String delimiter, DataRepresentation format)
+     * Test for: DataRepresentation[] readIntoDataRepresentation(String filename, String delimiter, DataRepresentation format)
      *
      * tests the case of the specified delimiter is null. In this case, everything should be
      * stored as a single test case
      */
     public void testNullDelimiter() throws NoSuchMethodException, InvalidFormatException, IllegalAccessException, InstantiationException, FileNotFoundException, InvocationTargetException {
         String filename = "test";
-        String delimiter = null;
         DataRepresentation d = new CSV();
         String contents = "1,2,3,4,5,6   1,2,3   5,6,7";
         createFile(filename, contents);
 
-        DataRepresentation[] testcase = fileReader.readIntoDataRepresentation(filename, delimiter, d);
+        DataRepresentation[] testcase = fileReader.readIntoDataRepresentation(filename, null, d);
         assertEquals(1, testcase.length);
         removeFile(filename);
     }
 
     @Test
     /*
-     * Test for: String[] read(String filename, String delimiter, DataRepresentation format)
+     * Test for: DataRepresentation[] readIntoDataRepresentation(String filename, String delimiter, DataRepresentation format)
      *
      * Test for the case of an empty filename. a FileNotFoundException should be thrown
      * since files cannot be nameless
@@ -150,7 +148,7 @@ public class FileReaderTest {
 
     @Test
     /*
-     * Test for: String[] read(String filename, String delimiter, DataRepresentation format)
+     * Test for: DataRepresentation[] readIntoDataRepresentation(String filename, String delimiter, DataRepresentation format)
      *
      * tests for the case of an empty file. The contents of an empty file will not match the
      * given data representation, so it should throw a InvalidFormatException
@@ -169,7 +167,7 @@ public class FileReaderTest {
 
     @Test
     /*
-     * Test for: String[] read(String filename, String delimiter, DataRepresentation format)
+     * Test for: DataRepresentation[] readIntoDataRepresentation(String filename, String delimiter, DataRepresentation format)
      *
      * Test for when the data representation passed is null. An InvalidFormatException
      * should be thrown
@@ -177,12 +175,11 @@ public class FileReaderTest {
     public void testNullFormat() {
         String filename = "test";
         String delimiter = "\r\n";
-        DataRepresentation d = null;
         String contents = "1,2,3,4,5,6\n1,2,3\n5,6,7";
         createFile(filename, contents);
 
         try {
-            fileReader.readIntoDataRepresentation(filename, delimiter, d);
+            fileReader.readIntoDataRepresentation(filename, delimiter, null);
             fail(); // if exception not thrown, fail
         } catch (Exception e) {
             assertTrue(e instanceof InvalidFormatException);
@@ -192,7 +189,7 @@ public class FileReaderTest {
 
     @Test
     /*
-     * Test for: String[] read(String filename, String delimiter, DataRepresentation format)
+     * Test for: DataRepresentation[] readIntoDataRepresentation(String filename, String delimiter, DataRepresentation format)
      *
      * Test for when the filename does not match any existing files. A
      * FileNotFoundExcpetion should be thrown
@@ -215,7 +212,7 @@ public class FileReaderTest {
 
     @Test
     /*
-     * Test for: String[] read(String filename, String delimiter, DataRepresentation format)
+     * Test for: DataRepresentation[] readIntoDataRepresentation(String filename, String delimiter, DataRepresentation format)
      *
      *  Test for when the contents of the file does not match the passed data representation.
      *  An InvalidFormatException should be thrown
@@ -234,6 +231,37 @@ public class FileReaderTest {
             assertTrue(e instanceof InvalidFormatException);
         }
         removeFile(filename);
+    }
+
+    @Test
+    /*test for: DataRepresentation[] readIntoDataRepresentation(String filename, String delimiter, DataRepresentation format)
+    *
+    * Test that the FileReaderService can read in data representations that are split
+    * among several files in a folder.
+     */
+    public void testFolderOfTests() throws Exception{
+        //set up folder contents
+        String folderName = "file-reader-service-test-folder";
+        String file1 = "test-file-1";
+        String file2 = "test-file-2";
+        String file3 = "test-file-3";
+        if(new File(folderName).mkdir()){
+            createFile(folderName+"/"+file1, "1,2,3,4,5,6\n1,2,3\n5,6,7");
+            createFile(folderName+"/"+file2, "5,6,7");
+            createFile(folderName+"/"+file3, "1,2,3,4,5,6\n1,2,3");
+        } else
+            fail();
+
+        //check that all test cases are correctly read in
+        DataRepresentation[] testCases =
+                fileReader.readIntoDataRepresentation(folderName, System.lineSeparator(), new CSV());
+        assertEquals(6, testCases.length);
+
+        //clean up test files
+        removeFile(folderName+"/"+file1);
+        removeFile(folderName+"/"+file2);
+        removeFile(folderName+"/"+file3);
+        new File(folderName).delete();
     }
 }
 

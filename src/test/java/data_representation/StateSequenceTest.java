@@ -36,7 +36,6 @@ public class StateSequenceTest {
     public void testOptionalIdentifier() throws InvalidFormatException {
         StateSequence withID = new StateSequence(testcase);
         StateSequence withoutID = new StateSequence(testcase.substring(5));
-        assertTrue(d.checkFormat(testcase.substring(5)));
         assertEquals(withID.toString(), "[43] " + withoutID.toString());
     }
 
@@ -67,28 +66,24 @@ public class StateSequenceTest {
     @Test
     /*Test that parse() completes successfully without throwing an exception*/
     public void testShortParse() throws InvalidFormatException {
-        assertTrue(d.checkFormat("Start-6"));
         d.parse("Start-6");
     }
 
     @Test(expected=InvalidFormatException.class)
     /*Tests that the parse() correctly throws an InvalidFormatException when given an invalid string*/
     public void testParseOnlyIdentifier() throws InvalidFormatException {
-        assertFalse(d.checkFormat("[7]"));
         d.parse("[7]");
     }
 
     @Test(expected=InvalidFormatException.class)
     /*Tests that the parse() correctly throws an InvalidFormatException when given an invalid string*/
     public void testParseNoStartState() throws InvalidFormatException {
-        assertFalse(d.checkFormat("6-7-8-9"));
         d.parse("6-7-8-9");
     }
 
     @Test(expected=InvalidFormatException.class)
     /*Tests that the parse() correctly throws an InvalidFormatException when given an invalid string*/
     public void testParseNoStates() throws InvalidFormatException {
-        assertFalse(d.checkFormat("Start-"));
         d.parse("Start-");
     }
 
@@ -102,7 +97,6 @@ public class StateSequenceTest {
     /*Tests that the parse() correctly throws an InvalidFormatException when given an invalid string*/
     public void testParseWithBadIdentifier() throws InvalidFormatException {
         String badID = "[] Start-1(0)-OffProtected-4-StoppedProtected-13-PlayingProtected-27-PausedProtected-56-xxxPlayingProtected";
-        assertFalse(d.checkFormat(badID));
         d.parse(badID);
     }
 
@@ -110,21 +104,7 @@ public class StateSequenceTest {
     /*Tests that the parse() correctly throws an InvalidFormatException when given an invalid string*/
     public void testParseWithNonNumberIdentifier() throws InvalidFormatException {
         String badID = "[b] Start-1(0)-OffProtected-4-StoppedProtected-13-PlayingProtected-27-PausedProtected-56-xxxPlayingProtected";
-        assertFalse(d.checkFormat(badID));
         d.parse(badID);
-    }
-
-    @Test
-    /*Test that the format comes back correct*/
-    public void testCheckCorrectFormat() {
-        assertTrue(d.checkFormat(testcase));
-    }
-
-    @Test
-    /*Test that the format comes back incorrect*/
-    public void testCheckIncorrectFormat() {
-        assertFalse(d.checkFormat(""));
-        assertFalse(d.checkFormat(null));
     }
 
     @Test
