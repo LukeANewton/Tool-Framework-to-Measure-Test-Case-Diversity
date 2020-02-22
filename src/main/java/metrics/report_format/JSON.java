@@ -12,7 +12,7 @@ import java.util.Map;
  *
  * @author crushton
  */
-public class JsonFormat implements ReportFormat {
+public class JSON implements ReportFormat {
     /**
      * Formats the similarity values, aggregations of the similarity values and data from the DTO into a convenient format.
      *

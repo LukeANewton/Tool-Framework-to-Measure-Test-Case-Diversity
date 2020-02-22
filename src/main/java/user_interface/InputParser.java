@@ -1,14 +1,10 @@
 package user_interface;
 
+import model.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import model.CompareDTO;
-import model.ConfigDTO;
-import model.DataTransferObject;
-import model.HelpDTO;
-import model.HelpType;
 
 /**
  * The parser for commands input through the user interface. The parse() function takes
@@ -31,6 +27,7 @@ public class InputParser {
 	private static final String NUMBER_THREADS_FLAG = "-t";
 	private static final String SAVE_FLAG = "-s";
 	private static final String DATA_REPRESENTATION_FLAG = "-f";
+	private static final String REPORT_FORMAT_FLAG = "-r";
 
 	/**
 	 * The main function provided by the InputParser object. parse() takes a
@@ -105,7 +102,7 @@ public class InputParser {
 	 */
 	private DataTransferObject parseCompareCommand(List<String> tokens) throws InvalidCommandException{
 		//expect command to match: compare <test-file-1> [<test-file-2>] <data-representation> [-m <pairwise-metric> | -a <aggregation-method> |
-		//													-d <delimiter> | -t <number-of-threads> | -s <output-file-location>]
+		//													-d <delimiter> | -t <number-of-threads> | -s <output-file-location> | -r <report-format>]
 		CompareDTO compare = new CompareDTO();
 
 		//first check the boundaries for allowable command sizes
@@ -200,6 +197,23 @@ public class InputParser {
 						compare.setOutputFilename(tokens.get(i));
 					}
 					break;
+				case REPORT_FORMAT_FLAG: //found a report format flag
+					if (isAtLastElement) {//reached the end of the tokens, so there is no value after the flag
+						throw new InvalidCommandException("No method specified after report format flag.");
+					}
+					i++;
+					if (isTokenCompareFlag(tokens.get(i))) {// the next token is a flag, so there is no value after the flag
+						throw new InvalidCommandException("No method specified after report format flag.");
+					} else { //the next token(s) should be the report format names
+						List<String> reportFormats = new ArrayList<>();
+						while(i < tokens.size() && !isTokenCompareFlag(tokens.get(i))){
+							reportFormats.add(tokens.get(i));
+							i++;
+						}
+						i--;
+						compare.setReportFormats(reportFormats.toArray(new String[0]));
+					}
+					break;
 				default: //the token is not a flag, and should not be in the command
 					throw new InvalidCommandException("Unrecognized token '" + tokens.get(i) + "'.");
 			}
@@ -230,7 +244,7 @@ public class InputParser {
 	 */
 	private boolean isTokenCompareFlag(String token) {
 		return token.equals(DIVERISTY_METRIC_FLAG) | token.equals(AGGREGATION_METHOD_FLAG) | token.equals(DELIMITER_FLAG) |
-				token.equals(NUMBER_THREADS_FLAG) | token.equals(SAVE_FLAG);
+				token.equals(NUMBER_THREADS_FLAG) | token.equals(SAVE_FLAG) | token.equals(REPORT_FORMAT_FLAG);
 	}
 
 	/**
@@ -245,17 +259,20 @@ public class InputParser {
 		HelpDTO help = new HelpDTO();
 
 		if (tokens.size() == 0) { //the help command contained only "help"
-			help.setHelpType(HelpType.Command);
+			help.setHelpType(HelpType.COMMAND);
 		} else if (tokens.size() == 1) {
 			switch (tokens.get(0)) {
 				case DIVERISTY_METRIC_FLAG:  //need to provide list of diversity metrics
-					help.setHelpType(HelpType.Metric);
+					help.setHelpType(HelpType.METRIC);
 					break;
 				case AGGREGATION_METHOD_FLAG: //need to provide list of aggregation methods
-					help.setHelpType(HelpType.AggregationMethod);
+					help.setHelpType(HelpType.AGGREGATION_METHOD);
 					break;
 				case DATA_REPRESENTATION_FLAG: //need to proved list of data representations
-					help.setHelpType(HelpType.DataRepresentation);
+					help.setHelpType(HelpType.DATA_REPRESENTATION);
+					break;
+				case REPORT_FORMAT_FLAG: //need to proved list of report formats
+					help.setHelpType(HelpType.REPORT_FORMAT);
 					break;
 				default:  //the type of help requested is not recognized
 					throw new InvalidCommandException("Help type not valid: " + tokens.get(0) + " ");

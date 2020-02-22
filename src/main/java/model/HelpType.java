@@ -11,5 +11,20 @@ package model;
  *
  */
 public enum HelpType {
-	AggregationMethod, DataRepresentation, Metric, Command
+	DATA_REPRESENTATION ("data representation"),
+	AGGREGATION_METHOD ("aggregation method"),
+	REPORT_FORMAT ("report format"),
+	METRIC ("pairwise metric", "listwise metric"),
+	COMMAND ("command");
+
+	private final String[] values;
+	public String[] getNames() {
+		return values;
+	}
+	public String getName() {
+		return values[0];
+	}
+	HelpType(String... values) {
+		this.values = values;
+	}
 }

@@ -9,7 +9,7 @@ import java.util.List;
  *
  * @author crushton
  */
-public class RawResultFormat implements ReportFormat {
+public class RawResults implements ReportFormat {
     /**
      * Formats the aggregations of the similarity values into a convenient format.
      *

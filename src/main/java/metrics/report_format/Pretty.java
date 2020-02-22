@@ -10,7 +10,7 @@ import java.util.Map;
  *
  * @author crushton
  */
-public class PrettyFormat implements ReportFormat {
+public class Pretty implements ReportFormat {
 
     /**
      * Formats the aggregations of the similarity values and data from the DTO into a convenient format.

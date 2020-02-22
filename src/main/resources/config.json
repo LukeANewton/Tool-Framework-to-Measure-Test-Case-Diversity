@@ -7,10 +7,12 @@
   "dataRepresentationLocation": "data_representation",
   "delimiter": "\r\n",
   "aggregationMethod": "AverageValue",
-  "aggregationMethodLocation": "metrics.aggregation.",
+  "aggregationMethodLocation": "metrics.aggregation",
   "numThreads":  15,
   "resultRoundingScale": 2,
   "resultRoundingMode": "HALF_UP",
   "outputFileName": "comparison_result",
-  "outputFileLocation": ""
+  "outputFileLocation": "",
+  "reportFormat": "RawResults",
+  "reportFormatLocation": "metrics.report_format"
 }

@@ -98,7 +98,7 @@ public class ComparisonService {
 		ArrayList<Double> similarities = new ArrayList<>();
 		for (Future<Object> future : futureList)
 			similarities.add((Double) future.get());
-		
+
 		return similarities;
 	}
 

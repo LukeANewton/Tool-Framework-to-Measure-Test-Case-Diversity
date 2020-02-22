@@ -1,28 +1,29 @@
 package model;
 
 import org.junit.Test;
-import java.util.Objects;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class HelpDTOTest {
 
     private CommandType helpCommand = CommandType.Help;
-    private HelpType helpType = HelpType.Command;
+    private HelpType helpType = HelpType.COMMAND;
 
     @Test
     public void testHelpDTO(){
         HelpDTO help = new HelpDTO();
-        help.setHelpType(HelpType.Command);
+        help.setHelpType(HelpType.COMMAND);
 
-        assertTrue("CommandType should be "+ helpCommand +", but is: " + help.getCommandType(), Objects.equals(help.getCommandType(), helpCommand));
-        assertTrue("HelpType should be "+ helpType +", but is: " + help.getHelpType(), Objects.equals(help.getHelpType(), helpType));
+        assertEquals("CommandType should be " + helpCommand + ", but is: " + help.getCommandType(), help.getCommandType(), helpCommand);
+        assertEquals("HelpType should be " + helpType + ", but is: " + help.getHelpType(), help.getHelpType(), helpType);
     }
 
     @Test
     public void testEmptyHelpDTO(){
         HelpDTO help = new HelpDTO();
 
-        assertTrue("CommandType should be "+ helpCommand +", but is: " + help.getCommandType(), Objects.equals(help.getCommandType(), helpCommand));
+        assertEquals("CommandType should be " + helpCommand + ", but is: " + help.getCommandType(), help.getCommandType(), helpCommand);
         assertNull("HelpType should be null, but is: " + help.getHelpType(), help.getHelpType());
     }
 }

@@ -24,6 +24,7 @@ public class ControllerHelpTest {
             "\t\tperforms a diversity calculation within a test suite, or between test suites at the specified filename(s)" + System.lineSeparator() +
             "\t\t\t-m <metric>: set the diversity metric to use in the calculation. Available metrics can be found with 'help -m'" + System.lineSeparator() +
             "\t\t\t-a <method>: set the method to use for aggregating results. Available methods can be found with 'help -a'" + System.lineSeparator() +
+            "\t\t\t-r [<format>]: set the report formats to use to display results. Available formats can be found with 'help -r'" + System.lineSeparator() +
             "\t\t\t-d <delimiter>: set the delimiter that separates test cases within the passed test suite file(s). This can be a character, string, or regular expression" + System.lineSeparator() +
             "\t\t\t-s <filename>: denote that the results of the operation should be saved to a file named <filename>" + System.lineSeparator() +
             "\t\t\t-t [<integer>]: denote that the operation should use a thread pool for concurrency, and optionally specify the number of threads" + System.lineSeparator() +
@@ -33,7 +34,8 @@ public class ControllerHelpTest {
             "\t\tlists information on the requested topic" + System.lineSeparator() +
             "\t\t\t-m: lists the available comparison metrics in the system" + System.lineSeparator() +
             "\t\t\t-a: lists the available aggregation methods in the system" + System.lineSeparator() +
-            "\t\t\t-f: lists the available data representations in the system" + System.lineSeparator() + System.lineSeparator();
+            "\t\t\t-f: lists the available data representations in the system" + System.lineSeparator() +
+            "\t\t\t-r: lists the available report formats in the system" + System.lineSeparator() + System.lineSeparator();
 
     @Before
     public void setUp() throws IOException {

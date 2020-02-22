@@ -32,16 +32,16 @@ public class InputParserTest {
         StringBuilder command = new StringBuilder();
         command.append("help");
         switch(helpType){
-            case AggregationMethod:
+            case AGGREGATION_METHOD:
                 command.append(" -a");
                 break;
-            case DataRepresentation:
+            case DATA_REPRESENTATION:
                 command.append(" -f");
                 break;
-            case Metric:
+            case METRIC:
                 command.append(" -m");
                 break;
-            case Command:
+            case COMMAND:
                 break;
         }
 
@@ -53,25 +53,25 @@ public class InputParserTest {
     @Test
     /*test for parsing command help*/
     public void testCommandHelp() throws InvalidCommandException {
-        helpHelper(HelpType.Command);
+        helpHelper(HelpType.COMMAND);
     }
 
     @Test
     /*test for parsing aggregation method help*/
     public void testAggregationHelp() throws InvalidCommandException {
-        helpHelper(HelpType.AggregationMethod);
+        helpHelper(HelpType.AGGREGATION_METHOD);
     }
 
     @Test
     /*test for parsing comparison metric help*/
     public void testPairwiseHelp() throws InvalidCommandException {
-        helpHelper(HelpType.Metric);
+        helpHelper(HelpType.METRIC);
     }
 
     @Test
     /*test for parsing data representation help*/
     public void testDataRepresentationHelp() throws InvalidCommandException {
-        helpHelper(HelpType.DataRepresentation);
+        helpHelper(HelpType.DATA_REPRESENTATION);
     }
 
     @Test(expected = InvalidCommandException.class)

@@ -111,7 +111,7 @@ public class Controller {
 			valid commands through issuing a HelpDTO*/
             console.displayResults(e.getErrorMessage() + "Valid commands are:");
             HelpDTO help = new HelpDTO();
-            help.setHelpType(HelpType.Command);
+            help.setHelpType(HelpType.COMMAND);
             dto = help;
         }
 
@@ -147,7 +147,7 @@ public class Controller {
 
         //try to load the class
         return (DataRepresentation) loadRequiredImplementation(dto.getDataRepresentation(), packageName,
-                DATA_REP_INTERFACE_PATH, InterfaceType.DATA_REPRESENTATION.getName());
+                DATA_REP_INTERFACE_PATH, HelpType.DATA_REPRESENTATION.getName());
     }
 
     /**
@@ -168,7 +168,7 @@ public class Controller {
         List<AggregationStrategy> strategies = new ArrayList<>();
         for (String name : dto.getAggregationMethods()) {
             AggregationStrategy strategy = (AggregationStrategy) loadRequiredImplementation(name, packageName,
-                    AGGREGATION_INTERFACE_PATH, InterfaceType.AGGREGATION_STRATEGY.getName());
+                    AGGREGATION_INTERFACE_PATH, HelpType.AGGREGATION_METHOD.getName());
             if (strategy == null) {
                 return new AggregationStrategy[0];
             } else {
@@ -185,10 +185,10 @@ public class Controller {
      * @return an instance of the report formats specified in the dto
      */
     private ReportFormat[] loadReportFormats(CompareDTO dto) {
-
         // Nothing specified in dto, so load default from config file and set it in the dto to be passed to the report
-        if (dto.getReportFormats() == null)
-            dto.setReportFormats(new String[]{config.getReportFormat()});
+        if (dto.getReportFormats() == null) {
+            dto.setReportFormats(new String[] { config.getReportFormat() } );
+        }
 
         //set the package to look in
         String packageName = config.getReportFormatLocation();
@@ -197,14 +197,14 @@ public class Controller {
         List<ReportFormat> formats = new ArrayList<>();
         for (String className : dto.getReportFormats()) {
             ReportFormat format = (ReportFormat) loadRequiredImplementation(className, packageName,
-                    REPORT_FORMAT_INTERFACE_PATH, InterfaceType.REPORT_FORMAT.getName());
+                    REPORT_FORMAT_INTERFACE_PATH, HelpType.REPORT_FORMAT.getName());
             if (format == null) {
                 return new ReportFormat[0];
             } else {
                 formats.add(format);
             }
         }
-        return (ReportFormat[]) formats.toArray();
+        return formats.toArray(new ReportFormat[0]);
     }
 
     /**
@@ -322,7 +322,7 @@ public class Controller {
             dto.setNumberOfThreads(config.getNumThreads());
         }
         ExecutorService threadPool = Executors.newFixedThreadPool(dto.getNumberOfThreads());
-        List<Double> similarityValuesForEachComparisonStrategy;
+        List<Double> similaritiesFromComparisons;
         comparisonService = new ComparisonService(threadPool);
         switch(type) { //pairing and comparison is dependent on the type of comparison metric being used
             case pairwise:
@@ -346,7 +346,7 @@ public class Controller {
                 //now perform the actual comparison
                 try {
                     console.displayResults("Performing Comparison...");
-                    similarityValuesForEachComparisonStrategy = comparisonService.pairwiseCompare(pairs, pairwiseStrategy, console, dto.isUseThreadPool());
+                    similaritiesFromComparisons = comparisonService.pairwiseCompare(pairs, pairwiseStrategy, console, dto.isUseThreadPool());
                 } catch (Exception e) {
                     console.displayResults("Error in pairwise comparison calculation: " + e.toString());
                     return;
@@ -358,31 +358,31 @@ public class Controller {
                     console.displayResults("Performing Comparison...");
                     List<List<DataRepresentation>> suites = new ArrayList<>();
                     suites.add(Arrays.asList(testSuite1));
-                    if (testSuite2 != null)
+                    if (testSuite2 != null) {
                         suites.add(Arrays.asList(testSuite2));
-                    similarityValuesForEachComparisonStrategy = comparisonService.listwiseCompare(suites, listwiseStrategy, console, dto.isUseThreadPool());
+                    }
+                    similaritiesFromComparisons = comparisonService.listwiseCompare(suites, listwiseStrategy, console, dto.isUseThreadPool());
                 } catch (Exception e) {
                     console.displayResults("Error in pairwise comparison calculation: " + e.toString());
                     return;
                 }
                 break;
             default:
-                similarityValuesForEachComparisonStrategy = new ArrayList<>();
-            }
-            threadPool.shutdown();
-        List<String> aggregateResults = new ArrayList<>();
-            if (similarityValuesForEachComparisonStrategy.isEmpty()) {
-                console.displayResults("no results were obtained from the calculation");
-            } else {
-                for (AggregationStrategy aggregation : aggregationStrategies) {
-                    aggregateResults.add(aggregation.aggregate(similarityValuesForEachComparisonStrategy));
-            }
+                similaritiesFromComparisons = new ArrayList<>();
         }
 
-        // TODO: Do we need to convert aggregateResults to String[]?
-        for (ReportFormat reportFormat : reportFormats) {
-            String result = reportFormat.format(dto, similarityValuesForEachComparisonStrategy, aggregateResults);
+        threadPool.shutdown();
 
+        List<String> aggregateResults = new ArrayList<>();
+        if (similaritiesFromComparisons.isEmpty()) {
+            console.displayResults("No results were obtained from the calculation");
+        } else {
+            for (AggregationStrategy aggregation : aggregationStrategies) {
+                aggregateResults.add(aggregation.aggregate(similaritiesFromComparisons));
+            }
+        }
+        for (ReportFormat reportFormat : reportFormats) {
+            String result = reportFormat.format(dto, similaritiesFromComparisons, aggregateResults);
             //output results to file, if required
             String filename = dto.getOutputFilename();
             if (reportFormats.length > 1) {
@@ -492,11 +492,12 @@ public class Controller {
         StringBuilder result = new StringBuilder();
         //determine which type of help is needed, each works the same way except for Command help
         switch(helpType){
-            case Command:
+            case COMMAND:
                 result.append("\tcompare <filename> [<filename>] <data-representation>").append(System.lineSeparator());
                 result.append("\t\tperforms a diversity calculation within a test suite, or between test suites at the specified filename(s)").append(System.lineSeparator());
                 result.append("\t\t\t-m <metric>: set the diversity metric to use in the calculation. Available metrics can be found with 'help -m'").append(System.lineSeparator());
                 result.append("\t\t\t-a <method>: set the method to use for aggregating results. Available methods can be found with 'help -a'").append(System.lineSeparator());
+                result.append("\t\t\t-r [<format>]: set the report formats to use to display results. Available formats can be found with 'help -r'").append(System.lineSeparator());
                 result.append("\t\t\t-d <delimiter>: set the delimiter that separates test cases within the passed test suite file(s). This can be a character, string, or regular expression").append(System.lineSeparator());
                 result.append("\t\t\t-s <filename>: denote that the results of the operation should be saved to a file named <filename>").append(System.lineSeparator());
                 result.append("\t\t\t-t [<integer>]: denote that the operation should use a thread pool for concurrency, and optionally specify the number of threads").append(System.lineSeparator());
@@ -507,21 +508,26 @@ public class Controller {
                 result.append("\t\t\t-m: lists the available comparison metrics in the system").append(System.lineSeparator());
                 result.append("\t\t\t-a: lists the available aggregation methods in the system").append(System.lineSeparator());
                 result.append("\t\t\t-f: lists the available data representations in the system").append(System.lineSeparator());
+                result.append("\t\t\t-r: lists the available report formats in the system").append(System.lineSeparator());
                 console.displayResults(result.toString());
                 return;
-            case Metric:
+            case METRIC:
                 displayHelp(config.getPairwiseMethodLocation(),
-                        PAIRWISE_COMPARISON_INTERFACE_PATH, "pairwise metric");
+                        PAIRWISE_COMPARISON_INTERFACE_PATH, HelpType.METRIC.getNames()[0]);
                 displayHelp(config.getListwiseMethodLocation(),
-                        LISTWISE_COMPARISON_INTERFACE_PATH, "listwise metric");
+                        LISTWISE_COMPARISON_INTERFACE_PATH, HelpType.METRIC.getNames()[1]);
                 break;
-            case AggregationMethod:
+            case AGGREGATION_METHOD:
                 displayHelp(config.getAggregationMethodLocation(),
-                        AGGREGATION_INTERFACE_PATH, "aggregation method");
+                        AGGREGATION_INTERFACE_PATH, HelpType.AGGREGATION_METHOD.getName());
                 break;
-            case DataRepresentation:
+            case DATA_REPRESENTATION:
                 displayHelp(config.getDataRepresentationLocation(),
-                        DATA_REP_INTERFACE_PATH, "data representation");
+                        DATA_REP_INTERFACE_PATH, HelpType.DATA_REPRESENTATION.getName());
+                break;
+            case REPORT_FORMAT:
+                displayHelp(config.getReportFormatLocation(),
+                        REPORT_FORMAT_INTERFACE_PATH, HelpType.REPORT_FORMAT.getName());
                 break;
         }
 

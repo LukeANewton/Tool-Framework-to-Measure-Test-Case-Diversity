@@ -10,7 +10,7 @@ import java.util.Map;
  *
  * @author crushton
  */
-public class XMLFormat implements ReportFormat {
+public class XML implements ReportFormat {
     private final String SINGLE_INDENT = "\t";
     private final String DOUBLE_INDENT = "\t\t";
     private String indentation = "";
@@ -91,7 +91,7 @@ public class XMLFormat implements ReportFormat {
      * @param data the data to be appended
      * @return this object to be called again to chain append calls
      */
-    private XMLFormat append(Object data) {
+    private XML append(Object data) {
         formattedData.append(indentation).append(data);
         return this;
     }
