@@ -107,23 +107,6 @@ public class CSVTest {
     }
 
     /**
-     * Test that the format comes back correct
-     */
-    @Test
-    public void testCheckCorrectFormat() {
-        assertTrue(csv.checkFormat(values.toString()));
-    }
-
-    /**
-     * Test that the format comes back incorrect
-     */
-    @Test
-    public void testCheckIncorrectFormat() {
-        assertFalse(csv.checkFormat(""));
-    }
-
-
-    /**
      * test that the getDescription method does return a description of the method
      */
     @Test
