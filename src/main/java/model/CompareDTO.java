@@ -28,6 +28,8 @@ public class CompareDTO extends DataTransferObject {
 	private String dataRepresentation;
 	//the location to save results to
 	private String outputFilename;
+	//true to save the file
+	private boolean save = false;
 	
 	/**Constructor*/
 	public CompareDTO() {
@@ -106,4 +108,8 @@ public class CompareDTO extends DataTransferObject {
 	public void setUseThreadPool(boolean useThreadPool) {
 		this.useThreadPool = useThreadPool;
 	}
+
+	public boolean getSave() { return save; }
+
+	public void setSave(boolean save) { this.save = save; }
 }

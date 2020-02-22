@@ -110,7 +110,7 @@ public class ControllerCompareTest {
      * @param saveFileName the name of a file to save output to
      */
     private void doComparison(String filename1, String filename2, String metric, String aggregation,
-                              String delimiter, String saveFileName, String numThreads){
+                              String delimiter, boolean save, String saveFileName, String numThreads){
         StringBuilder s = new StringBuilder();
         s.append("compare ").append(filename1);
         if(filename2 != null)
@@ -122,8 +122,11 @@ public class ControllerCompareTest {
             s.append(" -a ").append(aggregation);
         if(delimiter != null)
             s.append(" -d ").append(delimiter);
-        if(saveFileName != null)
-            s.append(" -s ").append(saveFileName);
+        if(save){
+            s.append(" -s");
+            if(saveFileName != null)
+                s.append(" ").append(saveFileName);
+        }
         if(numThreads != null)
             s.append(" -t ").append(numThreads);
         c.processCommand(s.toString());
@@ -154,7 +157,7 @@ public class ControllerCompareTest {
         String testOutputName = "test-out";
 
         doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "CommonElements", "AverageValue",
-                null, testOutputName, null);
+                null, true, testOutputName, null);
 
         //check that the file was correctly created
         assertTrue(new File(testOutputName).exists());
@@ -179,9 +182,9 @@ public class ControllerCompareTest {
         String outputName2 = "test-out2";
 
         doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "CommonElements", "AverageValue",
-                null, outputName1, null);
+                null, true, outputName1, null);
         doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "CommonElements", "MinimumValue",
-                null, outputName2, null);
+                null, true, outputName2, null);
 
         //check that the results are the same for each file
         assertEquals(readFile(outputName1), readFile(outputName2));
@@ -203,13 +206,13 @@ public class ControllerCompareTest {
         String contents = "1,2,3,4,5,6" + delimiter + "1,2,3,5,4,6";
         writeFile(inputName1, contents);
         doComparison(inputName1, null, "CommonElements", "AverageValue",
-                delimiter, outputName1, null);
+                delimiter, true, outputName1, null);
 
         delimiter = System.lineSeparator();
         contents = "1,2,3,4,5,6" + delimiter + "1,2,3,5,4,6";
         writeFile(inputName2, contents);
         doComparison(inputName2, null, "CommonElements", "MinimumValue",
-                null, outputName2, null);
+                null, true, outputName2, null);
 
         //check that the results are the same for each file
         assertEquals(readFile(outputName1), readFile(outputName2));
@@ -227,12 +230,13 @@ public class ControllerCompareTest {
         config.setPairwiseMethodLocation("metrics.comparison.pairwise");
         config.setAggregationMethod("AverageValue");
         config.setAggregationMethodLocation("metrics.aggregation");
+        config.setOutputFileName("default");
         config.setDelimiter(System.lineSeparator());
         writer.writeConfig(CONFIG_NAME, config);
 
         c = Controller.getController(); //getting a new controller is required because the config file is read in during creation
         doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, null, null,
-                null, null, null);
+                null, false, null, null);
 
         //check the value of the resulting comparison. The singlePairTestSuite JaccardIndex should be 1
         String expected = "1.0" + System.lineSeparator();
@@ -244,7 +248,7 @@ public class ControllerCompareTest {
     /*test for the compare command with an invalid pairwise metric name*/
     public void testCompareInvalidMetric() {
         doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "banana", null,
-                null, null, null);
+                null, false, null, null);
         assertEquals("The specified metric either cannot be found, or does not implement the required interface" +
                 System.lineSeparator(), outContent.toString());
     }
@@ -253,7 +257,7 @@ public class ControllerCompareTest {
     /*test for the compare command with an invalid aggregation method name*/
     public void testCompareInvalidAggregation() {
         doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, null, "apple",
-                null, null, null);
+                null, false, null, null);
         assertEquals("no aggregation method named apple in metrics.aggregation. found" +
                 System.lineSeparator(), outContent.toString());
     }
@@ -289,7 +293,7 @@ public class ControllerCompareTest {
     /*test for the compare command with a comparison metric that cannot be instantiated*/
     public void testCompareMetricCannotBeInstantiated() {
         doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "PairwiseComparisonStrategy", null,
-                null, null, null);
+                null, false, null, null);
         assertEquals("The specified metric either cannot be found, or does not implement the required interface" +
                 System.lineSeparator(), outContent.toString());
     }
@@ -309,7 +313,7 @@ public class ControllerCompareTest {
         String emptyTestSuiteName = "empty-test-suite";
         new File(emptyTestSuiteName).createNewFile();
         doComparison(emptyTestSuiteName, null, null, null,
-                null, null, null);
+                null, false, null, null);
         assertEquals("operation failed because " + emptyTestSuiteName +
                 " does not contain any test cases"+System.lineSeparator(), outContent.toString());
         deleteFiles(emptyTestSuiteName);
@@ -336,7 +340,7 @@ public class ControllerCompareTest {
         String emptyTestSuiteName = "empty-test-suite";
         new File(emptyTestSuiteName).createNewFile();
         doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, emptyTestSuiteName, null, null,
-                null, null, null);
+                null, false, null, null);
         assertEquals("operation failed because " + emptyTestSuiteName + " does not contain any test cases"
                         +System.lineSeparator(), outContent.toString());
         deleteFiles(emptyTestSuiteName);
@@ -347,7 +351,7 @@ public class ControllerCompareTest {
     two test suites that contain a single test case each*/
     public void testGeneratePairsForTwoSmallSuites(){
         doComparison(SINGLE_CASE_TEST_SUITE_FILE_NAME, SINGLE_CASE_TEST_SUITE_FILE_NAME, "JaccardIndex", null,
-                null, null, null);
+                null, false, null, null);
         String expected = "1.0" + System.lineSeparator();
         String actual = outContent.toString();
         assertEquals(expected, actual.substring(actual.length() - expected.length()));
@@ -357,7 +361,7 @@ public class ControllerCompareTest {
     /*test for the compare command that checks the proper error is displayed when a test suite is too small to generate pairs*/
     public void testCompareFailTooFewTestCases(){
         doComparison(SINGLE_CASE_TEST_SUITE_FILE_NAME, null, "JaccardIndex", null, null,
-                null, null);
+                false, null, null);
         String expected = "Test suite contains insufficient test cases to generate pairs" + System.lineSeparator();
         String actual = outContent.toString();
         assertEquals(expected, actual.substring(actual.length() - expected.length()));
@@ -373,11 +377,11 @@ public class ControllerCompareTest {
         String output4 = RESULT_FILE_NAME + "4";
 
         doComparison(SAMPLE_TEST_SUITE_A_FILE_NAME, null, "CommonElements", null, null,
-                output1, "7");
+                true, output1, "7");
         doComparison(SAMPLE_TEST_SUITE_A_FILE_NAME, null, "CommonElements", null, null,
-                output2, "3");
+                true, output2, "3");
         doComparison(SAMPLE_TEST_SUITE_A_FILE_NAME, null, "CommonElements", null, null,
-                output3, null);
+                true, output3, null);
         c.processCommand("compare " + SAMPLE_TEST_SUITE_A_FILE_NAME + " CSV -m CommonElements -t -s " + output4);
 
         assertEquals(readFile(output1), readFile(output2));
@@ -396,7 +400,7 @@ public class ControllerCompareTest {
      does not change the calculation result*/
     public void testCompareMultipleAggregations() throws IOException {
         doComparison(SAMPLE_TEST_SUITE_A_FILE_NAME, null, "CommonElements", "AverageValue MinimumValue", null,
-                RESULT_FILE_NAME, "7");
+                true, RESULT_FILE_NAME, "7");
         /*hand calculated value:
         sampleTestSuiteA generates 10 pairs
         with common elements: [4 4 4 4 5 9 9 5 5 12]*/
@@ -434,6 +438,38 @@ public class ControllerCompareTest {
         deleteFiles(RESULT_FILE_NAME);
     }
 
+    @Test
+    /*test for the compare command that provides a save token but no file name in dto*/
+    public void testCompareSaveFileNameNotInDTO() throws IOException {
+        String filename = "defaultName";
+        config.setOutputFileName(filename);
+        writer.writeConfig(CONFIG_NAME, config);
+
+        //getting a new controller is required because the config file is read in during creation
+        c = Controller.getController();
+
+        doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "CommonElements", null, null,
+                true, null, null);
+
+        assertEquals("4.0" ,readFile(filename));
+        deleteFiles(filename);
+    }
+
+    @Test
+    /*test for the compare command that provides a save token but no file name in dto or config*/
+    public void testCompareSaveFileNameNotInDTOAndConfig() throws IOException {
+        config.setOutputFileName(null);
+        writer.writeConfig(CONFIG_NAME, config);
+
+        //getting a new controller is required because the config file is read in during creation
+        c = Controller.getController();
+
+        doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "CommonElements", null, null,
+                true, null, null);
+
+        assertTrue(outContent.toString(), outContent.toString().contains("failed to save, outputFileName not given"));
+    }
+
     /**
      * helper method for tests that check an overwrite option
      *
@@ -441,19 +477,18 @@ public class ControllerCompareTest {
      */
     private void prepareFileExistsIssue(String choice) {
         doComparison(SAMPLE_TEST_SUITE_A_FILE_NAME, null, "CommonElements", null, null,
-                RESULT_FILE_NAME, null);
+                true, RESULT_FILE_NAME, null);
         provideInput(choice);
         c = Controller.getController();
         doComparison(SAMPLE_TEST_SUITE_A_FILE_NAME, null, "CommonElements", null, null,
-                RESULT_FILE_NAME, null);
+                true, RESULT_FILE_NAME, null);
     }
 
     @Test
     /*test the compare command for a listwise command*/
     public void testListwiseCompare() throws IOException {
-
         doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "ShannonIndex", null, null,
-                RESULT_FILE_NAME, null);
+                true, RESULT_FILE_NAME, null);
         assertEquals(1.79 ,Double.parseDouble(readFile(RESULT_FILE_NAME)), 0.01);
         deleteFiles(RESULT_FILE_NAME);
     }
@@ -462,7 +497,7 @@ public class ControllerCompareTest {
     /*test the compare command for a listwise command*/
     public void testListwiseCompareMultipleFiles() throws IOException {
         doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, SAMPLE_TEST_SUITE_A_FILE_NAME, "ShannonIndex", "MinimumValue", null,
-                RESULT_FILE_NAME, null);
+                true, RESULT_FILE_NAME, null);
         assertEquals(1.79 ,Double.parseDouble(readFile(RESULT_FILE_NAME)), 0.01);
         deleteFiles(RESULT_FILE_NAME);
     }
@@ -474,13 +509,13 @@ public class ControllerCompareTest {
         String outputName2 = "test-out2";
 
         doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "CommonElements", "AverageValue",
-                null, outputName1, null);
+                null, true, outputName1, null);
         config.setPairwiseMethodLocation(config.getPairwiseMethodLocation()+".");
         config.setAggregationMethodLocation(config.getAggregationMethodLocation()+".");
         writer.writeConfig(CONFIG_NAME, config);
         c = Controller.getController();
         doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "CommonElements", "AverageValue",
-                null, outputName2, null);
+                null, true, outputName2, null);
 
         //check that the results are the same for each file
         assertEquals(readFile(outputName1), readFile(outputName2));
