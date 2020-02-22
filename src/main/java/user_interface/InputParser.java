@@ -8,9 +8,9 @@ import java.util.List;
 
 /**
  * The parser for commands input through the user interface. The parse() function takes
- * the command as input and returns a DataTransfer object which encapsulates all the 
- * information required to issue a request to the controller. 
- * 
+ * the command as input and returns a DataTransfer object which encapsulates all the
+ * information required to issue a request to the controller.
+ *
  * @author luken
  *
  */
@@ -31,12 +31,12 @@ public class InputParser {
 
 	/**
 	 * The main function provided by the InputParser object. parse() takes a
-	 * string as input and attempts to extract the information for a system 
+	 * string as input and attempts to extract the information for a system
 	 * command, which is encapsulated into a DataTransferObject
-	 * 
+	 *
 	 * @param command a string representation of a system command
 	 * @throws InvalidCommandException exception thrown when the command is determined invalid
-	 * @return a DataTransferObject, containing the relevant information to make a 
+	 * @return a DataTransferObject, containing the relevant information to make a
 	 * 				request to the controller
 	 */
 	public DataTransferObject parse(String command) throws InvalidCommandException {
@@ -62,7 +62,7 @@ public class InputParser {
 
 	/**
 	 * parse instructions for a configure command
-	 * 
+	 *
 	 * @param tokens a list of any specified flags/values after the command keyword
 	 * @throws InvalidCommandException exception thrown when the command is determined invalid
 	 * @return a DataTransferObject containing the necessary information to issue the command input
@@ -95,7 +95,7 @@ public class InputParser {
 
 	/**
 	 * parse instructions for a compare command
-	 * 
+	 *
 	 * @param tokens a list of any specified flags/values after the command keyword
 	 * @throws InvalidCommandException exception thrown when the command is determined invalid
 	 * @return a DataTransferObject containing the necessary information to issue the command input
@@ -187,15 +187,11 @@ public class InputParser {
 					}
 					break;
 				case SAVE_FLAG: //found a flag to specify if saving results to a file
-					if (isAtLastElement) {//reached the end of the tokens, so there is no value after the flag
-						throw new InvalidCommandException("No filename specified after save flag.");
-					}
+				compare.setSave(true);
+				if(!isAtLastElement && !isTokenCompareFlag(tokens.get(i+1))) {// the next token is a not flag
 					i++;
-					if (isTokenCompareFlag(tokens.get(i))) {// the next token is a flag, so there is no value after the flag
-						throw new InvalidCommandException("No filename specified after save flag.");
-					} else { //the next token should be the filename to save output to
-						compare.setOutputFilename(tokens.get(i));
-					}
+					compare.setOutputFilename(tokens.get(i));
+				}
 					break;
 				case REPORT_FORMAT_FLAG: //found a report format flag
 					if (isAtLastElement) {//reached the end of the tokens, so there is no value after the flag
@@ -218,8 +214,8 @@ public class InputParser {
 					throw new InvalidCommandException("Unrecognized token '" + tokens.get(i) + "'.");
 			}
 		}
-		
-		/*done iterating over tokens, all that is left is to check the filenames and 
+
+		/*done iterating over tokens, all that is left is to check the filenames and
 		 * data representation we found. There should be either two filenames and
 		 * one data representation, or one filename and one data representation.
 		 */
@@ -238,7 +234,7 @@ public class InputParser {
 
 	/**
 	 * helper function to determine if a token is one of the possible flags that can be set for a compare command
-	 * 
+	 *
 	 * @param token the token to check for valid flags
 	 * @return true if the token input is a flag that is valid in a compare command, otherwise returns false
 	 */
@@ -249,7 +245,7 @@ public class InputParser {
 
 	/**
 	 * parse instructions for a help command
-	 * 
+	 *
 	 * @param tokens a list of any specified flags/values after the command keyword
 	 * @throws InvalidCommandException exception thrown when the command is determined invalid
 	 * @return a DataTransferObject containing the necessary information to issue the command input

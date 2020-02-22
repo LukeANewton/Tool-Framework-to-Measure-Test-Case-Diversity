@@ -380,37 +380,50 @@ public class Controller {
             for (AggregationStrategy aggregation : aggregationStrategies) {
                 aggregateResults.add(aggregation.aggregate(similaritiesFromComparisons));
             }
+            outputResults(dto, similaritiesFromComparisons, aggregateResults, reportFormats);
         }
+    }
+
+    private void outputResults(CompareDTO dto, List<Double> similaritiesFromComparisons, List<String> aggregateResults, ReportFormat[] reportFormats){
+
+        //output results to file, if required
         for (ReportFormat reportFormat : reportFormats) {
             String result = reportFormat.format(dto, similaritiesFromComparisons, aggregateResults);
-            //output results to file, if required
-            String filename = dto.getOutputFilename();
-            if (reportFormats.length > 1) {
-                filename = filename + reportFormat.getClass().getSimpleName();
-            }
-            if (filename != null) {
-                File output = new File(filename);
-                try {
-                    if (output.exists()) {
-                        OverwriteOption overwriteOption = console.getOverwriteChoice(filename);
-                        switch (overwriteOption) {
-                            case Yes:
-                                fileWriterService.write(filename, result, true, false);
-                                break;
-                            case No:
-                                console.displayResults("file writing cancelled since file already exists");
-                                break;
-                            case Append: //write the results out on a new line
-                                fileWriterService.write(filename, result, false, true);
-                        }
-                    } else
-                        fileWriterService.write(filename, result, false, false);
-                } catch (IOException e) {
-                    console.displayResults("failed to write to " + filename + ": " + e.getMessage());
+            if (dto.getSave()) {
+                String filename;
+                if (dto.getOutputFilename() != null) {
+                    filename = dto.getOutputFilename();
+                } else {
+                    filename = config.getOutputFileName();
+                }
+                // If there are multiple formats, we append the format name (class name) to the file name to distinguish them.
+                if (reportFormats.length > 1) {
+                    filename = filename + reportFormat.getClass().getSimpleName();
+                }
+                if (filename != null) {
+                    File output = new File(filename);
+                    try {
+                        if (output.exists()) {
+                            OverwriteOption overwriteOption = console.getOverwriteChoice(filename);
+                            switch (overwriteOption) {
+                                case Yes:
+                                    fileWriterService.write(filename, result, true, false);
+                                    break;
+                                case No:
+                                    console.displayResults("file writing cancelled since file already exists");
+                                    break;
+                                case Append: //write the results out on a new line
+                                    fileWriterService.write(filename, result, false, true);
+                            }
+                        } else
+                            fileWriterService.write(filename, result, false, false);
+                    } catch (IOException e) {
+                        console.displayResults("failed to write to " + filename + ": " + e.getMessage());
+                    }
+                } else {
+                    console.displayResults("failed to save, outputFileName not given");
                 }
             }
-
-            //output results to console
             console.displayResults(System.lineSeparator() + System.lineSeparator() + result);
         }
     }

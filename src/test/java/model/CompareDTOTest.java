@@ -17,6 +17,7 @@ public class CompareDTOTest {
     private String testCaseLocationOne = "Location/test1";
     private String testCaseLocationTwo = "Location/test2";
     private boolean useThreadPool = true;
+    private boolean save = true;
 
     @Test
     /**
@@ -32,6 +33,7 @@ public class CompareDTOTest {
         compare.setComparisonMethod(pairwiseMethod);
         compare.setTestCaseLocationOne(testCaseLocationOne);compare.setTestCaseLocationTwo(testCaseLocationTwo);
         compare.setUseThreadPool(useThreadPool);
+        compare.setSave(save);
 
         assertEquals("CommandType should be " + compareCommand + ", but is: " + compare.getCommandType(),
                 compare.getCommandType(), compareCommand);
@@ -51,6 +53,7 @@ public class CompareDTOTest {
                 compare.getTestCaseLocationOne(), testCaseLocationOne);
         assertEquals("TestCaseLocationTwo should be " + testCaseLocationTwo + ", but is: " + compare.getTestCaseLocationTwo(),
                 compare.getTestCaseLocationTwo(), testCaseLocationTwo);
+        assertTrue("Save should be true", compare.getSave());
         assertTrue(compare.isUseThreadPool());
     }
 
@@ -68,6 +71,7 @@ public class CompareDTOTest {
         assertNull("PairwiseMethod should be null, but is: " + compareEmpty.getComparisonMethod(), compareEmpty.getComparisonMethod());
         assertNull("TestCaseLocationOne should be null, but is: " + compareEmpty.getTestCaseLocationOne(), compareEmpty.getTestCaseLocationOne());
         assertNull("TestCaseLocationTwo should be null, but is: " + compareEmpty.getTestCaseLocationTwo(), compareEmpty.getTestCaseLocationTwo());
+        assertFalse("Save should be false", compareEmpty.getSave());
         assertFalse(compareEmpty.isUseThreadPool());
     }
 }
