@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Scanner;
 
 import com.google.gson.Gson;
@@ -28,9 +29,6 @@ public class FileReaderService {
 	 * @throws FileNotFoundException thrown when no file with the specified name is found
 	 */
 	private String readFile(String filename) throws FileNotFoundException {
-		if(filename.equals(""))
-			throw new FileNotFoundException();
-
 		File file = new File(filename);
 
 		Scanner sc = new Scanner(file);
@@ -46,6 +44,25 @@ public class FileReaderService {
 	}
 
 	/**
+	 * recursively reads through a folder structure to find all test cases in a folder
+	 *
+	 * @param file the name of the file to read from
+	 * @return a list of all file contents found
+	 * @throws FileNotFoundException occurs when a file specified does not exist
+	 */
+	private ArrayList<String> readFromFolder(File file) throws FileNotFoundException {
+		ArrayList<String> list = new ArrayList<>();
+
+		if(file.isDirectory()){//its a folder
+			for(File subFile : Objects.requireNonNull(file.listFiles()))
+				list.addAll(readFromFolder(subFile));
+		} else{//its a file
+				list.add(readFile(file.getAbsolutePath()));
+		}
+		return list;
+	}
+
+	/**
 	 * reads a test suite file located at filename into the passed DataRepresentation for later iteration over
 	 *
 	 * @param filename the test suite file containing test cases
@@ -57,25 +74,27 @@ public class FileReaderService {
 		if (format == null)
 			throw new InvalidFormatException();
 
-		String s = readFile(filename);
+		String[] testFiles = readFromFolder(new File(filename)).toArray(new String[0]);
 
-		if(s.equals("")) //the file is empty
-			return new DataRepresentation[]{};
-
-		//at this point, we have all the file read in, so we can split up the test cases
-		String[] testCases;
-		if (delimiter == null){
-			testCases = new String[] {s};
-		} else{
-			testCases = s.split(delimiter);
-		}
-
-		//all the file contents is in the system, now we need to read them into data representations
 		ArrayList<DataRepresentation> list = new ArrayList<>();
-		for (String testCase : testCases) {
-			DataRepresentation d = format.getClass().getConstructor().newInstance();
-			d.parse(testCase);
-			list.add(d);
+		for(String s : testFiles){
+			if(s.equals("")) //the file is empty
+				continue;
+
+			//at this point, we have all the file read in, so we can split up the test cases
+			String[] testCases;
+			if (delimiter == null){
+				testCases = new String[] {s};
+			} else{
+				testCases = s.split(delimiter);
+			}
+
+			//all the file contents is in the system, now we need to read them into data representations
+			for (String testCase : testCases) {
+				DataRepresentation d = format.getClass().getConstructor().newInstance();
+				d.parse(testCase);
+				list.add(d);
+			}
 		}
 		return list.toArray(new DataRepresentation[0]);
 	}
@@ -93,5 +112,4 @@ public class FileReaderService {
 		jsonReader.close();
 		return result;
 	}
-
 }
