@@ -82,34 +82,6 @@ public class EventStatePairs implements DataRepresentation {
     }
 
     @Override
-    public boolean checkFormat(String s) {
-        if(s == null || s.length() == 0)
-            return false;
-        if (s.charAt(0) == '['){//there is an id at the start of the test case
-            if (s.charAt(1) == ']')
-                return false;
-            int i = 2;
-            for(;s.charAt(i) != ']';i++){}//find the end of the id
-            try {
-                Long.valueOf(s.substring(1, i));
-                s = s.substring(i+1).trim(); //remove the identifier from the test case string
-            }catch(NumberFormatException e) {
-                return false;
-            }
-        }
-
-        if(!s.startsWith("Start-"))
-            return false;
-        s = s.substring(6);
-
-        String[] stateEventList = s.split("-");
-        if(stateEventList.length == 1 && stateEventList[0].equals(""))
-            return false;
-        //every event should have a following state, so length must be even
-        return stateEventList.length % 2 != 1;
-    }
-
-    @Override
     public String getDescription() {
         return "reads in a dash-separated list of alternating events and states, storing each event and resulting state as a tuple";
     }
