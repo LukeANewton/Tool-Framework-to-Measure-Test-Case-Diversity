@@ -448,11 +448,10 @@ public class ControllerCompareTest {
         //getting a new controller is required because the config file is read in during creation
         c = Controller.getController();
 
-        doComparison(sampleTestSuiteA, null, "CommonElements", null, null,
+        doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "CommonElements", null, null,
                 true, null, null);
 
-        //prepareFileExistsIssue(filename, "y");
-        assertEquals("6.1" ,readFile(filename));
+        assertEquals("4.0" ,readFile(filename));
         deleteFiles(filename);
     }
 
@@ -465,7 +464,7 @@ public class ControllerCompareTest {
         //getting a new controller is required because the config file is read in during creation
         c = Controller.getController();
 
-        doComparison(sampleTestSuiteA, null, "CommonElements", null, null,
+        doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "CommonElements", null, null,
                 true, null, null);
 
         assertTrue(outContent.toString(), outContent.toString().contains("failed to save, outputFileName not given"));
