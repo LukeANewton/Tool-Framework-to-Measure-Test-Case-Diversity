@@ -98,11 +98,21 @@ public class ComparisonServiceTest {
         assertEquals(1.92, Double.parseDouble(results[0]), TOLERANCE);
     }
 
-    private  List<DataRepresentation> buildTestSuite() throws InvalidFormatException {
+    private  List<String> getTestSuiteStrings() {
+        List<String> testsuite = new ArrayList<>();
+        testsuite.add("1,2,3,4,5,6");
+        testsuite.add("5,4,8,5,2,4,7");
+        testsuite.add("1,1,1,4,5,8");
+        return testsuite;
+    }
+
+    private  List<DataRepresentation> buildTestSuite(List<String> testCases) throws InvalidFormatException {
         List<DataRepresentation> testsuite = new ArrayList<>();
-        testsuite.add(new CSV("1,2,3,4,5,6"));
-        testsuite.add(new CSV("5,4,8,5,2,4,7"));
-        testsuite.add(new CSV("1,1,1,4,5,8"));
+        for(String s : testCases) {
+            DataRepresentation d = new CSV();
+            d.parse(s);
+            testsuite.add(d);
+        }
         return testsuite;
     }
 
@@ -110,11 +120,11 @@ public class ComparisonServiceTest {
     /*Test for the Comparison service with a listwise comparison that uses the thread pool*/
     public void testPairwiseThreadPoolDoesNotChangeResult() throws Exception {
         PairingService p = new PairingService(Executors.newFixedThreadPool(1));
-        assertEquals(Double.parseDouble(comparisonService.pairwiseCompare(p.makePairs(null,
-                buildTestSuite().toArray(new DataRepresentation[3])),
+        assertEquals(Double.parseDouble(comparisonService.pairwiseCompare(p.makePairsWithin(null,
+                new CSV(), getTestSuiteStrings().toArray(new String[3])),
                 new CommonElements(), aggregationStrategy, null, true)[0]),
-                Double.parseDouble(comparisonService.pairwiseCompare(p.makePairs(null,
-                        buildTestSuite().toArray(new DataRepresentation[3])),
+                Double.parseDouble(comparisonService.pairwiseCompare(p.makePairsWithin(null,
+                        new CSV(), getTestSuiteStrings().toArray(new String[3])),
                         new CommonElements(), aggregationStrategy, null, false)[0]),
                 TOLERANCE);
     }
@@ -124,8 +134,8 @@ public class ComparisonServiceTest {
     public void testListwiseThreadPoolDoesNotChangeResult() throws Exception {
         List<List<DataRepresentation>> testsuites1 = new ArrayList<>();
         List<List<DataRepresentation>> testsuites2 = new ArrayList<>();
-        testsuites1.add(buildTestSuite());
-        testsuites2.add(buildTestSuite());
+        testsuites1.add(buildTestSuite(getTestSuiteStrings()));
+        testsuites2.add(buildTestSuite(getTestSuiteStrings()));
 
         assertEquals(Double.parseDouble(comparisonService.listwiseCompare(testsuites1, new ShannonIndex(), aggregationStrategy, null, true)[0]),
                 Double.parseDouble(comparisonService.listwiseCompare(testsuites2, new ShannonIndex(), aggregationStrategy, null, false)[0]),
