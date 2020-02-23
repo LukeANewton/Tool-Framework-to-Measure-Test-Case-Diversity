@@ -13,5 +13,7 @@ public interface HelpTarget {
      *
      * @return a description of the object
      */
-    public String getDescription();
+    default String getDescription() {
+        return null;
+    }
 }
