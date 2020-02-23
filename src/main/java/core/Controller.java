@@ -70,7 +70,8 @@ public class Controller {
             return new Controller();
         } catch (Exception e) {// the configuration file does not exist
             //this determines if we are executing within the jar file or not
-            if(Controller.class.getResource("Controller.class").toString().startsWith("jar")) {
+            if(Controller.class.getResource("Controller.class").toString().startsWith("jar")
+                    && !new File(CONFIG_FILE).exists()) {
                 try{//try to create a jar in the proper spot from the default inside the jar
                     //read in the config file from the jar
                     InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(CONFIG_FILE);
