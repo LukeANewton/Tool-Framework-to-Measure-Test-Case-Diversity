@@ -297,9 +297,12 @@ public class Controller {
                 console.displayResults("Pairing Test Cases...");
                 try {
                     if (testSuite2 == null)
-                        pairs = pairingService.makePairs(console, testSuite1);
+                        pairs = pairingService.makePairsWithin(console, testSuite1[0],
+                                fileReaderService.readTestCases(dto.getTestCaseLocationOne(), delimiter));
                     else
-                        pairs = pairingService.makePairs(console, testSuite1, testSuite2);
+                        pairs = pairingService.makePairsBetween(console, testSuite1[0],
+                                fileReaderService.readTestCases(dto.getTestCaseLocationOne(), delimiter),
+                                fileReaderService.readTestCases(dto.getTestCaseLocationTwo(), delimiter));
                 } catch (Exception e) {
                     console.displayResults("Error during pair generation: " + e.toString());
                     return;
