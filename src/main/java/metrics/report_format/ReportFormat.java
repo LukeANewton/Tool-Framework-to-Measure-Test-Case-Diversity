@@ -1,5 +1,6 @@
 package metrics.report_format;
 
+import core.HelpTarget;
 import model.CompareDTO;
 import model.DataTransferObject;
 
@@ -14,7 +15,7 @@ import java.util.*;
 /**
  * @author crushton
  */
-public interface ReportFormat {
+public interface ReportFormat extends HelpTarget {
 
     String DATE_FORMAT = "MM/dd/yyyy HH:mm";
     // The recommended maximum size to nicely print in the report format
@@ -28,12 +29,6 @@ public interface ReportFormat {
      * @return A nicely formatted string
      */
     String format(CompareDTO dto, List<Double> similarities, List<String> aggregations);
-
-    /**
-     * Provides a description of the format
-     * @return a brief description of the format
-     */
-    String getDescription();
 
     default String getUser() {
         return System.getProperty("user.name");

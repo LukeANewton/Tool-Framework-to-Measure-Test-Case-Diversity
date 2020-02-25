@@ -294,10 +294,9 @@ public class Controller {
         }
 
         //read in the first test suite file
-        String delimiter = dto.getDelimiter();
-        if (delimiter == null)
-            delimiter = config.getDelimiter();
-        DataRepresentation[] testSuite1 = getTestSuite(dto.getTestCaseLocationOne(), delimiter, dataRepresentation);
+        if (dto.getDelimiter() == null)
+            dto.setDelimiter(config.getDelimiter());
+        DataRepresentation[] testSuite1 = getTestSuite(dto.getTestCaseLocationOne(), dto.getDelimiter(), dataRepresentation);
         if(testSuite1 == null) //this triggers when an exception is thrown
             return;
         else if (testSuite1.length == 0){//if the file has not test cases, we cannot proceed with hte operation
@@ -308,7 +307,7 @@ public class Controller {
         //if there is a second file, read it in as well
         DataRepresentation[] testSuite2 = null;
         if(dto.getTestCaseLocationTwo() != null) {
-            testSuite2 = getTestSuite(dto.getTestCaseLocationTwo(), delimiter, dataRepresentation);
+            testSuite2 = getTestSuite(dto.getTestCaseLocationTwo(), dto.getDelimiter(), dataRepresentation);
             if (testSuite2 == null) //this triggers when an exception is thrown
                 return;
             else if (testSuite2.length == 0) {//if the file has not test cases, we cannot proceed with the operation
