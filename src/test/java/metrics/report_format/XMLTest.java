@@ -73,8 +73,8 @@ public class XMLTest {
         assertTrue("Format does not contain the <username> tag.", result.contains("<username>") && result.contains("</username"));
         assertTrue("Format does not contain the <hostname> tag.", result.contains("<hostname>") && result.contains("</hostname"));
         assertTrue("Format does not contain the <datetime> tag.", result.contains("<datetime>") && result.contains("</datetime"));
-        assertEquals("Result is not what was expected.", EXPECTED.replaceAll("\\n|\\r\\n", System.getProperty("line.separator")),
-                result.replaceAll("\\n|\\r\\n", System.getProperty("line.separator")));
+        assertEquals("Result is not what was expected.", EXPECTED.replaceAll("\\n|\\r\\n", System.lineSeparator()),
+                result.replaceAll("\\n|\\r\\n", System.lineSeparator()));
     }
 
     @Test
