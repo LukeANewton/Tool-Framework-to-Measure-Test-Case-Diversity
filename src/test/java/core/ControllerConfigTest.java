@@ -52,7 +52,7 @@ public class ControllerConfigTest {
         //test the creation of a controller without a config file
         c = Controller.getController();
         assertNull(c);
-        String expected = "Failed to read from configuration file: config.json. Ensure the file exists in the same directory as this program.\r\n";
+        String expected = "Failed to read from configuration file: config.json. Ensure the file exists in the same directory as this program." + System.lineSeparator();
         assertEquals(expected, outContent.toString());
 
         //restore config file
@@ -68,7 +68,7 @@ public class ControllerConfigTest {
         assertEquals("Error setting config values for the test","banana", config.getDelimiter());
 
         c.processCommand("config delimiter apple");
-        assertEquals("Successfully set delimiter to the value apple\r\n", outContent.toString());
+        assertEquals("Successfully set delimiter to the value apple" + System.lineSeparator(), outContent.toString());
 
         config = reader.readConfig(configName);
         assertEquals("Delimiter should be set to apple but is: " + config.getDelimiter(),"apple", config.getDelimiter());
@@ -83,7 +83,7 @@ public class ControllerConfigTest {
         assertEquals("Error setting config values for the test",0, config.getNumThreads());
 
         c.processCommand("config numThreads 5");
-        assertEquals("Successfully set numThreads to the value 5\r\n", outContent.toString());
+        assertEquals("Successfully set numThreads to the value 5" + System.lineSeparator(), outContent.toString());
 
         config = reader.readConfig(configName);
         assertEquals("NumThreads should be set to 5 but is: " + config.getNumThreads(),5, config.getNumThreads());
@@ -93,14 +93,14 @@ public class ControllerConfigTest {
     /*Use a config command to set the int for the numThreads property too a string*/
     public void testProcessStringToIntParamCommandConfig() {
         c.processCommand("config numThreads apple");
-        assertEquals("Failed to set numThreads to apple. The value for numThreads should be a number\r\n", outContent.toString());
+        assertEquals("Failed to set numThreads to apple. The value for numThreads should be a number" + System.lineSeparator(), outContent.toString());
     }
 
     @Test
     /*Use a config command with an invalid property*/
     public void testProcessInvalidCommandConfig() {
         c.processCommand("config banana banana");
-        assertEquals("The parameter banana is not valid\r\n", outContent.toString());
+        assertEquals("The parameter banana is not valid" + System.lineSeparator(), outContent.toString());
     }
 
 }

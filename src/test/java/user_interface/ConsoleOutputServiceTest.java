@@ -117,7 +117,7 @@ public class ConsoleOutputServiceTest {
         //fire 9 more events to complete all 10 tasks. then we should have a full progress bar
         for(int i = 0; i < 9; i++)
             support.firePropertyChange(new PropertyChangeEvent(this, "completedTask", 0, 1));
-        expected = "[==========]\r\n";
+        expected = "[==========]"+System.lineSeparator();
         /*unfortunately, unlike the terminal, output streams do not overwrite the contents
         when you use a /r, so we only check the end of the output stream to see what would
         be printed in the end*/
