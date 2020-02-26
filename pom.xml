@@ -81,7 +81,7 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
-                            <finalName>a</finalName>
+                            <finalName>JCompare</finalName>
                             <archive>
                                 <manifest>
                                     <mainClass>
