@@ -1,8 +1,8 @@
 # Tool Framework to Measure Test Case Diversity
 
-This is the capstone project for 3 undergraduate software engineering students at Carleton Univeristy. This is an extensible tool which can be used to automate diveristy measurements on test suites.
+This is the capstone project for 3 undergraduate software engineering students at Carleton Univeristy. This is an extensible tool which can be used to automate diveristy measurements on test suites. The project is written in Java and built using Maven.
 
-## Contributors
+## Authors
 Eric Bedard
 
 Luke Newton
