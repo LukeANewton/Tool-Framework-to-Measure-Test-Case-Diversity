@@ -10,7 +10,6 @@ import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -36,14 +35,14 @@ public class PairingService {
      * @param testSuite the test suite of test cases
      * @return a list of pairs of test cases in the form of data representations
      */
-    public List<Tuple<DataRepresentation, DataRepresentation>> makePairs(PropertyChangeListener pcl,
-                                                                         DataRepresentation[] testSuite) throws Exception {
+    public List<Tuple<DataRepresentation, DataRepresentation>> makePairsWithin(
+            PropertyChangeListener pcl, DataRepresentation format, String[] testSuite) throws Exception {
         setListener(pcl, testSuite.length);
         List<Tuple<DataRepresentation, DataRepresentation>> pairs = new ArrayList<>();
         List<Future<Object>> futureList = new ArrayList<>();
         for (int i = 0; i < testSuite.length; i++)//for each test case, generate a command that makes pairs with the remainder of the suite
             futureList.add(threadPool.submit(new PairingCommand(pcl, testSuite[i],
-                    Arrays.copyOfRange(testSuite, i+1, testSuite.length))));
+                    Arrays.copyOfRange(testSuite, i+1, testSuite.length), format)));
 
         for (Future<Object> future : futureList) {
             List<Tuple<DataRepresentation, DataRepresentation>> result =
@@ -59,15 +58,16 @@ public class PairingService {
      * @param testSuites an array of test suite arrays containing DataRepresentations for pairing
      * @return a list of pairs of test cases in the form of data representations
      */
-    public List<Tuple<DataRepresentation, DataRepresentation>> makePairs(PropertyChangeListener pcl,
-                                                                         DataRepresentation[]... testSuites) throws Exception {
+    public List<Tuple<DataRepresentation, DataRepresentation>> makePairsBetween(
+            PropertyChangeListener pcl, DataRepresentation format, String[]... testSuites) throws Exception {
         setListener(pcl, Arrays.stream(testSuites).mapToInt(e->e.length).toArray());
         List<Tuple<DataRepresentation, DataRepresentation>> pairs = new ArrayList<>();
         List<Future<Object>> futureList = new ArrayList<>();
         for (int i = 0; i < testSuites.length; i++) {//for each test suite
             for (int j = 0; j < testSuites[i].length; j++) //for each test case, create a command that generates pairs on the rest of the suites
                 futureList.add(threadPool.submit(new PairingCommand(pcl, testSuites[i][j],
-                        flatten(Arrays.copyOfRange(testSuites, i+1, testSuites.length))
+                        flatten(Arrays.copyOfRange(testSuites, i+1, testSuites.length)),
+                        format
                        )));
         }
         for (Future<Object> future : futureList) {
@@ -84,9 +84,9 @@ public class PairingService {
      * @param testSuites the 2D array
      * @return the input array flattened
      */
-    private DataRepresentation[] flatten(DataRepresentation[][] testSuites){
+    private String[] flatten(String[][] testSuites){
         return Arrays.stream(testSuites)
-                .flatMap(Arrays::stream).toArray(DataRepresentation[]::new);
+                .flatMap(Arrays::stream).toArray(String[]::new);
     }
 
     /**

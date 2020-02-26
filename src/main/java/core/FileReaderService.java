@@ -11,6 +11,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -62,6 +63,34 @@ public class FileReaderService {
 		return list;
 	}
 
+
+	/**
+	 * reads a test suite file located at filename into the passed DataRepresentation for later iteration over
+	 *
+	 * @param filename the test suite file containing test cases
+	 * @param delimiter the character(s)/pattern that separates each test case in the file
+	 * @return the test cases formatted as DataRepresentation objects
+	 */
+	public String[] readTestCases(String filename, String delimiter) throws FileNotFoundException {
+		String[] testFiles = readFromFolder(new File(filename)).toArray(new String[0]);
+
+		ArrayList<String> list = new ArrayList<>();
+		for(String s : testFiles) {
+			if (s.equals("")) //the file is empty
+				continue;
+
+			//at this point, we have all the file read in, so we can split up the test cases
+			String[] testCases;
+			if (delimiter == null)
+				testCases = new String[]{s};
+			else
+				testCases = s.split(delimiter);
+
+			list.addAll(Arrays.asList(testCases));
+		}
+		return list.toArray(new String[0]);
+	}
+
 	/**
 	 * reads a test suite file located at filename into the passed DataRepresentation for later iteration over
 	 *
@@ -73,28 +102,12 @@ public class FileReaderService {
 	public DataRepresentation[] readIntoDataRepresentation(String filename, String delimiter, DataRepresentation format) throws InvalidFormatException, FileNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 		if (format == null)
 			throw new InvalidFormatException();
-
-		String[] testFiles = readFromFolder(new File(filename)).toArray(new String[0]);
-
+		String[] testCases = readTestCases(filename, delimiter);
 		ArrayList<DataRepresentation> list = new ArrayList<>();
-		for(String s : testFiles){
-			if(s.equals("")) //the file is empty
-				continue;
-
-			//at this point, we have all the file read in, so we can split up the test cases
-			String[] testCases;
-			if (delimiter == null){
-				testCases = new String[] {s};
-			} else{
-				testCases = s.split(delimiter);
-			}
-
-			//all the file contents is in the system, now we need to read them into data representations
-			for (String testCase : testCases) {
-				DataRepresentation d = format.getClass().getConstructor().newInstance();
-				d.parse(testCase);
-				list.add(d);
-			}
+		for (String testCase : testCases) {//once all test cases are read, parse them into data representations
+			DataRepresentation d = format.getClass().getConstructor().newInstance();
+			d.parse(testCase);
+			list.add(d);
 		}
 		return list.toArray(new DataRepresentation[0]);
 	}

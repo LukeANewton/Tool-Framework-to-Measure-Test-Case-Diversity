@@ -49,7 +49,7 @@ public class ComparisonServiceTest {
         comparisonService = new ComparisonService(Executors.newFixedThreadPool(2));
     }
 
-    /*
+    /**
      * Test that the comparison service is comparing pairs correctly when given completely similar pairs.
      */
     @Test
@@ -59,7 +59,7 @@ public class ComparisonServiceTest {
         assertTrue(results.stream().allMatch(results.get(0)::equals));
     }
 
-    /*
+    /**
      * Test that the comparison service is comparing pairs correctly when given completely dissimilar pairs.
      */
     @Test
@@ -69,7 +69,7 @@ public class ComparisonServiceTest {
         assertTrue(results.stream().allMatch(results.get(0)::equals));
     }
 
-    /*
+    /**
      * Test that the comparison service is comparing pairs correctly when given half similar pairs.
      * This is a 0.0 value because the current aggregation strategy finds the minimum
      */
@@ -97,34 +97,53 @@ public class ComparisonServiceTest {
         assertEquals(1, results.size());
     }
 
-    private  List<DataRepresentation> buildTestSuite() throws InvalidFormatException {
-        List<DataRepresentation> testsuite = new ArrayList<>();
-        testsuite.add(new CSV("1,2,3,4,5,6"));
-        testsuite.add(new CSV("5,4,8,5,2,4,7"));
-        testsuite.add(new CSV("1,1,1,4,5,8"));
+    private  List<String> getTestSuiteStrings() {
+        List<String> testsuite = new ArrayList<>();
+        testsuite.add("1,2,3,4,5,6");
+        testsuite.add("5,4,8,5,2,4,7");
+        testsuite.add("1,1,1,4,5,8");
         return testsuite;
     }
 
+    /**
+     * Builds a test suite of data representations given a list of test cases.
+     *
+     * @param testCases a pattern on elements distinguished by a delimiter.
+     * @return a list of data representations that allow iteration over each element in a test case.
+     * @throws InvalidFormatException when we're unable to parse the test cases.
+     */
+    private List<DataRepresentation> buildTestSuite(List<String> testCases) throws InvalidFormatException {
+        List<DataRepresentation> testsuite = new ArrayList<>();
+        for (String s : testCases) {
+            DataRepresentation d = new CSV();
+            d.parse(s);
+            testsuite.add(d);
+        }
+        return testsuite;
+    }
+
+    /**
+     * Test for the Comparison service with a listwise comparison that uses the thread pool.
+     */
     @Test
-    /*Test for the Comparison service with a listwise comparison that uses the thread pool*/
     public void testPairwiseThreadPoolDoesNotChangeResult() throws Exception {
         PairingService p = new PairingService(Executors.newFixedThreadPool(1));
-        assertEquals(comparisonService.pairwiseCompare(p.makePairs(null,
-                buildTestSuite().toArray(new DataRepresentation[3])),
-                new CommonElements(), null, true).get(0),
-                comparisonService.pairwiseCompare(p.makePairs(null,
-                        buildTestSuite().toArray(new DataRepresentation[3])),
-                        new CommonElements(), null, false).get(0),
+        assertEquals(comparisonService.pairwiseCompare(p.makePairsWithin(
+                null, new CSV(), getTestSuiteStrings().toArray(new String[3])), new CommonElements(), null, true).get(0),
+                comparisonService.pairwiseCompare(p.makePairsWithin(
+                        null, new CSV(), getTestSuiteStrings().toArray(new String[3])), new CommonElements(), null, false).get(0),
                 TOLERANCE);
     }
 
+    /**
+     * Test for the Comparison service with a listwise comparison that uses the thread pool.
+     */
     @Test
-    /*Test for the Comparison service with a listwise comparison that uses the thread pool*/
     public void testListwiseThreadPoolDoesNotChangeResult() throws Exception {
         List<List<DataRepresentation>> testsuites1 = new ArrayList<>();
         List<List<DataRepresentation>> testsuites2 = new ArrayList<>();
-        testsuites1.add(buildTestSuite());
-        testsuites2.add(buildTestSuite());
+        testsuites1.add(buildTestSuite(getTestSuiteStrings()));
+        testsuites2.add(buildTestSuite(getTestSuiteStrings()));
 
         assertEquals(comparisonService.listwiseCompare(testsuites1, new ShannonIndex(), null, true).get(0),
                 comparisonService.listwiseCompare(testsuites2, new ShannonIndex(), null, false).get(0),

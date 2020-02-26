@@ -72,7 +72,8 @@ public class Controller {
             return new Controller();
         } catch (Exception e) {// the configuration file does not exist
             //this determines if we are executing within the jar file or not
-            if(Controller.class.getResource("Controller.class").toString().startsWith("jar")) {
+            if(Controller.class.getResource("Controller.class").toString().startsWith("jar")
+                    && !new File(CONFIG_FILE).exists()) {
                 try{//try to create a jar in the proper spot from the default inside the jar
                     //read in the config file from the jar
                     InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(CONFIG_FILE);
@@ -331,9 +332,12 @@ public class Controller {
                 console.displayResults("Pairing Test Cases...");
                 try {
                     if (testSuite2 == null)
-                        pairs = pairingService.makePairs(console, testSuite1);
+                        pairs = pairingService.makePairsWithin(console, testSuite1[0],
+                                fileReaderService.readTestCases(dto.getTestCaseLocationOne(), dto.getDelimiter()));
                     else
-                        pairs = pairingService.makePairs(console, testSuite1, testSuite2);
+                        pairs = pairingService.makePairsBetween(console, testSuite1[0],
+                                fileReaderService.readTestCases(dto.getTestCaseLocationOne(), dto.getDelimiter()),
+                                fileReaderService.readTestCases(dto.getTestCaseLocationTwo(), dto.getDelimiter()));
                 } catch (Exception e) {
                     console.displayResults("Error during pair generation: " + e.toString());
                     return;
