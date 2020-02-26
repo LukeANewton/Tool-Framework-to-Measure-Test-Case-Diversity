@@ -41,6 +41,9 @@ public class InputParserTest {
             case METRIC:
                 command.append(" -m");
                 break;
+            case REPORT_FORMAT:
+                command.append(" -r");
+                break;
             case COMMAND:
                 break;
         }
@@ -60,6 +63,15 @@ public class InputParserTest {
     /*test for parsing aggregation method help*/
     public void testAggregationHelp() throws InvalidCommandException {
         helpHelper(HelpType.AGGREGATION_METHOD);
+    }
+
+    /**
+     * Test for parsing report format method help
+     * @throws InvalidCommandException on invalid command construction.
+     */
+    @Test
+    public void testReportFormatHelp() throws InvalidCommandException {
+        helpHelper(HelpType.REPORT_FORMAT);
     }
 
     @Test
@@ -170,11 +182,12 @@ public class InputParserTest {
      * @param file1 the expected first filename to find in the DTO
      * @param file2 the expected second filename value to find in the DTO
      * @param dataRepresentation the expected data representation to find in the DTO
+     * @param reportFormats the name of the report format class.
      * @throws InvalidCommandException when the parameters specified result in an invalid command
      */
     private void compareHelper(String file1, String file2, String dataRepresentation, String comparisonMethod,
                                String[] aggregationMethods, String delimiter, String outputFilename,
-                               boolean save, Integer numThreads) throws InvalidCommandException {
+                               boolean save, Integer numThreads, String[] reportFormats) throws InvalidCommandException {
         StringBuilder command = new StringBuilder();
         command.append("compare").append(" ").append(file1).append(" ").append(file2).append(" ").append(dataRepresentation);
         if(comparisonMethod != null)
@@ -183,6 +196,12 @@ public class InputParserTest {
             command.append(" -a");
             for(String aggregationMethod : aggregationMethods)
                 command.append(" ").append(aggregationMethod);
+        }
+        if (reportFormats != null) {
+            command.append(" -r");
+            for (String format : reportFormats) {
+                command.append(" ").append(format);
+            }
         }
         if(delimiter != null)
             command.append(" -d ").append(delimiter);
@@ -202,6 +221,7 @@ public class InputParserTest {
         assertEquals(dataRepresentation, ((CompareDTO)dto).getDataRepresentation());
         assertEquals(comparisonMethod, ((CompareDTO)dto).getComparisonMethod());
         assertArrayEquals(aggregationMethods, ((CompareDTO) dto).getAggregationMethods());
+        assertArrayEquals(reportFormats, ((CompareDTO) dto).getReportFormats());
         assertEquals(delimiter, ((CompareDTO)dto).getDelimiter());
         assertEquals(outputFilename, ((CompareDTO)dto).getOutputFilename());
         assertEquals(numThreads, ((CompareDTO)dto).getNumberOfThreads());
@@ -216,7 +236,7 @@ public class InputParserTest {
         String file2 = "file2";
         String dataRepresentation = "CSV";
         compareHelper(file1, file2, dataRepresentation, null, null,
-                null, null, false, null);
+                null, null, false, null, null);
     }
 
     @Test
@@ -227,7 +247,7 @@ public class InputParserTest {
         String dataRepresentation = "CSV";
         String output = "out";
         compareHelper(file1, file2, dataRepresentation, null, null,
-                null, output, true, null);
+                null, output, true, null, null);
     }
 
     @Test
@@ -238,7 +258,7 @@ public class InputParserTest {
         String dataRepresentation = "CSV";
 
         compareHelper(file1, file2, dataRepresentation, null, null,
-                null, null, true, null);
+                null, null, true, null, null);
     }
 
     @Test
@@ -250,7 +270,7 @@ public class InputParserTest {
         int numThreads = 2;
 
         compareHelper(file1, file2, dataRepresentation, null, null,
-                null, null, true, numThreads);
+                null, null, true, numThreads, null);
     }
 
     @Test
@@ -262,7 +282,7 @@ public class InputParserTest {
         String metric = "out";
 
         compareHelper(file1, file2, dataRepresentation, metric, null,
-                null, null, true, null);
+                null, null, true, null, null);
     }
 
     @Test
@@ -301,7 +321,7 @@ public class InputParserTest {
         String dataRepresentation = "CSV";
         String metric = "out";
         compareHelper(file1, file2, dataRepresentation, null, new String[]{metric},
-                null, null, false, null);
+                null, null, false, null, null);
     }
 
     @Test
@@ -312,7 +332,7 @@ public class InputParserTest {
         String dataRepresentation = "CSV";
         String metric = "out";
         compareHelper(file1, file2, dataRepresentation, null, new String[]{metric, metric, metric},
-                null, null, false, null);
+                null, null, false, null, null);
     }
 
     @Test
@@ -343,6 +363,85 @@ public class InputParserTest {
         }
     }
 
+    /* *******************
+     * Report Formatting *
+     ********************/
+
+    /**
+     * Test for parsing a valid compare command with report format flag.
+     * @throws InvalidCommandException when the command is constructed incorrectly.
+     */
+    @Test
+    public void testCompareReportFormatFlag() throws InvalidCommandException {
+        String file1 = "file1";
+        String file2 = "file2";
+        String dataRepresentation = "CSV";
+        compareHelper(file1, file2, dataRepresentation, null, null,
+                null, null, false, null, new String[]{"RawResults"});
+    }
+
+    /**
+     * Test for parsing a valid compare command with report format flag and bad formats.
+     * @throws InvalidCommandException when the command is constructed incorrectly.
+     */
+    @Test
+    public void testCompareInvalidReportFormat() throws InvalidCommandException {
+        String file1 = "file1";
+        String file2 = "file2";
+        String dataRepresentation = "CSV";
+        compareHelper(file1, file2, dataRepresentation, null, null,
+                null, null, false, null, new String[]{"notAFormat"});
+    }
+
+    /**
+     * Test for parsing a valid compare command with report format flag
+     * @throws InvalidCommandException when the command is constructed incorrectly.
+     */
+    @Test
+    public void testCompareMultipleReportFormatsFlag() throws InvalidCommandException {
+        String file1 = "file1";
+        String file2 = "file2";
+        String dataRepresentation = "CSV";
+        compareHelper(file1, file2, dataRepresentation, null, null,
+                null, null, false, null, new String[]{"JSON", "XML", "Pretty", "RawResults"});
+    }
+
+    /**
+     * Test for parsing a compare command with report format flag but no provided method.
+     */
+    @Test
+    public void testCompareReportFormatFlagNoValueEndOfCommand(){
+        String file1 = "file1";
+        String dataRepresentation = "CSV";
+
+        try {
+            input.parse("compare " + file1 + " " + dataRepresentation + " -m metricname -r");
+            fail();
+        }catch(InvalidCommandException e){
+            assertEquals("No method specified after report format flag.", e.getErrorMessage());
+        }
+    }
+
+    /**
+     * Test for parsing a compare command with report format flag but no provided method.
+     */
+    @Test
+    public void testCompareReportFormatFlagNoValue(){
+        String file1 = "file1";
+        String dataRepresentation = "CSV";
+
+        try {
+            input.parse("compare " + file1 + " " + dataRepresentation + " -r -s out.txt");
+            fail();
+        }catch(InvalidCommandException e){
+            assertEquals("No method specified after report format flag.", e.getErrorMessage());
+        }
+    }
+
+    /* ************
+     * Delimiters *
+    **************/
+
     @Test
     /*test for parsing a valid compare command with delimiter flag*/
     public void testCompareDelimiterFlag() throws InvalidCommandException {
@@ -351,7 +450,7 @@ public class InputParserTest {
         String dataRepresentation = "CSV";
         String delimiter = "out";
         compareHelper(file1, file2, dataRepresentation, null, null,
-                delimiter, null, false, null);
+                delimiter, null, false, null, null);
     }
 
     @Test
@@ -390,7 +489,7 @@ public class InputParserTest {
         String dataRepresentation = "CSV";
         Integer numThreads = 4;
         compareHelper(file1, file2, dataRepresentation, null, null,
-                null, null, false, numThreads);
+                null, null, false, numThreads, null);
     }
 
     @Test
@@ -440,7 +539,7 @@ public class InputParserTest {
         String metric = "out";
         Integer numThreads = 4;
         compareHelper(file1, file2, dataRepresentation, metric, null,
-                delimiter, null, false, numThreads);
+                delimiter, null, false, numThreads, null);
     }
 
     @Test
@@ -454,7 +553,7 @@ public class InputParserTest {
         Integer numThreads = 4;
         String outputFile = "out.txt";
         compareHelper(file1, file2, dataRepresentation, metric, new String[]{metric},
-                delimiter, outputFile, true, numThreads);
+                delimiter, outputFile, true, numThreads, null);
     }
 
     @Test

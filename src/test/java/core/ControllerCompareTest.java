@@ -1,13 +1,24 @@
 package core;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import model.Config;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.Reader;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class ControllerCompareTest {
@@ -109,10 +120,10 @@ public class ControllerCompareTest {
      * @param aggregation the name of the optional aggregation method
      * @param delimiter the delimiter between test cases
      * @param saveFileName the name of a file to save output to
-     * @param reportFormat the name of the report format to use
+     * @param reportFormats the names of the report formats to use
      */
-    private void doComparison(String filename1, String filename2, String metric, String aggregation,
-                              String delimiter, boolean save, String saveFileName, String numThreads, String reportFormat){
+    private void doComparison(String filename1, String filename2, String metric, String aggregation, String delimiter,
+                              boolean save, String saveFileName, String numThreads, String[] reportFormats) {
         StringBuilder s = new StringBuilder();
         s.append("compare ").append(filename1);
         if (filename2 != null)
@@ -131,8 +142,12 @@ public class ControllerCompareTest {
         }
         if(numThreads != null)
             s.append(" -t ").append(numThreads);
-        if (reportFormat != null)
-            s.append(" -r ").append(reportFormat);
+        if (reportFormats != null) {
+            s.append(" -r");
+            for (String format : reportFormats) {
+                s.append(" ").append(format);
+            }
+        }
         c.processCommand(s.toString());
     }
 
@@ -576,5 +591,75 @@ public class ControllerCompareTest {
 
         //clean up files created
         deleteFiles(outputName1, outputName2);
+    }
+
+    /**
+     * Test that output isn't saved to a file when save = false and an file name is specified.
+     * This test confirms that the save flag overrides the assumption of saving when a file name is entered or read from config.
+     */
+    @Test
+    public void testSaveFalseGivenFileName() {
+        String fileName = "ControllerCompareTest_testSaveFalseGivenFileName";
+        doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "CommonElements", "AverageValue",
+                null, false, fileName + "", null, new String[]{"JSON"});
+        boolean fileExists = new File(fileName + "JSON").exists();
+        assertFalse("Output file created when save flag set to false.", fileExists);
+        if (fileExists) {
+            deleteFiles(fileName + "JSON");
+        }
+    }
+
+    /**
+     * Test multiple specified report formats print results to file and console.
+     */
+    @Test
+    public void testMultipleReportFormatsPrintResults() throws IOException {
+        doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "CommonElements", "AverageValue",
+                null, true, RESULT_FILE_NAME, null, new String[]{"RawResults", "JSON"});
+
+        c = Controller.getController();
+
+        // Check files
+        assertFalse(readFile(RESULT_FILE_NAME + "RawResults").isEmpty());
+        assertTrue(readFile(RESULT_FILE_NAME + "RawResults").contains("4.0"));
+
+        Reader reader = new FileReader(RESULT_FILE_NAME + "JSON");
+        JsonElement jsonResult = JsonParser.parseReader(reader);
+        reader.close();
+
+        assertTrue(jsonResult.isJsonObject());
+        assertEquals("4.0", jsonResult.getAsJsonObject().get("results").getAsJsonObject().get("averagevalue").getAsString());
+
+        deleteFiles(RESULT_FILE_NAME + "RawResults", RESULT_FILE_NAME + "JSON");
+
+        // Check console
+        assertTrue("Correct result wasn't printed to console.", outContent.toString().contains("4.0"));
+        assertTrue("Expected JSON format wasn't printed to console.", outContent.toString().contains("\"results\":{"));
+    }
+
+    /**
+     * Test specified report format prints results to console.
+     */
+    @Test
+    public void testReportFormatPrintsResultsToConsole() {
+        doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "CommonElements", "AverageValue",
+                null, false, RESULT_FILE_NAME, null, new String[]{"RawResults"});
+        c = Controller.getController();
+        // By adding the line separator, we can safely assume that the format is either Pretty or Raw.
+        assertTrue("Correct result wasn't printed to console.", outContent.toString().contains("4.0"+System.lineSeparator()));
+        // This ensures that the format has to be Raw, which is what we asked for.
+        assertFalse("Incorrect (pretty?) format printed to console when we expected the raw format.", outContent.toString().contains("Results:"));
+    }
+
+    /**
+     * Test that a bad report format will print an error message to the console.
+     */
+    @Test
+    public void testBadReportFormat() {
+        final String INVALID_FORMAT = "NotAFormat872iqwert";
+        doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "CommonElements", "AverageValue",
+                null, false, RESULT_FILE_NAME, null, new String[]{INVALID_FORMAT});
+        c = Controller.getController();
+        assertTrue("No error printed to console when given an invalid report format name.", outContent.toString().contains("report format named " + INVALID_FORMAT));
     }
 }

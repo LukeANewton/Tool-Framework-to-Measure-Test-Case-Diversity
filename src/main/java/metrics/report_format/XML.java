@@ -7,6 +7,7 @@ import java.util.Map;
 
 /**
  * XML report format.
+ * Note: If this file gets any more complicated, please think about adding an XML parser dependency.
  *
  * @author crushton
  */

@@ -264,10 +264,10 @@ public class InputParser {
 				case AGGREGATION_METHOD_FLAG: //need to provide list of aggregation methods
 					help.setHelpType(HelpType.AGGREGATION_METHOD);
 					break;
-				case DATA_REPRESENTATION_FLAG: //need to proved list of data representations
+				case DATA_REPRESENTATION_FLAG: //need to provide list of data representations
 					help.setHelpType(HelpType.DATA_REPRESENTATION);
 					break;
-				case REPORT_FORMAT_FLAG: //need to proved list of report formats
+				case REPORT_FORMAT_FLAG: //need to provide list of report formats
 					help.setHelpType(HelpType.REPORT_FORMAT);
 					break;
 				default:  //the type of help requested is not recognized

@@ -282,6 +282,26 @@ public class ConfigTest {
         }
 
         /**
+         * Test getter and setter for report format location.
+         */
+        @Test
+        public void getSetReportFormatLocation() {
+                String newLocation = "newReportFormatLocation";
+                config.setReportFormatLocation(newLocation);
+                assertEquals(config.getReportFormatLocation(), newLocation);
+        }
+
+        /**
+         * Test getter and setter for report format.
+         */
+        @Test
+        public void getSetReportFormat() {
+                String newFormat = "newReportFormat";
+                config.setReportFormat(newFormat);
+                assertEquals(config.getReportFormat(), newFormat);
+        }
+
+        /**
          * Test the to string method for failures
          */
         @Test

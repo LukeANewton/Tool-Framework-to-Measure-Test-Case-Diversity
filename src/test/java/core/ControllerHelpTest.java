@@ -78,6 +78,15 @@ public class ControllerHelpTest {
         assertNotNull(outContent.toString());
     }
 
+    /**
+     * Test for parsing report format help
+     */
+    @Test
+    public void testReportFormatHelp() {
+        c.processCommand("help -r");
+        assertNotNull(outContent.toString());
+    }
+
     @Test
     /*test for parsing comparison metric help*/
     public void testPairwiseHelp() {
