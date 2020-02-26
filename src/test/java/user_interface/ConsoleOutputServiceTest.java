@@ -118,9 +118,6 @@ public class ConsoleOutputServiceTest {
         for(int i = 0; i < 9; i++)
             support.firePropertyChange(new PropertyChangeEvent(this, "completedTask", 0, 1));
         expected = "[==========]"+System.lineSeparator();
-        /*unfortunately, unlike the terminal, output streams do not overwrite the contents
-        when you use a /r, so we only check the end of the output stream to see what would
-        be printed in the end*/
-        assertEquals(expected, outContent.toString().substring(outContent.toString().length() - 14));
+        assertTrue(outContent.toString().contains(expected));
     }
 }

@@ -134,7 +134,7 @@ public class FileWriterServiceTest {
         //read back in to test
         assertTrue(file.exists());
         try {
-            assertEquals(FILE_CONTENTS+"\r\n"+FILE_CONTENTS, readFile(FILENAME));
+            assertEquals(FILE_CONTENTS+System.lineSeparator()+FILE_CONTENTS, readFile(FILENAME));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             fail();
