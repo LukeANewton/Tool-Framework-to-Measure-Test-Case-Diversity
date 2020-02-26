@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"core"},{"l":"data_representation"},{"l":"metrics.aggregation"},{"l":"metrics.comparison.listwise"},{"l":"metrics.comparison.pairwise"},{"l":"model"},{"l":"user_interface"},{"l":"utilities"}]
