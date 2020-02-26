@@ -58,7 +58,7 @@ public class ControllerHelpTest {
     @Test
     /*Test for the error handling of invalid command types*/
     public void testProcessInvalidCommand() {
-        String expected = "The keyword 'banana' is not recognized. Valid commands are:\r\n" + commandHelpString;
+        String expected = "The keyword 'banana' is not recognized. Valid commands are:"  + System.lineSeparator() + commandHelpString;
         c.processCommand("banana apple orange");
         assertEquals(expected, outContent.toString());
     }
@@ -93,14 +93,14 @@ public class ControllerHelpTest {
     @Test
     /*test for parsing an invalid help with extra tokens*/
     public void testHelpExtraTokens() {
-        String expected = "Unexpected additional tokens: [-m] Valid commands are:\r\n" + commandHelpString;
+        String expected = "Unexpected additional tokens: [-m] Valid commands are:" + System.lineSeparator() + commandHelpString;
         compareAgainstString("help -f -m", expected);
     }
 
     @Test
     /*test for parsing an invalid help with invalid type*/
     public void testHelpInvalidType() {
-        String expected = "Help type not valid: -x Valid commands are:\r\n" + commandHelpString;
+        String expected = "Help type not valid: -x Valid commands are:" + System.lineSeparator() + commandHelpString;
         compareAgainstString("help -x", expected);
     }
 

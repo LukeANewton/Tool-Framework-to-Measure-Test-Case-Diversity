@@ -43,19 +43,19 @@ public class ControllerCompareTest {
         originalConfigFile = reader.readConfig(CONFIG_NAME);
 
         //create test suite files for use in tests
-        String contents = "1,2,3,4,5,6\r\n1,2,3,5,4,6";
+        String contents = "1,2,3,4,5,6"+System.lineSeparator()+"1,2,3,5,4,6";
         writeFile(SINGLE_PAIR_TEST_SUITE_FILE_NAME, contents);
         contents = "1,2,3,4,5,6";
         writeFile(SINGLE_CASE_TEST_SUITE_FILE_NAME, contents);
-        contents = "1,2,3,4,5\r\n" +
-                "1,2,3,4,6,7,3,4,6,7,3,4,5\r\n" +
-                "1,2,3,4,6,8,9,3,4,6,8,9,3,4,5\r\n" +
-                "1,2,3,4,6,7,3,4,6,8,9,3,4,5\r\n" +
+        contents = "1,2,3,4,5" + System.lineSeparator() +
+                "1,2,3,4,6,7,3,4,6,7,3,4,5" + System.lineSeparator() +
+                "1,2,3,4,6,8,9,3,4,6,8,9,3,4,5" + System.lineSeparator() +
+                "1,2,3,4,6,7,3,4,6,8,9,3,4,5" + System.lineSeparator() +
                 "1,2,3,4,6,7,3,4,6,8,9,3,10";
         writeFile(SAMPLE_TEST_SUITE_A_FILE_NAME, contents);
-        contents = "4,7,9,36,4,6,6,6,6\r\n" +
-                "1,2,3,4,6,3,8,26,0,2,7,8,6,66\r\n" +
-                "1,2,3,4,4,6,3,7,2,6,9\r\n" +
+        contents = "4,7,9,36,4,6,6,6,6" + System.lineSeparator() +
+                "1,2,3,4,6,3,8,26,0,2,7,8,6,66" + System.lineSeparator() +
+                "1,2,3,4,4,6,3,7,2,6,9" + System.lineSeparator() +
                 "4,6,7,3,4,6,8,9,3,4,5";
         writeFile(SAMPLE_TEST_SUITE_B_FILE_NAME, contents);
     }
@@ -74,7 +74,7 @@ public class ControllerCompareTest {
     public void testControllerCreationWithoutConfigFile(){
         deleteFiles(CONFIG_NAME);
         Controller.getController();
-        assertEquals("Failed to read from configuration file: " + CONFIG_NAME + ". Ensure the file exists in the same directory as this program.\r\n", outContent.toString());
+        assertEquals("Failed to read from configuration file: " + CONFIG_NAME + ". Ensure the file exists in the same directory as this program." + System.lineSeparator(), outContent.toString());
     }
 
     /**
