@@ -21,6 +21,7 @@
 # Eclipse settings
 .classpath
 .project
+.settings/
 
 # build directories
 out/
