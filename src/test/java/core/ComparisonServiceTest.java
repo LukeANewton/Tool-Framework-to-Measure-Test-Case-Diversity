@@ -2,11 +2,9 @@ package core;
 
 import data_representation.CSV;
 import data_representation.DataRepresentation;
-import metrics.aggregation.AggregationStrategy;
-import metrics.aggregation.AverageValue;
+import metrics.comparison.listwise.ShannonIndex;
 import metrics.comparison.pairwise.CommonElements;
 import metrics.comparison.pairwise.PairwiseComparisonStrategy;
-import metrics.comparison.listwise.ShannonIndex;
 import org.junit.Before;
 import org.junit.Test;
 import utilities.Tuple;
@@ -16,6 +14,7 @@ import java.util.List;
 import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test suite that tests the comparison service
@@ -24,7 +23,6 @@ public class ComparisonServiceTest {
 
     private List<Tuple<DataRepresentation, DataRepresentation>> differentTestCasePairs, sameTestCasePairs, halfSimilarPairs;
     private PairwiseComparisonStrategy strategy;
-    private AggregationStrategy[] aggregationStrategy;
     private ComparisonService comparisonService;
     private final double TOLERANCE = 0.01;
 
@@ -49,42 +47,44 @@ public class ComparisonServiceTest {
 
         strategy = new CommonElements();
         comparisonService = new ComparisonService(Executors.newFixedThreadPool(2));
-        aggregationStrategy = new AggregationStrategy[]{new AverageValue()};
     }
 
-    /*
+    /**
      * Test that the comparison service is comparing pairs correctly when given completely similar pairs.
      */
     @Test
     public void testCompareSimilarPairs() throws Exception {
-        String[] results = comparisonService.pairwiseCompare(sameTestCasePairs, strategy, aggregationStrategy, null, false);
-        assertEquals(1, results.length);
-        assertEquals(1.0, Double.parseDouble(results[0]), TOLERANCE);
+        List<Double> results = comparisonService.pairwiseCompare(sameTestCasePairs, strategy, null, false);
+        assertEquals(10, results.size());
+        assertTrue(results.stream().allMatch(results.get(0)::equals));
     }
 
-    /*
+    /**
      * Test that the comparison service is comparing pairs correctly when given completely dissimilar pairs.
      */
     @Test
     public void testCompareDissimilarPairs() throws Exception {
-        String[] results = comparisonService.pairwiseCompare(differentTestCasePairs, strategy, aggregationStrategy, null, false);
-        assertEquals(1, results.length);
-        assertEquals(0.0, Double.parseDouble(results[0]), TOLERANCE);
+        List<Double> results = comparisonService.pairwiseCompare(differentTestCasePairs, strategy, null, false);
+        assertEquals(10, results.size());
+        assertTrue(results.stream().allMatch(results.get(0)::equals));
     }
 
-    /*
+    /**
      * Test that the comparison service is comparing pairs correctly when given half similar pairs.
      * This is a 0.0 value because the current aggregation strategy finds the minimum
      */
     @Test
     public void testCompareHalfSimilarPairs() throws Exception {
-        String[] results = comparisonService.pairwiseCompare(halfSimilarPairs, strategy, aggregationStrategy, null, false);
-        assertEquals(1, results.length);
-        assertEquals(0.5, Double.parseDouble(results[0]), TOLERANCE);
+        List<Double> results = comparisonService.pairwiseCompare(halfSimilarPairs, strategy, null, false);
+        assertEquals(10, results.size());
     }
 
+
+    /** TODO: This appears to be broken; shouldn't the result be 3 similarities?
+     * Test for the comparison service with a listwise comparison.
+     * @throws Exception when unable to make comparisons
+     */
     @Test
-    /*Test for the Comparison service with a listwise comparison that uses the thread pool*/
     public void testListwiseComparison() throws Exception {
         List<List<DataRepresentation>> testsuites = new ArrayList<>();
         List<DataRepresentation> testsuite = new ArrayList<>();
@@ -93,9 +93,8 @@ public class ComparisonServiceTest {
         testsuite.add(new CSV("1,1,1,4,5,8"));
         testsuites.add(testsuite);
 
-        String[] results = comparisonService.listwiseCompare(testsuites, new ShannonIndex(), aggregationStrategy, null, false);
-        assertEquals(1, results.length);
-        assertEquals(1.92, Double.parseDouble(results[0]), TOLERANCE);
+        List<Double> results = comparisonService.listwiseCompare(testsuites, new ShannonIndex(), null, false);
+        assertEquals(1, results.size());
     }
 
     private  List<String> getTestSuiteStrings() {
@@ -106,9 +105,16 @@ public class ComparisonServiceTest {
         return testsuite;
     }
 
-    private  List<DataRepresentation> buildTestSuite(List<String> testCases) throws InvalidFormatException {
+    /**
+     * Builds a test suite of data representations given a list of test cases.
+     *
+     * @param testCases a pattern on elements distinguished by a delimiter.
+     * @return a list of data representations that allow iteration over each element in a test case.
+     * @throws InvalidFormatException when we're unable to parse the test cases.
+     */
+    private List<DataRepresentation> buildTestSuite(List<String> testCases) throws InvalidFormatException {
         List<DataRepresentation> testsuite = new ArrayList<>();
-        for(String s : testCases) {
+        for (String s : testCases) {
             DataRepresentation d = new CSV();
             d.parse(s);
             testsuite.add(d);
@@ -116,29 +122,31 @@ public class ComparisonServiceTest {
         return testsuite;
     }
 
+    /**
+     * Test for the Comparison service with a listwise comparison that uses the thread pool.
+     */
     @Test
-    /*Test for the Comparison service with a listwise comparison that uses the thread pool*/
     public void testPairwiseThreadPoolDoesNotChangeResult() throws Exception {
         PairingService p = new PairingService(Executors.newFixedThreadPool(1));
-        assertEquals(Double.parseDouble(comparisonService.pairwiseCompare(p.makePairsWithin(null,
-                new CSV(), getTestSuiteStrings().toArray(new String[3])),
-                new CommonElements(), aggregationStrategy, null, true)[0]),
-                Double.parseDouble(comparisonService.pairwiseCompare(p.makePairsWithin(null,
-                        new CSV(), getTestSuiteStrings().toArray(new String[3])),
-                        new CommonElements(), aggregationStrategy, null, false)[0]),
+        assertEquals(comparisonService.pairwiseCompare(p.makePairsWithin(
+                null, new CSV(), getTestSuiteStrings().toArray(new String[3])), new CommonElements(), null, true).get(0),
+                comparisonService.pairwiseCompare(p.makePairsWithin(
+                        null, new CSV(), getTestSuiteStrings().toArray(new String[3])), new CommonElements(), null, false).get(0),
                 TOLERANCE);
     }
 
+    /**
+     * Test for the Comparison service with a listwise comparison that uses the thread pool.
+     */
     @Test
-    /*Test for the Comparison service with a listwise comparison that uses the thread pool*/
     public void testListwiseThreadPoolDoesNotChangeResult() throws Exception {
         List<List<DataRepresentation>> testsuites1 = new ArrayList<>();
         List<List<DataRepresentation>> testsuites2 = new ArrayList<>();
         testsuites1.add(buildTestSuite(getTestSuiteStrings()));
         testsuites2.add(buildTestSuite(getTestSuiteStrings()));
 
-        assertEquals(Double.parseDouble(comparisonService.listwiseCompare(testsuites1, new ShannonIndex(), aggregationStrategy, null, true)[0]),
-                Double.parseDouble(comparisonService.listwiseCompare(testsuites2, new ShannonIndex(), aggregationStrategy, null, false)[0]),
+        assertEquals(comparisonService.listwiseCompare(testsuites1, new ShannonIndex(), null, true).get(0),
+                comparisonService.listwiseCompare(testsuites2, new ShannonIndex(), null, false).get(0),
                 TOLERANCE);
     }
 }

@@ -29,7 +29,9 @@ public class ConfigTest {
                 "  \"resultRoundingScale\": 2,\n" +
                 "  \"resultRoundingMode\": \"HALF_UP\",\n" +
                 "  \"outputFileName\": \"comparison_result\",\n" +
-                "  \"outputFileLocation\": \"\"\n" +
+                "  \"outputFileLocation\": \"\",\n" +
+                "  \"reportFormat\": \"RawResults\",\n" +
+                "  \"reportFormatLocation\": \"metrics.report_format.\"\n" +
                 "}";
 
         /*Make a json file exclusively for testing purposes.*/
@@ -279,24 +281,31 @@ public class ConfigTest {
                 assertEquals(config.getOutputFileLocation(), newLocation);
         }
 
+        /**
+         * Test getter and setter for report format location.
+         */
         @Test
-        /*test the to string method*/
+        public void getSetReportFormatLocation() {
+                String newLocation = "newReportFormatLocation";
+                config.setReportFormatLocation(newLocation);
+                assertEquals(config.getReportFormatLocation(), newLocation);
+        }
+
+        /**
+         * Test getter and setter for report format.
+         */
+        @Test
+        public void getSetReportFormat() {
+                String newFormat = "newReportFormat";
+                config.setReportFormat(newFormat);
+                assertEquals(config.getReportFormat(), newFormat);
+        }
+
+        /**
+         * Test the to string method for failures
+         */
+        @Test
         public void testToString() {
-               assertEquals(config.toString(), "Config{" +
-                       "listwiseMethod=\'ShannonIndex\'," +
-                       " listwiseMethodLocation=\'metrics.comparison.listwise\'," +
-                       " pairwiseMethod=\'CommonElements\'," +
-                       " pairwiseMethodLocation=\'metrics.comparison.pairwise\'," +
-                       " dataRepresentation=\'CSV\'," +
-                       " dataRepresentationLocation=\'data_representation\'," +
-                       " delimiter=\n," +
-                       " aggregationMethod=\'\'," +
-                       " aggregationMethodLocation=\'metrics.aggregation.\'," +
-                       " numThreads=3," +
-                       " resultRoundingScale=2," +
-                       " resultRoundingMode=\'HALF_UP\'," +
-                       " outputFileName=\'comparison_result\'," +
-                       " outputFileLocation=\'\'" +
-                       "}");
+               assertNotNull(config.toString());
         }
 }

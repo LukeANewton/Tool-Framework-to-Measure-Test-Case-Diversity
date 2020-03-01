@@ -19,6 +19,8 @@ public class CompareDTO extends DataTransferObject {
 	private String testCaseLocationTwo;
 	//the number of threads to use in a thread pool for pairwise comparisons
 	private Integer numberOfThreads;
+	//the desired report formats
+	private String[] reportFormats;
 
 	//true to use a thread pool, false to handle tasks sequentially
 	private boolean useThreadPool;
@@ -107,6 +109,14 @@ public class CompareDTO extends DataTransferObject {
 
 	public void setUseThreadPool(boolean useThreadPool) {
 		this.useThreadPool = useThreadPool;
+	}
+	
+	public String[] getReportFormats() {
+		return reportFormats;
+	}
+
+	public void setReportFormats(String[] reportFormats) {
+		this.reportFormats = reportFormats;
 	}
 
 	public boolean getSave() { return save; }

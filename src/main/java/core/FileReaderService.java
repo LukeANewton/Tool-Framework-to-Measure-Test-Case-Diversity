@@ -1,5 +1,10 @@
 package core;
 
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
+import data_representation.DataRepresentation;
+import model.Config;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -9,11 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Scanner;
-
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import data_representation.DataRepresentation;
-import model.Config;
 
 /**
  * Handles the system functionality for reading test cases from files.

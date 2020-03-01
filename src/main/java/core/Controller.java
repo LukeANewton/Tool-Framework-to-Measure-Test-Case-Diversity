@@ -4,6 +4,7 @@ import data_representation.DataRepresentation;
 import metrics.aggregation.AggregationStrategy;
 import metrics.comparison.listwise.ListwiseComparisonStrategy;
 import metrics.comparison.pairwise.PairwiseComparisonStrategy;
+import metrics.report_format.ReportFormat;
 import model.*;
 import user_interface.ConsoleOutputService;
 import user_interface.InputParser;
@@ -32,6 +33,7 @@ public class Controller {
     private static final String PAIRWISE_COMPARISON_INTERFACE_PATH = "metrics.comparison.pairwise.PairwiseComparisonStrategy";
     private static final String LISTWISE_COMPARISON_INTERFACE_PATH = "metrics.comparison.listwise.ListwiseComparisonStrategy";
     private static final String AGGREGATION_INTERFACE_PATH = "metrics.aggregation.AggregationStrategy";
+    private static final String REPORT_FORMAT_INTERFACE_PATH = "metrics.report_format.ReportFormat";
 
     //configuration object containing config file values
     private Config config;
@@ -100,7 +102,7 @@ public class Controller {
      *
      * @param command the command for the system to execute
      */
-    public void processCommand(String command){
+    public void processCommand(String command) {
         //parse the command into a DTO
         DataTransferObject dto;
         try {
@@ -110,13 +112,13 @@ public class Controller {
 			valid commands through issuing a HelpDTO*/
             console.displayResults(e.getErrorMessage() + "Valid commands are:");
             HelpDTO help = new HelpDTO();
-            help.setHelpType(HelpType.Command);
+            help.setHelpType(HelpType.COMMAND);
             dto = help;
         }
 
         //determine which command is being parsed
         CommandType commandType = dto.getCommandType();
-        switch(commandType){
+        switch(commandType) {
             case Help:
                 processHelpCommand((HelpDTO)dto);
                 break;
@@ -135,18 +137,18 @@ public class Controller {
      * @param dto the DataTransferObject containing information to run a compare command
      * @return an instance of the DataRepresentation specified in the dto
      */
-    private DataRepresentation loadDataRepresentation(CompareDTO dto){
-        String name = dto.getDataRepresentation();
+    private DataRepresentation loadDataRepresentation(CompareDTO dto) {
 
-        if (name == null)//nothing specified in dto, so load default from config file
-            name = config.getDataRepresentation();
+        if (dto.getDataRepresentation() == null) { // Nothing specified in dto, so load default from config file
+            dto.setDataRepresentation(config.getDataRepresentation());
+        }
 
         //set the package to look in
         String packageName = config.getDataRepresentationLocation();
 
         //try to load the class
-        return (DataRepresentation) loadRequiredImplementation(name, packageName,
-                DATA_REP_INTERFACE_PATH, "data representation");
+        return (DataRepresentation) loadRequiredImplementation(dto.getDataRepresentation(), packageName,
+                DATA_REP_INTERFACE_PATH, HelpType.DATA_REPRESENTATION.getName());
     }
 
     /**
@@ -156,25 +158,54 @@ public class Controller {
      * @return an instance of the PairwiseComparisonStrategy specified in the dto
      */
     private AggregationStrategy[] loadAggregationStrategy(CompareDTO dto) {
-        String[] names = dto.getAggregationMethods();
 
-        if (names == null)//nothing specified in dto, so load default from config file
-            names = new String[]{config.getAggregationMethod()};
+        if (dto.getAggregationMethods() == null) // Nothing specified in dto, so load default from config file and set it in the dto to be passed to the report
+            dto.setAggregationMethods(new String[]{config.getAggregationMethod()});
 
         //set the package to look in
         String packageName = config.getAggregationMethodLocation();
 
         //try to load the class
         List<AggregationStrategy> strategies = new ArrayList<>();
-        for(String name: names){
+        for (String name : dto.getAggregationMethods()) {
             AggregationStrategy strategy = (AggregationStrategy) loadRequiredImplementation(name, packageName,
-                    AGGREGATION_INTERFACE_PATH, "aggregation method");
-            if(strategy == null)
-                return null;
-            else
+                    AGGREGATION_INTERFACE_PATH, HelpType.AGGREGATION_METHOD.getName());
+            if (strategy == null) {
+                return new AggregationStrategy[0];
+            } else {
                 strategies.add(strategy);
+            }
         }
         return strategies.toArray(new AggregationStrategy[0]);
+    }
+
+    /**
+     * Obtains the report formats for a compare command
+     *
+     * @param dto the DataTransferObject containing information to run a compare command
+     * @return an instance of the report formats specified in the dto
+     */
+    private ReportFormat[] loadReportFormats(CompareDTO dto) {
+        // Nothing specified in dto, so load default from config file and set it in the dto to be passed to the report
+        if (dto.getReportFormats() == null) {
+            dto.setReportFormats(new String[] { config.getReportFormat() } );
+        }
+
+        //set the package to look in
+        String packageName = config.getReportFormatLocation();
+
+        //try to load the class
+        List<ReportFormat> formats = new ArrayList<>();
+        for (String className : dto.getReportFormats()) {
+            ReportFormat format = (ReportFormat) loadRequiredImplementation(className, packageName,
+                    REPORT_FORMAT_INTERFACE_PATH, HelpType.REPORT_FORMAT.getName());
+            if (format == null) {
+                return new ReportFormat[0];
+            } else {
+                formats.add(format);
+            }
+        }
+        return formats.toArray(new ReportFormat[0]);
     }
 
     /**
@@ -254,42 +285,46 @@ public class Controller {
 
         //load the aggregation methods
         AggregationStrategy[] aggregationStrategies = loadAggregationStrategy(dto);
-        if(aggregationStrategies == null)
+        if (aggregationStrategies.length == 0) {
             return;
+        }
+
+        ReportFormat[] reportFormats = loadReportFormats(dto);
+        if (reportFormats.length == 0) {
+            return;
+        }
 
         //read in the first test suite file
-        String filename = dto.getTestCaseLocationOne();
-        String delimiter = dto.getDelimiter();
-        if (delimiter == null)
-            delimiter = config.getDelimiter();
-        DataRepresentation[] testSuite1 = getTestSuite(filename, delimiter, dataRepresentation);
+        if (dto.getDelimiter() == null)
+            dto.setDelimiter(config.getDelimiter());
+        DataRepresentation[] testSuite1 = getTestSuite(dto.getTestCaseLocationOne(), dto.getDelimiter(), dataRepresentation);
         if(testSuite1 == null) //this triggers when an exception is thrown
             return;
         else if (testSuite1.length == 0){//if the file has not test cases, we cannot proceed with hte operation
-            console.displayResults("operation failed because " + filename + " does not contain any test cases");
+            console.displayResults("operation failed because " + dto.getTestCaseLocationOne() + " does not contain any test cases");
             return;
         }
 
         //if there is a second file, read it in as well
         DataRepresentation[] testSuite2 = null;
         if(dto.getTestCaseLocationTwo() != null) {
-            filename = dto.getTestCaseLocationTwo();
-            testSuite2 = getTestSuite(filename, delimiter, dataRepresentation);
+            testSuite2 = getTestSuite(dto.getTestCaseLocationTwo(), dto.getDelimiter(), dataRepresentation);
             if (testSuite2 == null) //this triggers when an exception is thrown
                 return;
             else if (testSuite2.length == 0) {//if the file has not test cases, we cannot proceed with the operation
-                console.displayResults("operation failed because " + filename + " does not contain any test cases");
+                console.displayResults("operation failed because " + dto.getTestCaseLocationTwo() + " does not contain any test cases");
                 return;
             }
         }
 
         //create thread pool for pairing and comparison
-        if(dto.getNumberOfThreads() == null)
+        if (dto.getNumberOfThreads() == null) {
             dto.setNumberOfThreads(config.getNumThreads());
+        }
         ExecutorService threadPool = Executors.newFixedThreadPool(dto.getNumberOfThreads());
-
-        String[] results;
-        switch(type){//pairing and comparison is dependent on the type of comparison metric being used
+        List<Double> similaritiesFromComparisons;
+        comparisonService = new ComparisonService(threadPool);
+        switch(type) { //pairing and comparison is dependent on the type of comparison metric being used
             case pairwise:
                 //generate the pairs for comparison
                 pairingService = new PairingService(threadPool);
@@ -298,24 +333,23 @@ public class Controller {
                 try {
                     if (testSuite2 == null)
                         pairs = pairingService.makePairsWithin(console, testSuite1[0],
-                                fileReaderService.readTestCases(dto.getTestCaseLocationOne(), delimiter));
+                                fileReaderService.readTestCases(dto.getTestCaseLocationOne(), dto.getDelimiter()));
                     else
                         pairs = pairingService.makePairsBetween(console, testSuite1[0],
-                                fileReaderService.readTestCases(dto.getTestCaseLocationOne(), delimiter),
-                                fileReaderService.readTestCases(dto.getTestCaseLocationTwo(), delimiter));
+                                fileReaderService.readTestCases(dto.getTestCaseLocationOne(), dto.getDelimiter()),
+                                fileReaderService.readTestCases(dto.getTestCaseLocationTwo(), dto.getDelimiter()));
                 } catch (Exception e) {
                     console.displayResults("Error during pair generation: " + e.toString());
                     return;
                 }
-                if (pairs.size() == 0) {//no pairs could be made from the passed test suites
+                if (pairs.isEmpty()) {//no pairs could be made from the passed test suites
                     console.displayResults("Test suite contains insufficient test cases to generate pairs");
                     return;
                 }
                 //now perform the actual comparison
-                comparisonService = new ComparisonService(threadPool);
                 try {
                     console.displayResults("Performing Comparison...");
-                    results = comparisonService.pairwiseCompare(pairs, pairwiseStrategy, aggregationStrategies, console, dto.isUseThreadPool());
+                    similaritiesFromComparisons = comparisonService.pairwiseCompare(pairs, pairwiseStrategy, console, dto.isUseThreadPool());
                 } catch (Exception e) {
                     console.displayResults("Error in pairwise comparison calculation: " + e.toString());
                     return;
@@ -323,75 +357,78 @@ public class Controller {
                 break;
             case listwise:
                 //now perform the actual comparison
-                comparisonService = new ComparisonService(threadPool);
                 try {
                     console.displayResults("Performing Comparison...");
                     List<List<DataRepresentation>> suites = new ArrayList<>();
                     suites.add(Arrays.asList(testSuite1));
-                    if (testSuite2 != null)
+                    if (testSuite2 != null) {
                         suites.add(Arrays.asList(testSuite2));
-                    results = comparisonService.listwiseCompare(suites, listwiseStrategy,
-                            aggregationStrategies, console, dto.isUseThreadPool());
+                    }
+                    similaritiesFromComparisons = comparisonService.listwiseCompare(suites, listwiseStrategy, console, dto.isUseThreadPool());
                 } catch (Exception e) {
                     console.displayResults("Error in pairwise comparison calculation: " + e.toString());
                     return;
                 }
                 break;
             default:
-                results = new String[0];
+                similaritiesFromComparisons = new ArrayList<>();
         }
+
         threadPool.shutdown();
 
-        if(results.length == 0) {
-            console.displayResults("no results were obtained from the calculation");
+        List<String> aggregateResults = new ArrayList<>();
+        if (similaritiesFromComparisons.isEmpty()) {
+            console.displayResults("No results were obtained from the calculation");
         } else {
-            outputResults(results, dto);
+            for (AggregationStrategy aggregation : aggregationStrategies) {
+                aggregateResults.add(aggregation.aggregate(similaritiesFromComparisons));
+            }
+            outputResults(dto, similaritiesFromComparisons, aggregateResults, reportFormats);
         }
     }
 
-    private void outputResults(String[] results, CompareDTO dto){
-        StringBuilder s = new StringBuilder();
-        s.append(results[0]);
-        for(int i = 1; i < results.length; i++){
-            s.append(System.lineSeparator()).append(results[i]);
-        }
-        String result = s.toString();
+    private void outputResults(CompareDTO dto, List<Double> similaritiesFromComparisons, List<String> aggregateResults, ReportFormat[] reportFormats){
 
         //output results to file, if required
-        if(dto.getSave()) {
-            String filename;
-            if(dto.getOutputFilename() != null){
-                filename = dto.getOutputFilename();
-            } else {
-                filename = config.getOutputFileName();
-            }
-            if(filename != null) {
-                File output = new File(filename);
-                try {
-                    if (output.exists()) {
-                        OverwriteOption overwriteOption = console.getOverwriteChoice(filename);
-                        switch (overwriteOption) {
-                            case Yes:
-                                fileWriterService.write(filename, result, true, false);
-                                break;
-                            case No:
-                                console.displayResults("file writing cancelled since file already exists");
-                                break;
-                            case Append: //write the results out on a new line
-                                fileWriterService.write(filename, result, false, true);
-                        }
-                    } else
-                        fileWriterService.write(filename, result, false, false);
-                } catch (IOException e) {
-                    console.displayResults("failed to write to " + filename + ": " + e.getMessage());
+        for (ReportFormat reportFormat : reportFormats) {
+            String result = reportFormat.format(dto, similaritiesFromComparisons, aggregateResults);
+            if (dto.getSave()) {
+                String filename;
+                if (dto.getOutputFilename() != null) {
+                    filename = dto.getOutputFilename();
+                } else {
+                    filename = config.getOutputFileName();
                 }
-            } else {
-                console.displayResults("failed to save, outputFileName not given");
+                // If there are multiple formats, we append the format name (class name) to the file name to distinguish them.
+                if (reportFormats.length > 1) {
+                    filename = filename + reportFormat.getClass().getSimpleName();
+                }
+                if (filename != null) {
+                    File output = new File(filename);
+                    try {
+                        if (output.exists()) {
+                            OverwriteOption overwriteOption = console.getOverwriteChoice(filename);
+                            switch (overwriteOption) {
+                                case Yes:
+                                    fileWriterService.write(filename, result, true, false);
+                                    break;
+                                case No:
+                                    console.displayResults("file writing cancelled since file already exists");
+                                    break;
+                                case Append: //write the results out on a new line
+                                    fileWriterService.write(filename, result, false, true);
+                            }
+                        } else
+                            fileWriterService.write(filename, result, false, false);
+                    } catch (IOException e) {
+                        console.displayResults("failed to write to " + filename + ": " + e.getMessage());
+                    }
+                } else {
+                    console.displayResults("failed to save, outputFileName not given");
+                }
             }
+            console.displayResults(System.lineSeparator() + System.lineSeparator() + result);
         }
-
-        //output results to console
-        console.displayResults("Result:" + System.lineSeparator() + System.lineSeparator() + result);
     }
 
     /**
@@ -471,11 +508,12 @@ public class Controller {
         StringBuilder result = new StringBuilder();
         //determine which type of help is needed, each works the same way except for Command help
         switch(helpType){
-            case Command:
+            case COMMAND:
                 result.append("\tcompare <filename> [<filename>] <data-representation>").append(System.lineSeparator());
                 result.append("\t\tperforms a diversity calculation within a test suite, or between test suites at the specified filename(s)").append(System.lineSeparator());
                 result.append("\t\t\t-m <metric>: set the diversity metric to use in the calculation. Available metrics can be found with 'help -m'").append(System.lineSeparator());
                 result.append("\t\t\t-a <method>: set the method to use for aggregating results. Available methods can be found with 'help -a'").append(System.lineSeparator());
+                result.append("\t\t\t-r [<format>]: set the report formats to use to display results. Available formats can be found with 'help -r'").append(System.lineSeparator());
                 result.append("\t\t\t-d <delimiter>: set the delimiter that separates test cases within the passed test suite file(s). This can be a character, string, or regular expression").append(System.lineSeparator());
                 result.append("\t\t\t-s <filename>: denote that the results of the operation should be saved to a file named <filename>").append(System.lineSeparator());
                 result.append("\t\t\t-t [<integer>]: denote that the operation should use a thread pool for concurrency, and optionally specify the number of threads").append(System.lineSeparator());
@@ -486,21 +524,26 @@ public class Controller {
                 result.append("\t\t\t-m: lists the available comparison metrics in the system").append(System.lineSeparator());
                 result.append("\t\t\t-a: lists the available aggregation methods in the system").append(System.lineSeparator());
                 result.append("\t\t\t-f: lists the available data representations in the system").append(System.lineSeparator());
+                result.append("\t\t\t-r: lists the available report formats in the system").append(System.lineSeparator());
                 console.displayResults(result.toString());
                 return;
-            case Metric:
+            case METRIC:
                 displayHelp(config.getPairwiseMethodLocation(),
-                        PAIRWISE_COMPARISON_INTERFACE_PATH, "pairwise metric");
+                        PAIRWISE_COMPARISON_INTERFACE_PATH, HelpType.METRIC.getNames()[0]);
                 displayHelp(config.getListwiseMethodLocation(),
-                        LISTWISE_COMPARISON_INTERFACE_PATH, "listwise metric");
+                        LISTWISE_COMPARISON_INTERFACE_PATH, HelpType.METRIC.getNames()[1]);
                 break;
-            case AggregationMethod:
+            case AGGREGATION_METHOD:
                 displayHelp(config.getAggregationMethodLocation(),
-                        AGGREGATION_INTERFACE_PATH, "aggregation method");
+                        AGGREGATION_INTERFACE_PATH, HelpType.AGGREGATION_METHOD.getName());
                 break;
-            case DataRepresentation:
+            case DATA_REPRESENTATION:
                 displayHelp(config.getDataRepresentationLocation(),
-                        DATA_REP_INTERFACE_PATH, "data representation");
+                        DATA_REP_INTERFACE_PATH, HelpType.DATA_REPRESENTATION.getName());
+                break;
+            case REPORT_FORMAT:
+                displayHelp(config.getReportFormatLocation(),
+                        REPORT_FORMAT_INTERFACE_PATH, HelpType.REPORT_FORMAT.getName());
                 break;
         }
 
