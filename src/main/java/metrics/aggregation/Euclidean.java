@@ -17,10 +17,10 @@ public class Euclidean implements AggregationStrategy {
      * @throws NullPointerException when there is no resulting aggregate value created
      */
     @Override
-    public String aggregate(List<Double> similarities) throws NullPointerException {
+    public Double aggregate(List<Double> similarities) throws NullPointerException {
         if (similarities.isEmpty()) throw new NullPointerException();
         int exponent = 2;
-        return String.valueOf(Math.sqrt(similarities.stream().mapToDouble(similarity -> similarity = Math.pow(similarity, exponent)).sum()));
+        return Math.sqrt(similarities.stream().mapToDouble(similarity -> similarity = Math.pow(similarity, exponent)).sum());
     }
 
     /**

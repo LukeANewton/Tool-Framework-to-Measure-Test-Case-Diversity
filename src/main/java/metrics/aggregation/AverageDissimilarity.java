@@ -17,10 +17,10 @@ public class AverageDissimilarity implements AggregationStrategy {
      * @throws NullPointerException when there is no resulting aggregate value created
      */
     @Override
-    public String aggregate(List<Double> similarities) throws NullPointerException {
+    public Double aggregate(List<Double> similarities) throws NullPointerException {
         if (similarities.isEmpty()) throw new NullPointerException();
         int exponent = 2;
-        return String.valueOf(similarities.stream().mapToDouble(Double::valueOf).sum() / Math.pow(similarities.size(), exponent));
+        return similarities.stream().mapToDouble(Double::valueOf).sum() / Math.pow(similarities.size(), exponent);
     }
 
     /**

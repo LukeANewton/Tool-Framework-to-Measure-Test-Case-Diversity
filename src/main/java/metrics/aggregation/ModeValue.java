@@ -19,7 +19,7 @@ public class ModeValue implements AggregationStrategy {
      * @throws NullPointerException when there is no resulting aggregate value created
      */
     @Override
-    public String aggregate(List<Double> similarities) throws NullPointerException {
+    public Double aggregate(List<Double> similarities) throws NullPointerException {
         if (similarities.isEmpty()) throw new NullPointerException();
         // Count frequency of each element
         Map<Double, Long> countFrequencies = similarities.stream()
@@ -32,7 +32,7 @@ public class ModeValue implements AggregationStrategy {
         return countFrequencies.entrySet().stream()
                 .filter(tuple -> tuple.getValue() == maxFrequency)
                 .map(Map.Entry::getKey)
-                .collect(Collectors.toList()).toString();
+                .collect(Collectors.toList());
     }
 
     /**

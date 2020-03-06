@@ -16,8 +16,8 @@ public class MaximumValue implements AggregationStrategy {
      * @throws NullPointerException when there is no resulting aggregate value created
      */
     @Override
-    public String aggregate(List<Double> similarities) throws NullPointerException {
-        return String.valueOf(similarities.stream().max(Double::compare).orElseThrow(NullPointerException::new));
+    public Double aggregate(List<Double> similarities) throws NullPointerException {
+        return similarities.stream().max(Double::compare).orElseThrow(NullPointerException::new);
     }
 
     /**

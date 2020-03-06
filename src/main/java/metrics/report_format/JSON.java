@@ -22,7 +22,7 @@ public class JSON implements ReportFormat {
      * @return A nicely formatted string
      */
     @Override
-    public String format(CompareDTO dto, List<Double> similarities, List<String> aggregations) {
+    public String format(CompareDTO dto, List<Double> similarities, List<Double> aggregations) {
         JsonObject json = new JsonObject();
         json.addProperty("username", getUser());
         json.addProperty("hostname", getHost());

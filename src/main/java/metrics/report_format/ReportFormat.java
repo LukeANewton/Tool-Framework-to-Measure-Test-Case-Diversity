@@ -74,7 +74,7 @@ public interface ReportFormat extends HelpTarget {
         }
     }
 
-    default Map<String, String> getAggregations(CompareDTO dto, List<String> aggregations) {
+    default Map<String, String> getAggregations(CompareDTO dto, List<Double> aggregations) {
         Map<String, String> methodValuePair = new HashMap<>();
         String[] methods = dto.getAggregationMethods();
 

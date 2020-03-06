@@ -17,9 +17,9 @@ public class Manhattan implements AggregationStrategy {
      * @throws NullPointerException when there is no resulting aggregate value created
      */
     @Override
-    public String aggregate(List<Double> similarities) throws NullPointerException {
+    public Double aggregate(List<Double> similarities) throws NullPointerException {
         if (similarities.isEmpty()) throw new NullPointerException();
-        return String.valueOf(similarities.stream().mapToDouble(Math::abs).sum());
+        return similarities.stream().mapToDouble(Math::abs).sum();
     }
 
     /**

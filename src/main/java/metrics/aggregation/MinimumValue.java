@@ -20,8 +20,8 @@ public class MinimumValue implements AggregationStrategy {
      * @throws NullPointerException when there is no final similarity value caused by the similarities array being empty
      */
     @Override
-    public String aggregate(List<Double> similarities) throws NullPointerException {
-        return String.valueOf(similarities.stream().min(Double::compare).orElseThrow(NullPointerException::new));
+    public Double aggregate(List<Double> similarities) throws NullPointerException {
+        return similarities.stream().min(Double::compare).orElseThrow(NullPointerException::new);
     }
 
     /**
