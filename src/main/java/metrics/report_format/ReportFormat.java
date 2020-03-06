@@ -28,7 +28,7 @@ public interface ReportFormat extends HelpTarget {
      * @param aggregations The aggregated similarity values calculated by one or more aggregation strategies
      * @return A nicely formatted string
      */
-    String format(CompareDTO dto, List<Double> similarities, List<String> aggregations);
+    String format(CompareDTO dto, List<Double> similarities, List<Double> aggregations);
 
     default String getUser() {
         return System.getProperty("user.name");

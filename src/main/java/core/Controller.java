@@ -14,6 +14,8 @@ import utilities.Tuple;
 
 import java.io.*;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -376,18 +378,30 @@ public class Controller {
 
         threadPool.shutdown();
 
-        List<String> aggregateResults = new ArrayList<>();
+        List<Double> aggregateResults = new ArrayList<>();
         if (similaritiesFromComparisons.isEmpty()) {
             console.displayResults("No results were obtained from the calculation");
         } else {
+            List<Double> roundedSimilaritiesFromComparisons = new ArrayList<Double>();
+            BigDecimal rounded, notRounded;
             for (AggregationStrategy aggregation : aggregationStrategies) {
-                aggregateResults.add(aggregation.aggregate(similaritiesFromComparisons));
+                notRounded = new BigDecimal(aggregation.aggregate(roundedSimilaritiesFromComparisons));
+                try {
+                    rounded = notRounded.setScale(config.getResultRoundingScale(), RoundingMode.valueOf(config.getResultRoundingMode()));
+                } catch (IllegalArgumentException e){
+                    console.displayResults("Rounding Error: " + config.getResultRoundingMode() + " is not a valid rounding mode");
+                    rounded = notRounded;
+                } catch (Exception e){
+                    console.displayResults("Rounding Error: Could not round aggregation result");
+                    rounded = notRounded;
+                }
+                aggregateResults.add(rounded.doubleValue());
             }
             outputResults(dto, similaritiesFromComparisons, aggregateResults, reportFormats);
         }
     }
 
-    private void outputResults(CompareDTO dto, List<Double> similaritiesFromComparisons, List<String> aggregateResults, ReportFormat[] reportFormats){
+    private void outputResults(CompareDTO dto, List<Double> similaritiesFromComparisons, List<Double> aggregateResults, ReportFormat[] reportFormats){
 
         //output results to file, if required
         for (ReportFormat reportFormat : reportFormats) {
