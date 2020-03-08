@@ -378,30 +378,35 @@ public class Controller {
 
         threadPool.shutdown();
 
-        List<Double> aggregateResults = new ArrayList<>();
         if (similaritiesFromComparisons.isEmpty()) {
             console.displayResults("No results were obtained from the calculation");
         } else {
-            List<Double> roundedSimilaritiesFromComparisons = new ArrayList<Double>();
+            List<List<Double>> aggregateResults = new ArrayList<>();
+            List<Double> roundedSimilaritiesFromComparisons, aggregatedSimilarities;
             BigDecimal rounded, notRounded;
             for (AggregationStrategy aggregation : aggregationStrategies) {
-                notRounded = new BigDecimal(aggregation.aggregate(roundedSimilaritiesFromComparisons));
-                try {
-                    rounded = notRounded.setScale(config.getResultRoundingScale(), RoundingMode.valueOf(config.getResultRoundingMode()));
-                } catch (IllegalArgumentException e){
-                    console.displayResults("Rounding Error: " + config.getResultRoundingMode() + " is not a valid rounding mode");
-                    rounded = notRounded;
-                } catch (Exception e){
-                    console.displayResults("Rounding Error: Could not round aggregation result");
-                    rounded = notRounded;
+                roundedSimilaritiesFromComparisons = new ArrayList<Double>();
+                aggregatedSimilarities = aggregation.aggregate(similaritiesFromComparisons);
+                for(Double similarity : aggregatedSimilarities) {
+                    notRounded = new BigDecimal(similarity);
+                    try {
+                        rounded = notRounded.setScale(config.getResultRoundingScale(), RoundingMode.valueOf(config.getResultRoundingMode()));
+                    } catch (IllegalArgumentException e) {
+                        console.displayResults("Rounding Error: " + config.getResultRoundingMode() + " is not a valid rounding mode");
+                        rounded = notRounded;
+                    } catch (Exception e) {
+                        console.displayResults("Rounding Error: Could not round aggregation result");
+                        rounded = notRounded;
+                    }
+                    roundedSimilaritiesFromComparisons.add(rounded.doubleValue());
                 }
-                aggregateResults.add(rounded.doubleValue());
+                aggregateResults.add(roundedSimilaritiesFromComparisons);
             }
             outputResults(dto, similaritiesFromComparisons, aggregateResults, reportFormats);
         }
     }
 
-    private void outputResults(CompareDTO dto, List<Double> similaritiesFromComparisons, List<Double> aggregateResults, ReportFormat[] reportFormats){
+    private void outputResults(CompareDTO dto, List<Double> similaritiesFromComparisons, List<List<Double>> aggregateResults, ReportFormat[] reportFormats){
 
         //output results to file, if required
         for (ReportFormat reportFormat : reportFormats) {
