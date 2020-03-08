@@ -26,7 +26,7 @@ public class XML implements ReportFormat {
      * @return A nicely formatted string
      */
     @Override
-    public String format(CompareDTO dto, List<Double> similarities, List<Double> aggregations) {
+    public String format(CompareDTO dto, List<Double> similarities, List<List<Double>> aggregations) {
 
         append("<report>").append(System.lineSeparator());
         indentation = SINGLE_INDENT;
@@ -53,11 +53,11 @@ public class XML implements ReportFormat {
             append("</similarities>").append(System.lineSeparator());
         }
 
-        Map<String, String> aggregationMethodValuePairs = getAggregations(dto, aggregations);
+        Map<String, List<Double>> aggregationMethodValuePairs = getAggregations(dto, aggregations);
         append("<results>").append(System.lineSeparator());
         indentation = DOUBLE_INDENT;
         for (String method : aggregationMethodValuePairs.keySet()) {
-            append(createSingleLineXMLTag(method.toLowerCase(), aggregationMethodValuePairs.get(method)));
+            appendList(method.toLowerCase(), aggregationMethodValuePairs.get(method));
         }
         indentation = SINGLE_INDENT;
         append("</results>").append(System.lineSeparator());
@@ -94,6 +94,18 @@ public class XML implements ReportFormat {
      */
     private XML append(Object data) {
         formattedData.append(indentation).append(data);
+        return this;
+    }
+
+    /**
+     * Appends List of data to the string builder
+     * @param data the data to be appended
+     * @return this object to be called again to chain append calls
+     */
+    private XML appendList(String tagName, List<Double> data) {
+        for(Double dataValue: data){
+            formattedData.append(indentation).append("<" + tagName + "> ").append(dataValue).append(" </" + tagName + ">").append(System.lineSeparator());
+        }
         return this;
     }
 }

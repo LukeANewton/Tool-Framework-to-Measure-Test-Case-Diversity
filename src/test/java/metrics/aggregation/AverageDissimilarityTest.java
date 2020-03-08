@@ -42,7 +42,7 @@ public class AverageDissimilarityTest {
             sum += value;
         }
         double average = sum / Math.pow(NUM_SIMILARITY_VALUES, 2);
-        assertEquals(average, Double.parseDouble(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
+        assertEquals(average, aggregationStrategy.aggregate(similarityValues).get(0), TOLERANCE);
     }
 
     /**
@@ -52,7 +52,7 @@ public class AverageDissimilarityTest {
     @Test
     public void testNegativeAverageValue() {
         List<Double> similarityValues = new ArrayList<>(Arrays.asList(0.0, 0.0, 1.0, -1.0, -1.0));
-        assertEquals(-0.04, Double.parseDouble(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
+        assertEquals(-0.04, aggregationStrategy.aggregate(similarityValues).get(0), TOLERANCE);
     }
 
     /**
@@ -63,7 +63,7 @@ public class AverageDissimilarityTest {
     public void testAverageOneValue() {
         List<Double> similarityValues = new ArrayList<>();
         similarityValues.add(1.0);
-        assertEquals(1.0, Double.parseDouble(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
+        assertEquals(1.0, aggregationStrategy.aggregate(similarityValues).get(0), TOLERANCE);
     }
 
     /**
@@ -73,7 +73,7 @@ public class AverageDissimilarityTest {
     @Test
     public void testZeroAverageValue() {
         List<Double> similarityValues = new ArrayList<>(Arrays.asList(0.0, 0.0, 0.0, 0.0));
-        assertEquals(0.0, Double.parseDouble(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
+        assertEquals(0.0, aggregationStrategy.aggregate(similarityValues).get(0), TOLERANCE);
     }
 
     /**

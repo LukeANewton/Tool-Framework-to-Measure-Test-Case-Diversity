@@ -19,7 +19,7 @@ public class ModeValue implements AggregationStrategy {
      * @throws NullPointerException when there is no resulting aggregate value created
      */
     @Override
-    public Double aggregate(List<Double> similarities) throws NullPointerException {
+    public List<Double> aggregate(List<Double> similarities) throws NullPointerException {
         if (similarities.isEmpty()) throw new NullPointerException();
         // Count frequency of each element
         Map<Double, Long> countFrequencies = similarities.stream()

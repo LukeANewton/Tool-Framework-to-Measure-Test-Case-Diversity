@@ -28,7 +28,7 @@ public interface ReportFormat extends HelpTarget {
      * @param aggregations The aggregated similarity values calculated by one or more aggregation strategies
      * @return A nicely formatted string
      */
-    String format(CompareDTO dto, List<Double> similarities, List<Double> aggregations);
+    String format(CompareDTO dto, List<Double> similarities, List<List<Double>> aggregations);
 
     default String getUser() {
         return System.getProperty("user.name");
@@ -74,8 +74,8 @@ public interface ReportFormat extends HelpTarget {
         }
     }
 
-    default Map<String, String> getAggregations(CompareDTO dto, List<Double> aggregations) {
-        Map<String, String> methodValuePair = new HashMap<>();
+    default Map<String, List<Double>> getAggregations(CompareDTO dto, List<List<Double>> aggregations) {
+        Map<String, List<Double>> methodValuePair = new HashMap<>();
         String[] methods = dto.getAggregationMethods();
 
         // Assuming methods.length == aggregations.length

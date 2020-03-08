@@ -33,7 +33,7 @@ public class MaximumValueTest {
         list.add(2.72);
         list.add(4.0);
 
-        assertEquals(Double.parseDouble(aggregationStrategy.aggregate(list)), largest, 0.01);
+        assertEquals(largest, aggregationStrategy.aggregate(list).get(0), 0.01);
     }
 
     /**

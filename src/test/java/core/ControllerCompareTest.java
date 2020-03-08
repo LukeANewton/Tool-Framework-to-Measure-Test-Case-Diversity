@@ -646,7 +646,7 @@ public class ControllerCompareTest {
                 null, false, RESULT_FILE_NAME, null, new String[]{"RawResults"});
         c = Controller.getController();
         // By adding the line separator, we can safely assume that the format is either Pretty or Raw.
-        assertTrue("Correct result wasn't printed to console.", outContent.toString().contains("4.0"+System.lineSeparator()));
+        assertTrue("Correct result wasn't printed to console.\n" + outContent.toString(), outContent.toString().contains("[ 4.0 ]"+System.lineSeparator()));
         // This ensures that the format has to be Raw, which is what we asked for.
         assertFalse("Incorrect (pretty?) format printed to console when we expected the raw format.", outContent.toString().contains("Results:"));
     }

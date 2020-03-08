@@ -40,7 +40,7 @@ public class SquaredSummationTest {
         for (Double value : similarityValues) {
             sum += Math.pow(value, 2);
         }
-        assertEquals(sum, Double.parseDouble(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
+        assertEquals(sum, aggregationStrategy.aggregate(similarityValues).get(0), TOLERANCE);
     }
 
     /**
@@ -51,7 +51,7 @@ public class SquaredSummationTest {
     public void testAggregateOneValue() {
         List<Double> similarityValues = new ArrayList<>();
         similarityValues.add(-3.0);
-        assertEquals(9.0, Double.parseDouble(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
+        assertEquals(9.0, aggregationStrategy.aggregate(similarityValues).get(0), TOLERANCE);
     }
 
     /**
@@ -61,7 +61,7 @@ public class SquaredSummationTest {
     @Test
     public void testZeroAggregateValue() {
         List<Double> similarityValues = new ArrayList<>(Arrays.asList(0.0, 0.0, 0.0, 0.0));
-        assertEquals(0.0, Double.parseDouble(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
+        assertEquals(0.0, aggregationStrategy.aggregate(similarityValues).get(0), TOLERANCE);
     }
 
     /**

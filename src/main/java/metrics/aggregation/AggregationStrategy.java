@@ -22,5 +22,5 @@ public interface AggregationStrategy extends HelpTarget {
      * @return the aggregated similarity
      * @throws NullPointerException when there is no resulting aggregate value created
      */
-    Double aggregate(List<Double> similarities) throws NullPointerException;
+    List<Double> aggregate(List<Double> similarities) throws NullPointerException;
 }

@@ -23,7 +23,7 @@ public class MedianValueTest {
      */
     @Test
     public void aggregate() {
-        double median = 4.5;
+        Double median = 4.5;
 
         List<Double> list = new ArrayList<>();
         list.add(5.0);
@@ -34,7 +34,7 @@ public class MedianValueTest {
         list.add(2.72);
         list.add(4.0);
 
-        assertEquals(String.valueOf(median), aggregationStrategy.aggregate(list));
+        assertEquals(median, aggregationStrategy.aggregate(list).get(0));
     }
 
     /**
@@ -55,7 +55,11 @@ public class MedianValueTest {
         list.add(4.0);
         list.add(median2);
 
-        assertEquals(Arrays.toString(new double[]{median1, median2}), aggregationStrategy.aggregate(list));
+        List<Double> aggregation = aggregationStrategy.aggregate(list);
+
+        assertEquals(2, aggregation.size());
+        assert(aggregation.contains(median1));
+        assert(aggregation.contains(median2));
     }
 
     /**
@@ -63,12 +67,15 @@ public class MedianValueTest {
      */
     @Test
     public void aggregateOneValue() {
-        double median = 4.5;
+        Double median = 4.5;
 
         List<Double> list = new ArrayList<>();
         list.add(median);
 
-        assertEquals(String.valueOf(median), aggregationStrategy.aggregate(list));
+        List<Double> aggregation = aggregationStrategy.aggregate(list);
+
+        assertEquals(1, aggregation.size());
+        assertEquals(median, aggregation.get(0));
     }
 
     /**
@@ -83,7 +90,11 @@ public class MedianValueTest {
         list.add(median1);
         list.add(median2);
 
-        assertEquals(Arrays.toString(new double[]{median1, median2}), aggregationStrategy.aggregate(list));
+        List<Double> aggregation = aggregationStrategy.aggregate(list);
+
+        assertEquals(2, aggregation.size());
+        assert(aggregation.contains(median1));
+        assert(aggregation.contains(median2));
     }
 
     /**

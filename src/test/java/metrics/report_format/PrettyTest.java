@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
@@ -32,16 +33,16 @@ public class PrettyTest {
         final String COMPARISON_METHOD = "comparisonMethod";
         final String AGGREGATION_METHOD_ONE = "aggregationMethod1";
         final String AGGREGATION_METHOD_TWO = "aggregationMethod2";
-        final String AGGREGATED_VALUE_ONE = "aggregatedValue1";
-        final String AGGREGATED_VALUE_TWO = "aggregatedValue2";
+        final Double AGGREGATED_VALUE_ONE = 1d;
+        final Double AGGREGATED_VALUE_TWO = 2d;
 
         CompareDTO dto = new CompareDTO();
         dto.setComparisonMethod(COMPARISON_METHOD);
         dto.setAggregationMethods(new String[]{AGGREGATION_METHOD_ONE, AGGREGATION_METHOD_TWO});
 
-        List<String> aggregations = new ArrayList<>();
-        aggregations.add(AGGREGATED_VALUE_ONE);
-        aggregations.add(AGGREGATED_VALUE_TWO);
+        List<List<Double>> aggregations = new ArrayList<>();
+        aggregations.add(Arrays.asList(AGGREGATED_VALUE_ONE));
+        aggregations.add(Arrays.asList(AGGREGATED_VALUE_TWO));
 
         // Pretty format doesn't use similarities (they are not very pretty).
         String result = prettyFormat.format(dto, null, aggregations);
@@ -52,8 +53,8 @@ public class PrettyTest {
         assertTrue("Format does not contain a run parameter.", result.contains(AGGREGATION_METHOD_ONE));
         assertTrue("Format does not contain a run parameter.", result.contains(AGGREGATION_METHOD_TWO));
         assertTrue("Format does not contain the results declaration.", result.contains("Results:"));
-        assertTrue("Format does not contain a correct result pair.", result.contains(AGGREGATION_METHOD_ONE + ": " + AGGREGATED_VALUE_ONE));
-        assertTrue("Format does not contain a correct result pair.", result.contains(AGGREGATION_METHOD_TWO + ": " + AGGREGATED_VALUE_TWO));
+        assertTrue("Format does not contain a correct result pair.", result.contains(AGGREGATION_METHOD_ONE + ": " + Arrays.asList(AGGREGATED_VALUE_ONE)));
+        assertTrue("Format does not contain a correct result pair.", result.contains(AGGREGATION_METHOD_TWO + ": " + Arrays.asList(AGGREGATED_VALUE_TWO)));
     }
 
     /**

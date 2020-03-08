@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,6 +24,8 @@ import static org.junit.Assert.assertTrue;
 public class JSONTest {
 
     private ReportFormat jsonFormat;
+    final Double AGGREGATED_VALUE_ONE = 1d;
+    final Double AGGREGATED_VALUE_TWO = 2d;
 
     @Before
     public void setup() {
@@ -42,9 +45,9 @@ public class JSONTest {
         similarities.add(1.0);
         similarities.add(53.05);
 
-        List<String> aggregations = new ArrayList<>();
-        aggregations.add("aggregatedvalue1");
-        aggregations.add("aggregatedvalue2");
+        List<List<Double>> aggregations = new ArrayList<>();
+        aggregations.add(Arrays.asList(AGGREGATED_VALUE_ONE));
+        aggregations.add(Arrays.asList(AGGREGATED_VALUE_TWO));
 
         String result = jsonFormat.format(dto, similarities, aggregations);
         JsonElement json = JsonParser.parseString(result);
@@ -59,9 +62,9 @@ public class JSONTest {
         assertTrue("No 'similarities' parameter found.", json.getAsJsonObject().has("similarities"));
         assertTrue("No 'results' parameter found.", json.getAsJsonObject().has("results"));
         assertTrue("No 'aggregationmethod1' parameter found in results.", json.getAsJsonObject().getAsJsonObject("results").has("aggregationmethod1"));
-        assertEquals("No first aggregated value found in results.", "aggregatedvalue1", json.getAsJsonObject().getAsJsonObject("results").get("aggregationmethod1").getAsString());
+        assertEquals("No first aggregated value found in results.", "[ " + AGGREGATED_VALUE_ONE + " ]", json.getAsJsonObject().getAsJsonObject("results").get("aggregationmethod1").getAsString());
         assertTrue("No 'aggregationmethod2' parameter found in results.", json.getAsJsonObject().getAsJsonObject("results").has("aggregationmethod2"));
-        assertEquals("No second aggregated value found in results.", "aggregatedvalue2", json.getAsJsonObject().getAsJsonObject("results").get("aggregationmethod2").getAsString());
+        assertEquals("No second aggregated value found in results.", "[ " + AGGREGATED_VALUE_TWO + " ]", json.getAsJsonObject().getAsJsonObject("results").get("aggregationmethod2").getAsString());
     }
 
     /**
@@ -72,7 +75,7 @@ public class JSONTest {
         CompareDTO dto = new CompareDTO();
         int numSimilarities = jsonFormat.SIMILARITY_THRESHOLD + 1;
         List<Double> similarities = new ArrayList<>(Collections.nCopies(numSimilarities, 0.0));
-        List<String> aggregations = new ArrayList<>();
+        List<List<Double>> aggregations = new ArrayList<>();
 
         String result = jsonFormat.format(dto, similarities, aggregations);
         JsonElement json = JsonParser.parseString(result);

@@ -19,9 +19,9 @@ public class RawResults implements ReportFormat {
      * @return A nicely formatted string
      */
     @Override
-    public String format(CompareDTO dto, List<Double> similarities, List<Double> aggregations) {
+    public String format(CompareDTO dto, List<Double> similarities, List<List<Double>> aggregations) {
         StringBuilder formattedResults = new StringBuilder();
-        for (Double aggregation : aggregations) {
+        for (List<Double> aggregation : aggregations) {
             formattedResults.append(aggregation).append(System.lineSeparator());
         }
         return formattedResults.toString();
