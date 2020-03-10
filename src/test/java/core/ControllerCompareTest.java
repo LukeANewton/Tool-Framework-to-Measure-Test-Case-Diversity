@@ -188,7 +188,7 @@ public class ControllerCompareTest {
         String actual = outContent.toString();
         assertTrue("'"+ actual +"' doesn't contain '" + expected + "'.", actual.contains(expected));
         //check the actual value of the comparison (hand calculated)
-        assertEquals(Double.parseDouble(expected.substring(1, expected.length()-3)), 4.0, TOLERANCE);
+        assertEquals(Double.parseDouble(expected.substring(1, expected.length()-5)), 4.0, TOLERANCE);
 
         //clean up files created
         deleteFiles(testOutputName);
