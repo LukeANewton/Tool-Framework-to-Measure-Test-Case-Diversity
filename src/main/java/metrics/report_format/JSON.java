@@ -46,17 +46,7 @@ public class JSON implements ReportFormat {
         JsonObject aggregationsJson = new JsonObject();
         Map<String, List<Double>> aggregationPairs = getAggregations(dto, aggregations);
         for (String aggregationKey : aggregationPairs.keySet()) {
-            List<Double> aggregationValues = aggregationPairs.get(aggregationKey);
-            StringBuilder data = new StringBuilder();
-            data.append("[ ");
-            for(int i = 0; i < aggregationValues.size(); i++){
-                if(i != 0){
-                    data.append(", ");
-                }
-                data.append(aggregationValues.get(i));
-            }
-            data.append(" ]");
-            aggregationsJson.addProperty(aggregationKey.toLowerCase(), data.toString());
+            aggregationsJson.addProperty(aggregationKey.toLowerCase(), aggregationPairs.get(aggregationKey).toString());
         }
         json.add("results", aggregationsJson);
 

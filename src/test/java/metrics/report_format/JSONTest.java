@@ -62,9 +62,9 @@ public class JSONTest {
         assertTrue("No 'similarities' parameter found.", json.getAsJsonObject().has("similarities"));
         assertTrue("No 'results' parameter found.", json.getAsJsonObject().has("results"));
         assertTrue("No 'aggregationmethod1' parameter found in results.", json.getAsJsonObject().getAsJsonObject("results").has("aggregationmethod1"));
-        assertEquals("No first aggregated value found in results.", "[ " + AGGREGATED_VALUE_ONE + " ]", json.getAsJsonObject().getAsJsonObject("results").get("aggregationmethod1").getAsString());
+        assertEquals("No first aggregated value found in results.", "[" + AGGREGATED_VALUE_ONE + "]", json.getAsJsonObject().getAsJsonObject("results").get("aggregationmethod1").getAsString());
         assertTrue("No 'aggregationmethod2' parameter found in results.", json.getAsJsonObject().getAsJsonObject("results").has("aggregationmethod2"));
-        assertEquals("No second aggregated value found in results.", "[ " + AGGREGATED_VALUE_TWO + " ]", json.getAsJsonObject().getAsJsonObject("results").get("aggregationmethod2").getAsString());
+        assertEquals("No second aggregated value found in results.", "[" + AGGREGATED_VALUE_TWO + "]", json.getAsJsonObject().getAsJsonObject("results").get("aggregationmethod2").getAsString());
     }
 
     /**

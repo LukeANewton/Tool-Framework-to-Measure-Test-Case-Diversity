@@ -634,12 +634,12 @@ public class ControllerCompareTest {
         reader.close();
 
         assertTrue(jsonResult.isJsonObject());
-        assertEquals("[ 4.0 ]", jsonResult.getAsJsonObject().get("results").getAsJsonObject().get("averagevalue").getAsString());
+        assertEquals("[4.0]", jsonResult.getAsJsonObject().get("results").getAsJsonObject().get("averagevalue").getAsString());
 
         deleteFiles(RESULT_FILE_NAME + "RawResults", RESULT_FILE_NAME + "JSON");
 
         // Check console
-        assertTrue("Correct result wasn't printed to console.", outContent.toString().contains("[ 4.0 ]"));
+        assertTrue("Correct result wasn't printed to console.", outContent.toString().contains("[4.0]"));
         assertTrue("Expected JSON format wasn't printed to console.", outContent.toString().contains("\"results\":{"));
     }
 
