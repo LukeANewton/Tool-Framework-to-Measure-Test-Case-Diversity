@@ -188,7 +188,7 @@ public class ControllerCompareTest {
         String actual = outContent.toString();
         assertTrue("'"+ actual +"' doesn't contain '" + expected + "'.", actual.contains(expected));
         //check the actual value of the comparison (hand calculated)
-        assertEquals(Double.parseDouble(expected), 4.0, TOLERANCE);
+        assertEquals(Double.parseDouble(expected.substring(1, expected.length()-5)), 4.0, TOLERANCE);
 
         //clean up files created
         deleteFiles(testOutputName);
@@ -266,7 +266,7 @@ public class ControllerCompareTest {
                 null, false, null, null, null);
 
         //check the value of the resulting comparison. The singlePairTestSuite JaccardIndex should be 1
-        String expected = "1.0" + System.lineSeparator();
+        String expected = "[1.0]" + System.lineSeparator();
         String actual = outContent.toString();
         assertTrue("'" + actual + "' does not contain '" + expected + "'", actual.contains(expected));
     }
@@ -402,7 +402,7 @@ public class ControllerCompareTest {
         doComparison(SINGLE_CASE_TEST_SUITE_FILE_NAME, SINGLE_CASE_TEST_SUITE_FILE_NAME, "JaccardIndex", null,
                 null, false, null, null, null);
 
-        String expected = "1.0" + System.lineSeparator();
+        String expected = "[1.0]" + System.lineSeparator();
         String actual = outContent.toString();
         assertTrue("'" + actual + "' does not contain '" + expected + "'", actual.contains(expected));
     }
@@ -443,7 +443,8 @@ public class ControllerCompareTest {
         /*hand calculated value:
         sampleTestSuiteA generates 10 pairs
         with common elements: [4 4 4 4 5 9 9 5 5 12]*/
-        assertEquals(6.1, Double.parseDouble(readFile(output1)), TOLERANCE);
+        String result = readFile(output1);
+        assertEquals(6.1, Double.parseDouble(result.substring(1, result.length()-3)), TOLERANCE);
 
         deleteFiles(output1, output2, output3, output4);
     }
@@ -462,8 +463,11 @@ public class ControllerCompareTest {
         String contents = readFile(RESULT_FILE_NAME);
         String[] results = contents.split(System.lineSeparator());
 
-        assertEquals(6.1, Double.parseDouble(results[0]), TOLERANCE);
-        assertEquals(4, Double.parseDouble(results[1]), TOLERANCE);
+        String firstResult = results[0];
+        String secondResult = results[1];
+
+        assertEquals(6.1, Double.parseDouble(firstResult.substring(1, firstResult.length()-1)), TOLERANCE);
+        assertEquals(4, Double.parseDouble(secondResult.substring(1, firstResult.length()-1)), TOLERANCE);
 
         deleteFiles(RESULT_FILE_NAME);
     }
@@ -474,7 +478,7 @@ public class ControllerCompareTest {
     @Test
     public void testCompareFileExistsAppend() throws IOException {
         prepareFileExistsIssue("a");
-        assertEquals("6.1"+System.lineSeparator()+System.lineSeparator()+"6.1"+System.lineSeparator(), readFile(RESULT_FILE_NAME));
+        assertEquals("[6.1]"+System.lineSeparator()+System.lineSeparator()+"[6.1]"+System.lineSeparator(), readFile(RESULT_FILE_NAME));
         deleteFiles(RESULT_FILE_NAME);
     }
 
@@ -514,7 +518,7 @@ public class ControllerCompareTest {
         doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "CommonElements", null, null,
                 true, null, null, null);
 
-        assertEquals("4.0"+System.lineSeparator(), readFile(filename));
+        assertEquals("[4.0]"+System.lineSeparator(), readFile(filename));
         deleteFiles(filename);
     }
 
@@ -554,7 +558,8 @@ public class ControllerCompareTest {
     public void testListwiseCompare() throws IOException {
         doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "ShannonIndex", null, null,
                 true, RESULT_FILE_NAME, null, null);
-        assertEquals(1.79 ,Double.parseDouble(readFile(RESULT_FILE_NAME)), 0.01);
+        String result = readFile(RESULT_FILE_NAME);
+        assertEquals(1.79 ,Double.parseDouble(result.substring(1,result.length()-3)), 0.01);
         deleteFiles(RESULT_FILE_NAME);
     }
 
@@ -565,7 +570,8 @@ public class ControllerCompareTest {
     public void testListwiseCompareMultipleFiles() throws IOException {
         doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, SAMPLE_TEST_SUITE_A_FILE_NAME, "ShannonIndex", "MinimumValue", null,
                 true, RESULT_FILE_NAME, null, null);
-        assertEquals(1.79 ,Double.parseDouble(readFile(RESULT_FILE_NAME)), 0.01);
+        String result = readFile(RESULT_FILE_NAME);
+        assertEquals(1.79 ,Double.parseDouble(result.substring(1, result.length()-3)), 0.01);
         deleteFiles(RESULT_FILE_NAME);
     }
 
@@ -628,12 +634,12 @@ public class ControllerCompareTest {
         reader.close();
 
         assertTrue(jsonResult.isJsonObject());
-        assertEquals("4.0", jsonResult.getAsJsonObject().get("results").getAsJsonObject().get("averagevalue").getAsString());
+        assertEquals("[4.0]", jsonResult.getAsJsonObject().get("results").getAsJsonObject().get("averagevalue").getAsString());
 
         deleteFiles(RESULT_FILE_NAME + "RawResults", RESULT_FILE_NAME + "JSON");
 
         // Check console
-        assertTrue("Correct result wasn't printed to console.", outContent.toString().contains("4.0"));
+        assertTrue("Correct result wasn't printed to console.", outContent.toString().contains("[4.0]"));
         assertTrue("Expected JSON format wasn't printed to console.", outContent.toString().contains("\"results\":{"));
     }
 
@@ -646,7 +652,7 @@ public class ControllerCompareTest {
                 null, false, RESULT_FILE_NAME, null, new String[]{"RawResults"});
         c = Controller.getController();
         // By adding the line separator, we can safely assume that the format is either Pretty or Raw.
-        assertTrue("Correct result wasn't printed to console.", outContent.toString().contains("4.0"+System.lineSeparator()));
+        assertTrue("Correct result wasn't printed to console. " + outContent.toString(), outContent.toString().contains("[4.0]"+System.lineSeparator()));
         // This ensures that the format has to be Raw, which is what we asked for.
         assertFalse("Incorrect (pretty?) format printed to console when we expected the raw format.", outContent.toString().contains("Results:"));
     }
@@ -661,5 +667,63 @@ public class ControllerCompareTest {
                 null, false, RESULT_FILE_NAME, null, new String[]{INVALID_FORMAT});
         c = Controller.getController();
         assertTrue("No error printed to console when given an invalid report format name.", outContent.toString().contains("report format named " + INVALID_FORMAT));
+    }
+
+    /**
+     * Test rounding one aggregation result
+     */
+    @Test
+    public void testRoundOneAggregation() throws IOException {
+        config.setResultRoundingScale(5);
+        writer.writeConfig(CONFIG_NAME, config);
+        c = Controller.getController();
+
+        doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "ShannonIndex", null, null,
+                false, null, null, null);
+        assertTrue("Correct result wasn't printed to console. " + outContent.toString(), outContent.toString().contains("[1.79176]"+System.lineSeparator()));
+    }
+
+    /**
+     * Test rounding multiple aggregation methods
+     */
+    @Test
+    public void testRoundMultipleAggregation() throws IOException {
+        config.setResultRoundingScale(5);
+        writer.writeConfig(CONFIG_NAME, config);
+        c = Controller.getController();
+
+        doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "ShannonIndex", "AverageValue MinimumValue Summation", null,
+                false, null, null, null);
+        assertTrue("Correct result wasn't printed to console. " + outContent.toString(), outContent.toString().contains("[1.79176]"+System.lineSeparator()+"[1.79176]"+System.lineSeparator()+"[1.79176]"+System.lineSeparator()));
+    }
+
+    /**
+     * Test error while rounding
+     */
+    @Test
+    public void testErrorWhileRounding() throws IOException {
+        config.setResultRoundingMode("UNNECESSARY");
+        writer.writeConfig(CONFIG_NAME, config);
+        c = Controller.getController();
+
+        doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "ShannonIndex", "AverageValue MinimumValue Summation", null,
+                false, null, null, null);
+        assertTrue("Error wasn't printed to console. " + outContent.toString(), outContent.toString().contains("Rounding Error: Could not round aggregation result"+System.lineSeparator()));
+        assertTrue("Correct result wasn't printed to console. " + outContent.toString(), outContent.toString().contains("[1.7917594692280547]"+System.lineSeparator()));
+    }
+
+    /**
+     * Test incorrect rounding mode
+     */
+    @Test
+    public void testIncorrectRoundingMode() throws IOException {
+        config.setResultRoundingMode("banana");
+        writer.writeConfig(CONFIG_NAME, config);
+        c = Controller.getController();
+
+        doComparison(SINGLE_PAIR_TEST_SUITE_FILE_NAME, null, "ShannonIndex", "AverageValue MinimumValue Summation", null,
+                false, null, null, null);
+        assertTrue("Error wasn't printed to console. " + outContent.toString(), outContent.toString().contains("Rounding Error: banana is not a valid rounding mode"+System.lineSeparator()));
+        assertTrue("Correct result wasn't printed to console. " + outContent.toString(), outContent.toString().contains("[1.7917594692280547]"+System.lineSeparator()));
     }
 }

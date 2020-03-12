@@ -22,7 +22,7 @@ public class JSON implements ReportFormat {
      * @return A nicely formatted string
      */
     @Override
-    public String format(CompareDTO dto, List<Double> similarities, List<String> aggregations) {
+    public String format(CompareDTO dto, List<Double> similarities, List<List<Double>> aggregations) {
         JsonObject json = new JsonObject();
         json.addProperty("username", getUser());
         json.addProperty("hostname", getHost());
@@ -44,9 +44,9 @@ public class JSON implements ReportFormat {
         }
 
         JsonObject aggregationsJson = new JsonObject();
-        Map<String, String> aggregationPairs = getAggregations(dto, aggregations);
+        Map<String, List<Double>> aggregationPairs = getAggregations(dto, aggregations);
         for (String aggregationKey : aggregationPairs.keySet()) {
-            aggregationsJson.addProperty(aggregationKey.toLowerCase(), aggregationPairs.get(aggregationKey));
+            aggregationsJson.addProperty(aggregationKey.toLowerCase(), aggregationPairs.get(aggregationKey).toString());
         }
         json.add("results", aggregationsJson);
 

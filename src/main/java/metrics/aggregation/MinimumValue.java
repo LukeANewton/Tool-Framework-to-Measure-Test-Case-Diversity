@@ -1,5 +1,6 @@
 package metrics.aggregation;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -20,8 +21,8 @@ public class MinimumValue implements AggregationStrategy {
      * @throws NullPointerException when there is no final similarity value caused by the similarities array being empty
      */
     @Override
-    public String aggregate(List<Double> similarities) throws NullPointerException {
-        return String.valueOf(similarities.stream().min(Double::compare).orElseThrow(NullPointerException::new));
+    public List<Double> aggregate(List<Double> similarities) throws NullPointerException {
+        return Arrays.asList(similarities.stream().min(Double::compare).orElseThrow(NullPointerException::new));
     }
 
     /**

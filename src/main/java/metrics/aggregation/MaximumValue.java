@@ -1,5 +1,6 @@
 package metrics.aggregation;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -16,8 +17,8 @@ public class MaximumValue implements AggregationStrategy {
      * @throws NullPointerException when there is no resulting aggregate value created
      */
     @Override
-    public String aggregate(List<Double> similarities) throws NullPointerException {
-        return String.valueOf(similarities.stream().max(Double::compare).orElseThrow(NullPointerException::new));
+    public List<Double> aggregate(List<Double> similarities) throws NullPointerException {
+        return Arrays.asList(similarities.stream().max(Double::compare).orElseThrow(NullPointerException::new));
     }
 
     /**

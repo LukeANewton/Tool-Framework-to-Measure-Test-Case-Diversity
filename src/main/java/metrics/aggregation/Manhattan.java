@@ -1,5 +1,6 @@
 package metrics.aggregation;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -17,9 +18,9 @@ public class Manhattan implements AggregationStrategy {
      * @throws NullPointerException when there is no resulting aggregate value created
      */
     @Override
-    public String aggregate(List<Double> similarities) throws NullPointerException {
+    public List<Double> aggregate(List<Double> similarities) throws NullPointerException {
         if (similarities.isEmpty()) throw new NullPointerException();
-        return String.valueOf(similarities.stream().mapToDouble(Math::abs).sum());
+        return Arrays.asList(similarities.stream().mapToDouble(Math::abs).sum());
     }
 
     /**

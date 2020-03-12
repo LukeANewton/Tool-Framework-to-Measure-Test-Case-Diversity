@@ -28,7 +28,7 @@ public class ModeValueTest {
      */
     @Test
     public void aggregate() {
-        double mode = 17.11;
+        Double mode = 17.11;
 
         List<Double> list = new ArrayList<>();
         list.add(5.0);
@@ -39,7 +39,10 @@ public class ModeValueTest {
         list.add(2.72);
         list.add(4.0);
 
-        assertEquals(Arrays.toString(new double[]{mode}), aggregationStrategy.aggregate(list));
+        List<Double> result = aggregationStrategy.aggregate(list);
+
+        assertEquals(1, result.size());
+        assertEquals(mode, result.get(0));
     }
 
     /**
@@ -61,7 +64,11 @@ public class ModeValueTest {
         list.add(mode2);
         list.add(mode2);
 
-        assertEquals(Arrays.toString(new double[]{mode2, mode1}), aggregationStrategy.aggregate(list));
+        List<Double> result = aggregationStrategy.aggregate(list);
+
+        assertEquals(2, result.size());
+        assert(result.contains(mode1));
+        assert(result.contains(mode2));
     }
 
     /**

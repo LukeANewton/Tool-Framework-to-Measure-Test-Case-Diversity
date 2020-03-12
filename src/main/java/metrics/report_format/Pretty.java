@@ -21,7 +21,7 @@ public class Pretty implements ReportFormat {
      * @return A nicely formatted string
      */
     @Override
-    public String format(CompareDTO dto, List<Double> similarities, List<String> aggregations) {
+    public String format(CompareDTO dto, List<Double> similarities, List<List<Double>> aggregations) {
 
         StringBuilder formattedData = new StringBuilder();
         formattedData.append(getReportHeader()).append(System.lineSeparator());
@@ -33,7 +33,7 @@ public class Pretty implements ReportFormat {
         }
 
         formattedData.append(System.lineSeparator()).append("Results:").append(System.lineSeparator());
-        Map<String, String> aggregationMethodValuePairs = getAggregations(dto, aggregations);
+        Map<String, List<Double>> aggregationMethodValuePairs = getAggregations(dto, aggregations);
         for (String method : aggregationMethodValuePairs.keySet()) {
             formattedData.append(method).append(": ").append(aggregationMethodValuePairs.get(method)).append(System.lineSeparator());
         }

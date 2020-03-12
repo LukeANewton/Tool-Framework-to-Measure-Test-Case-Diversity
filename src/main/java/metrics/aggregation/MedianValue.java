@@ -1,5 +1,6 @@
 package metrics.aggregation;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,16 +18,16 @@ public class MedianValue implements AggregationStrategy {
      * @throws NullPointerException when there is no resulting aggregate value created
      */
     @Override
-    public String aggregate(List<Double> similarities) throws NullPointerException {
+    public List<Double> aggregate(List<Double> similarities) throws NullPointerException {
         if (similarities.isEmpty()) throw new NullPointerException();
         // For many similarities, consider an approach that uses pivot points. This would be O(n) while the current implementation is O(nlogn)
         Collections.sort(similarities);
-        Object[] similarities_array = similarities.toArray();
+        Double[] similarities_array = similarities.toArray(new Double[similarities.size()]);
         int middle = similarities_array.length / 2;
         if (similarities.size() % 2 == 0) {
-            return "[" + similarities_array[middle - 1] + ", " + similarities_array[middle] + "]";
+            return Arrays.asList(similarities_array[middle - 1], similarities_array[middle]);
         }
-        return String.valueOf(similarities_array[middle]);
+        return Arrays.asList(similarities_array[middle]);
     }
 
     /**

@@ -40,7 +40,7 @@ public class SummationTest {
         for (Double value : similarityValues) {
             sum += value;
         }
-        assertEquals(sum, Double.parseDouble(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
+        assertEquals(sum, aggregationStrategy.aggregate(similarityValues).get(0), TOLERANCE);
     }
 
     /**
@@ -51,7 +51,7 @@ public class SummationTest {
     public void testAggregateOneValue() {
         List<Double> similarityValues = new ArrayList<>();
         similarityValues.add(-3.0);
-        assertEquals(-3.0, Double.parseDouble(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
+        assertEquals(-3.0, aggregationStrategy.aggregate(similarityValues).get(0), TOLERANCE);
     }
 
     /**
@@ -61,7 +61,7 @@ public class SummationTest {
     @Test
     public void testZeroAggregateValue() {
         List<Double> similarityValues = new ArrayList<>(Arrays.asList(0.0, 0.0, 0.0, 0.0));
-        assertEquals(0.0, Double.parseDouble(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
+        assertEquals(0.0, aggregationStrategy.aggregate(similarityValues).get(0), TOLERANCE);
     }
 
     /**

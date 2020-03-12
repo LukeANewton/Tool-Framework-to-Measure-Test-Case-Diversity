@@ -41,7 +41,7 @@ public class EuclideanTest {
             sum += Math.pow(value, 2);
         }
         double euclidean = Math.sqrt(sum);
-        assertEquals(euclidean, Double.parseDouble(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
+        assertEquals(euclidean, aggregationStrategy.aggregate(similarityValues).get(0), TOLERANCE);
     }
 
     /**
@@ -52,7 +52,7 @@ public class EuclideanTest {
     public void testEuclideanOneValue() {
         List<Double> similarityValues = new ArrayList<>();
         similarityValues.add(-3.0);
-        assertEquals(3.0, Double.parseDouble(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
+        assertEquals(3.0, aggregationStrategy.aggregate(similarityValues).get(0), TOLERANCE);
     }
 
     /**
@@ -62,7 +62,7 @@ public class EuclideanTest {
     @Test
     public void testZeroEuclideanValue() {
         List<Double> similarityValues = new ArrayList<>(Arrays.asList(0.0, 0.0, 0.0, 0.0));
-        assertEquals(0.0, Double.parseDouble(aggregationStrategy.aggregate(similarityValues)), TOLERANCE);
+        assertEquals(0.0, aggregationStrategy.aggregate(similarityValues).get(0), TOLERANCE);
     }
 
     /**

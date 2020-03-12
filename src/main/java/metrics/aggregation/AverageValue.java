@@ -1,5 +1,6 @@
 package metrics.aggregation;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -20,8 +21,8 @@ public class AverageValue implements AggregationStrategy {
      * @throws NullPointerException when there is no final similarity value caused by the similarities array being empty
      */
     @Override
-    public String aggregate(List<Double> similarities) throws NullPointerException {
-        return String.valueOf(similarities.stream().mapToDouble(Double::valueOf).average().orElseThrow(NullPointerException::new));
+    public List<Double> aggregate(List<Double> similarities) throws NullPointerException {
+        return Arrays.asList(similarities.stream().mapToDouble(Double::valueOf).average().orElseThrow(NullPointerException::new));
     }
 
     /**

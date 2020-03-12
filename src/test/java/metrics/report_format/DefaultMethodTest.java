@@ -4,6 +4,7 @@ import model.CompareDTO;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -126,13 +127,17 @@ public class DefaultMethodTest {
         CompareDTO dto = new CompareDTO();
         dto.setAggregationMethods(new String[]{"method1", "method2"});
 
-        List<String> aggregations = new ArrayList<>();
-        aggregations.add("forMethod1");
-        aggregations.add("forMethod2");
+        List<Double> aggregations1 = new ArrayList<>();
+        aggregations1.add(1d);
+        List<Double> aggregations2 = new ArrayList<>();
+        aggregations2.add(2d);
+        List<List<Double>> aggregations = new ArrayList<>();
+        aggregations.add(aggregations1);
+        aggregations.add(aggregations2);
 
-        Map<String, String> methodAggregationMap = format.getAggregations(dto, aggregations);
-        assertEquals("Aggregation value one doesn't correspond to aggregation method one.", "forMethod1", methodAggregationMap.get("method1"));
-        assertEquals("Aggregation value two doesn't correspond to aggregation method two.", "forMethod2", methodAggregationMap.get("method2"));
+        Map<String, List<Double>> methodAggregationMap = format.getAggregations(dto, aggregations);
+        assertEquals("Aggregation value one doesn't correspond to aggregation method one.", Arrays.asList(1d), methodAggregationMap.get("method1"));
+        assertEquals("Aggregation value two doesn't correspond to aggregation method two.", Arrays.asList(2d), methodAggregationMap.get("method2"));
     }
 
     /**

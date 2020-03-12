@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,8 +33,8 @@ public class XMLTest {
         final String COMPARISON_METHOD = "comparisonMethod";
         final String AGGREGATION_METHOD_ONE = "aggregationMethod1";
         final String AGGREGATION_METHOD_TWO = "aggregationMethod2";
-        final String AGGREGATED_VALUE_ONE = "aggregatedValue1";
-        final String AGGREGATED_VALUE_TWO = "aggregatedValue2";
+        final Double AGGREGATED_VALUE_ONE = 1d;
+        final Double AGGREGATED_VALUE_TWO = 2d;
         final Double SIMILARITY_VALUE_ONE = 1.0;
         final Double SIMILARITY_VALUE_TWO = 53.05;
 
@@ -45,9 +46,9 @@ public class XMLTest {
         similarities.add(SIMILARITY_VALUE_ONE);
         similarities.add(SIMILARITY_VALUE_TWO);
 
-        List<String> aggregations = new ArrayList<>();
-        aggregations.add(AGGREGATED_VALUE_ONE);
-        aggregations.add(AGGREGATED_VALUE_TWO);
+        List<List<Double>> aggregations = new ArrayList<>();
+        aggregations.add(Arrays.asList(AGGREGATED_VALUE_ONE));
+        aggregations.add(Arrays.asList(AGGREGATED_VALUE_TWO));
 
         final String EXPECTED = "<report>\n" +
                 "\t<username> " + XMLFormat.getUser() + " </username>\n" +
@@ -82,16 +83,16 @@ public class XMLTest {
         final String COMPARISON_METHOD = "comparisonMethod";
         final String AGGREGATION_METHOD_ONE = "aggregationMethod1";
         final String AGGREGATION_METHOD_TWO = "aggregationMethod2";
-        final String AGGREGATED_VALUE_ONE = "aggregatedValue1";
-        final String AGGREGATED_VALUE_TWO = "aggregatedValue2";
+        final Double AGGREGATED_VALUE_ONE = 1d;
+        final Double AGGREGATED_VALUE_TWO = 2d;
 
         CompareDTO dto = new CompareDTO();
         dto.setComparisonMethod(COMPARISON_METHOD);
         dto.setAggregationMethods(new String[]{AGGREGATION_METHOD_ONE, AGGREGATION_METHOD_TWO});
 
-        List<String> aggregations = new ArrayList<>();
-        aggregations.add(AGGREGATED_VALUE_ONE);
-        aggregations.add(AGGREGATED_VALUE_TWO);
+        List<List<Double>> aggregations = new ArrayList<>();
+        aggregations.add(Arrays.asList(AGGREGATED_VALUE_ONE));
+        aggregations.add(Arrays.asList(AGGREGATED_VALUE_TWO));
 
         int numSimilarities = XMLFormat.SIMILARITY_THRESHOLD + 1;
         List<Double> similarities = new ArrayList<>(Collections.nCopies(numSimilarities, 0.0));
